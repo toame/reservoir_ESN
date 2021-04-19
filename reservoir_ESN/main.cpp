@@ -41,11 +41,6 @@ int main(void) {
 		}
 		
 	}
-	//for (int i = 0; i < input_signal[0].size(); i++) {
-	//	std::cout << input_signal[0][i] << " " << teacher_signal[0][i] << std::endl;
-	//}
-	//return 0;
-
 
 	std::chrono::system_clock::time_point  start, end; // 型は auto で可
 	for (int loop = 0; loop < 1; loop++) {
