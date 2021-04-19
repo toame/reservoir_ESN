@@ -34,7 +34,9 @@ int main(void) {
 		else if(task_name == "APPROX") {
 			d_alpha = 1.0;
 			alpha_min = 0.2;
-			task_for_function_approximation(input_signal[phase], teacher_signal[phase], 1.5, 5, step, phase);
+			const double nu = 1.5;
+			const int tau = 5;
+			task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
 
 		}
 		
