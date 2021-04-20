@@ -22,12 +22,15 @@ int main(void) {
 	const int step = 4000;
 	const int wash_out = 500;
 	std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
-	const std::string task_name = "APPROX";
+	const std::string task_name = "NARMA";
 	double alpha_min, d_alpha;
+
+	// 入力信号 教師信号の生成
 	for (int phase = 0; phase < PHASE_NUM; phase++) {
 		generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 100);
 		if (task_name == "NARMA") {
-			d_alpha = 0.01;
+			d_alpha = 0.002;
+			alpha_min = 0.001;
 			const int tau = 9;
 			generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
 		}
@@ -37,9 +40,7 @@ int main(void) {
 			const double nu = 1.5;
 			const int tau = 5;
 			task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
-
 		}
-		
 	}
 
 	std::chrono::system_clock::time_point  start, end; // 型は auto で可
@@ -54,7 +55,7 @@ int main(void) {
 			double test_nmse = 1e+10;
 			start = std::chrono::system_clock::now(); // 計測開始時間
 
-//#pragma omp parallel for
+			#pragma omp parallel for
 			for (int k = 0; k < 11 * 11; k++) {
 
 				const double p = ite_p * 0.1;
