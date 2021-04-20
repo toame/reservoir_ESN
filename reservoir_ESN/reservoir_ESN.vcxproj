@@ -152,6 +152,7 @@
     <ClCompile Include="task.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="graph.py" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
