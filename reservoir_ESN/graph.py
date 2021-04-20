@@ -2,7 +2,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 df = pd.read_csv('./data.txt', sep=',',comment='#')
 p_list = df["p"].unique()
-function_names = ["sinc", "tanh"]
+function_names = ["sinc", "tanh", "gauss", "oddsinc"]
 for function_name in function_names:
     data_x, data_y = [], []
     for p in p_list:

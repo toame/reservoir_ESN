@@ -16,6 +16,8 @@ double sinc(const double x) {
 	if (x == 0) return 1.0;
 	return sin(PI * x) / (PI * x);
 }
+double gauss(double y) { return exp(-y * y / 2.0) / sqrt(PI * 2); }
+double oddsinc(double y) { return sin(PI * y) / exp(std::abs(y / 2.0)) * 0.5; }
 typedef void (*FUNC)();
 int main(void) {
 
@@ -24,7 +26,7 @@ int main(void) {
 	const int wash_out = 500;
 	std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 	const std::string task_name = "NARMA";
-	std::vector<std::string> function_names = { "sinc", "tanh" };
+	std::vector<std::string> function_names = { "sinc", "tanh", "gauss", "oddsinc" };
 	double alpha_min, d_alpha;
 
 	// 入力信号 教師信号の生成
@@ -56,6 +58,8 @@ int main(void) {
 		double (*nonlinear)(double);
 		if (function_name == "sinc") nonlinear = sinc;
 		else if (function_name == "tanh") nonlinear = tanh;
+		else if (function_name == "gauss") nonlinear = gauss;
+		else if (function_name == "oddsinc") nonlinear = oddsinc;
 		for (int loop = 0; loop < 3; loop++) {
 			std::vector<std::vector<std::vector<std::vector<double>>>> output_node(11 * 11, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
 			std::vector<reservoir_layer> reservoir_layer_v(11 * 11);
