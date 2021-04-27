@@ -82,7 +82,7 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		if (show) {
-			std::cout << t << " " << reservoir_predict_signal << " " << teacher_signal[t] << std::endl;
+			std::cout << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << std::endl;
 		}
 	}
 	return sum_squared_average / (step - wash_out);

@@ -76,6 +76,33 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		}
 	}
 }
+void reservoir_layer::reservoir_update_show(const std::vector<double> input_signal, std::vector<std::vector<double>> output_node, const int t_size, const int wash_out, const std::string name) {
+
+	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
+	output_node[0][0] = 1.0;
+	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt);
+	std::ofstream outputfile("output_unit/" + name + ".txt");
+	outputfile << "t,unit,input,output" << std::endl;
+	std::vector<double> input_sum_node(unit_size + 1, 0);
+	for (int t = 0; t <= t_size; t++) {
+		for (int n = 1; n <= unit_size; n++) {
+			input_sum_node[n] = input_signal_strength[n] * input_signal[t];
+			for (int k = 1; k <= connection_degree; k++) {
+				input_sum_node[n] += weight_reservoir[n][k] * output_node[t][adjacency_list[n][k]];
+			}
+			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0];
+		}
+		output_node[t + 1][0] = 1.0;
+
+		for (int n = 1; n <= unit_size; n++) {
+			output_node[t + 1][n] = activation_function(input_sum_node[n], node_type[n]);
+			if (t >= 500)
+				outputfile << t << "," << n << "," << input_sum_node[n] << "," << output_node[t + 1][n] << std::endl;
+
+		}
+	}
+	outputfile.close();
+}
 // Echo State Property(ESP)の有無をチェックする
 // Echo State Propertyを持つリザーバーであるとは、リザーバーの持つノードの初期値に依存しない状態を言う。
 //

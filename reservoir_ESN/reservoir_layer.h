@@ -5,6 +5,8 @@
 #include <vector>
 #include <numeric>
 #include <cassert>
+#include <fstream>
+#include <string>
 #define LINEAR (0)
 #define NON_LINEAR (1)
 
@@ -30,6 +32,7 @@ public:
 
 	void generate_reservoir();
 	void reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size);
+	void reservoir_update_show(const std::vector<double> input_signal, std::vector<std::vector<double>> output_node, const int t_size, const int wash_out, const std::string name);
 	bool is_echo_state_property(const std::vector<double>& input_signal);
 	double activation_function(const double x, const int type);
 

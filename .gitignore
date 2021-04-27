@@ -340,3 +340,5 @@ ASALocalRun/
 healthchecksdb
 /reservoir_ESN/data.txt
 /reservoir_ESN/data2.txt
+/reservoir_ESN/output_unit
+/reservoir_ESN/data2_test.txt

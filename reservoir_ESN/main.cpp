@@ -36,8 +36,8 @@ int main(void) {
 	for (int phase = 0; phase < PHASE_NUM; phase++) {
 		generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 		if (task_name == "NARMA") {
-			d_alpha = 0.002;
-			alpha_min = 0.002;
+			d_alpha = 0.01;
+			alpha_min = 0.005;
 			const int tau = 9;
 			generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
 		}
@@ -63,7 +63,7 @@ int main(void) {
 		else if (function_name == "tanh") nonlinear = tanh;
 		else if (function_name == "gauss") nonlinear = gauss;
 		else if (function_name == "oddsinc") nonlinear = oddsinc;
-		for (int loop = 0; loop < 10; loop++) {
+		for (int loop = 0; loop < 1; loop++) {
 			std::vector<std::vector<std::vector<std::vector<double>>>> output_node(11 * 11, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
 			std::vector<reservoir_layer> reservoir_layer_v(11 * 11);
 			for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
@@ -139,6 +139,8 @@ int main(void) {
 
 				std::cout << function_name << "," << loop << "," << unit_size << "," << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << opt_nmse << "," << test_nmse << std::endl;
 				std::cerr << function_name << "," << loop << "," << unit_size << "," << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
+				reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, function_name + "_" + std::to_string(loop) + "_" + std::to_string(ite_p));
+
 			}
 
 		}
