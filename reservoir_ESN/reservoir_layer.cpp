@@ -96,7 +96,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 		for (int n = 1; n <= unit_size; n++) {
 			output_node[t + 1][n] = activation_function(input_sum_node[n], node_type[n]);
-			if (t >= 500)
+			if (t >= wash_out && t < wash_out + 200)
 				outputfile << t << "," << n << "," << input_sum_node[n] << "," << output_node[t + 1][n] << std::endl;
 
 		}
