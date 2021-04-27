@@ -63,6 +63,7 @@ int main(void) {
 				const int tau = param1[r];
 				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
 			}
+			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
 			else if (task_name == "narma2") {
 				d_alpha = 0.01;
 				alpha_min = 0.005;
@@ -119,8 +120,8 @@ int main(void) {
 						reservoir_layer_v[k] = reservoir_layer1;
 					}
 					int lm;
-					std::vector<std::vector<std::vector<double>>> w(11 * 11, std::vector<std::vector<double>>(10));　// 各リザーバーの出力重み
-					std::vector<std::vector<double>> nmse(11 * 11, std::vector<double>(10));						 // 各リザーバーのnmseを格納
+					std::vector<std::vector<std::vector<double>>> w(11 * 11, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
+					std::vector<std::vector<double>> nmse(11 * 11, std::vector<double>(10));						// 各リザーバーのnmseを格納
 					int opt_k = 0;
 					//#pragma omp parallel for
 					// 重みの学習を行う
