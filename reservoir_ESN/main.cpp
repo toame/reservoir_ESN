@@ -85,10 +85,11 @@ int main(void) {
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "approx") {
-				d_alpha = 1.0;
-				alpha_min = 0.2;
-				const double nu = param1[r];
-				const int tau = param2[r];
+				d_alpha = 2.0;
+				alpha_min = 1.0;
+				const int tau = param1[r];
+				const double nu = param2[r];
+				
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
 			}
