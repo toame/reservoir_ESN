@@ -23,7 +23,7 @@ double oddsinc(double y) {
 }
 typedef void (*FUNC)();
 int main(void) {
-
+	const int TRIAL_NUM = 10;	// ループ回数
 	const int unit_size = 100;
 	const int step = 4000;
 	const int wash_out = 500;
@@ -63,7 +63,7 @@ int main(void) {
 		else if (function_name == "tanh") nonlinear = tanh;
 		else if (function_name == "gauss") nonlinear = gauss;
 		else if (function_name == "oddsinc") nonlinear = oddsinc;
-		for (int loop = 0; loop < 1; loop++) {
+		for (int loop = 0; loop < TRIAL_NUM; loop++) {
 			std::vector<std::vector<std::vector<std::vector<double>>>> output_node(11 * 11, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
 			std::vector<reservoir_layer> reservoir_layer_v(11 * 11);
 			for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
@@ -139,7 +139,7 @@ int main(void) {
 
 				std::cout << function_name << "," << loop << "," << unit_size << "," << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << opt_nmse << "," << test_nmse << std::endl;
 				std::cerr << function_name << "," << loop << "," << unit_size << "," << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
-				reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, function_name + "_" + std::to_string(loop) + "_" + std::to_string(ite_p));
+				reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p));
 
 			}
 
