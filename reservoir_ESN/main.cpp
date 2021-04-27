@@ -17,7 +17,10 @@ double sinc(const double x) {
 	return sin(PI * x) / (PI * x);
 }
 double gauss(double y) { return exp(-y * y / 2.0) / sqrt(PI * 2); }
-double oddsinc(double y) { return sin(PI * y) / exp(std::abs(y / 2.0)) * 0.5; }
+double oddsinc(double y) { 
+	if (y <= 0) return sin(PI * y) / (PI * (y + 1));
+	else return sin(PI * -y) / (PI * (y - 1));
+}
 typedef void (*FUNC)();
 int main(void) {
 
@@ -26,7 +29,7 @@ int main(void) {
 	const int wash_out = 500;
 	std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 	const std::string task_name = "NARMA";
-	std::vector<std::string> function_names = { "tanh" };
+	std::vector<std::string> function_names = { "sinc", "tanh", "gauss", "oddsinc" };
 	double alpha_min, d_alpha;
 
 	// 入力信号 教師信号の生成
@@ -106,8 +109,8 @@ int main(void) {
 							if (lm != 0) output_learning.A[j][j] -= pow(10, -16 + lm - 1);
 						}
 						output_learning.IncompleteCholeskyDecomp2(unit_size + 1);
-						double eps = 1e-18;
-						int itr = 100;
+						double eps = 1e-12;
+						int itr = 10;
 						output_learning.ICCGSolver(unit_size + 1, itr, eps);
 						w[k][lm] = output_learning.w;
 						nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning.w, output_node[k][VAL], unit_size, wash_out, step, false);
@@ -130,7 +133,7 @@ int main(void) {
 
 				}
 				reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
-				test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, true);
+				test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, false);
 				end = std::chrono::system_clock::now();  // 計測終了時間
 				double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
