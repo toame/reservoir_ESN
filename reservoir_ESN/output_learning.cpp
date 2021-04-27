@@ -20,7 +20,7 @@ void output_learning::generate_simultaneous_linear_equationsA(const std::vector<
 	int count = step - wash_out;
 	std::vector<double> sub_output_node(count * (n_size + 1));
 	std::vector<double> B((n_size + 1) * (n_size + 1), 0.0);
-	for (int t = wash_out + 1; t <= step; t++) {
+	for (int t = wash_out + 1; t < step; t++) {
 		for (int n1 = 0; n1 <= n_size; n1++) {
 			sub_output_node[(t - wash_out - 1) * (n_size + 1) + n1] = output_node[t + 1][n1];
 		}
@@ -41,7 +41,7 @@ void output_learning::generate_simultaneous_linear_equationsb(const std::vector<
 		b[n1] = 0.0;
 	}
 	int count = 0;
-	for (int t = wash_out + 1; t <= step; t++) {
+	for (int t = wash_out + 1; t < step; t++) {
 		count++;
 		for (int n1 = 0; n1 <= n_size; n1++) {
 			b[n1] += output_node[t + 1][n1] * yt_s[t];

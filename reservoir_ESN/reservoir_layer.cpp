@@ -65,12 +65,8 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	for (int t = 0; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {
 			input_sum_node[n] = input_signal_strength[n] * input_signal[t];
-			for (int k = 1; k <= connection_degree; k += 5) {
+			for (int k = 1; k <= connection_degree; k++) {
 				input_sum_node[n] += weight_reservoir[n][k] * output_node[t][adjacency_list[n][k]];
-				input_sum_node[n] += weight_reservoir[n][k + 1] * output_node[t][adjacency_list[n][k + 1]];
-				input_sum_node[n] += weight_reservoir[n][k + 2] * output_node[t][adjacency_list[n][k + 2]];
-				input_sum_node[n] += weight_reservoir[n][k + 3] * output_node[t][adjacency_list[n][k + 3]];
-				input_sum_node[n] += weight_reservoir[n][k + 4] * output_node[t][adjacency_list[n][k + 4]];
 			}
 			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0];
 		}
