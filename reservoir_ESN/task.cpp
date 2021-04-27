@@ -55,6 +55,40 @@ void generate_narma_task(std::vector<double>& input_signal, std::vector<double>&
 	}
 }
 
+//  0.3, 0.05, 1.5, 0.1
+void generate_narma_task2(std::vector<double> input_signal, std::vector<double>& teacher_signal, const int tau, int step) {
+	const double alpha = 0.3;
+	const double beta = 0.05;
+	const double gamma = 1.5;
+	const double delta = 0.1;
+	for (int t = 0; t < step; t++) {
+		input_signal[t] = (input_signal[t] + 1) / 4;
+	}
+	teacher_signal.resize(step);
+	for (int t = 0; t < step; t++) {
+		double sum = 0.0;
+		if (t - tau >= 0) {
+			for (int i = tau + 1; i >= 1; i--) {  // for(i=tau; i>=1; i--){
+				sum = sum + teacher_signal[t - i];
+			}
+
+			teacher_signal[t] =
+				alpha * teacher_signal[t - 1] + beta * teacher_signal[t - 1] * sum + gamma * input_signal[t - tau] * input_signal[t] + delta;
+			if (tau > 9) teacher_signal[t] = tanh(teacher_signal[t]);  // NARMA(tau>=10)
+		}
+		else
+			teacher_signal[t] = 0;
+
+		//... cutt-off bound ...
+		if (teacher_signal[t] > 1.0) {
+			teacher_signal[t] = 1.0;
+		}
+		else if (teacher_signal[t] < -1.0) {
+			teacher_signal[t] = -1.0;
+		}
+	}
+}
+
 inline double squared(const double x) {
 	return x * x;
 }

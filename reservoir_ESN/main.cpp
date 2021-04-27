@@ -63,6 +63,12 @@ int main(void) {
 				const int tau = param1[r];
 				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
 			}
+			else if (task_name == "narma2") {
+				d_alpha = 0.01;
+				alpha_min = 0.005;
+				const int tau = param1[r];
+				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
+			}
 			else if (task_name == "apporx") {
 				d_alpha = 1.0;
 				alpha_min = 0.2;
@@ -98,6 +104,7 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 
 #pragma omp parallel for
+					// 複数のリザーバーの時間発展をまとめて処理
 					for (int k = 0; k < 11 * 11; k++) {
 
 						const double p = ite_p * 0.1;
@@ -112,10 +119,11 @@ int main(void) {
 						reservoir_layer_v[k] = reservoir_layer1;
 					}
 					int lm;
-					std::vector<std::vector<std::vector<double>>> w(11 * 11, std::vector<std::vector<double>>(10));
-					std::vector<std::vector<double>> nmse(11 * 11, std::vector<double>(10));
+					std::vector<std::vector<std::vector<double>>> w(11 * 11, std::vector<std::vector<double>>(10));　// 各リザーバーの出力重み
+					std::vector<std::vector<double>> nmse(11 * 11, std::vector<double>(10));						 // 各リザーバーのnmseを格納
 					int opt_k = 0;
 					//#pragma omp parallel for
+					// 重みの学習を行う
 					for (int k = 0; k < 11 * 11; k++) {
 						output_learning output_learning;
 						const double p = ite_p * 0.1;
@@ -141,7 +149,7 @@ int main(void) {
 						}
 					}
 					std::vector<double> opt_w;
-
+					// 検証データでもっとも性能の良いリザーバーを選択
 					for (int k = 0; k < 11 * 11; k++) {
 						for (int lm = 0; lm < 10; lm++) {
 							if (nmse[k][lm] < opt_nmse) {
@@ -155,6 +163,7 @@ int main(void) {
 						}
 
 					}
+					/*** TEST phase ***/
 					reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, false);
 					end = std::chrono::system_clock::now();  // 計測終了時間
@@ -162,6 +171,8 @@ int main(void) {
 
 					outputfile << function_name << "," << loop << "," << unit_size << "," << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << opt_nmse << "," << test_nmse << std::endl;
 					std::cerr << function_name << "," << loop << "," << unit_size << "," << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
+					
+					// リザーバーのユニット入出力を表示
 					reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" +  std::to_string(loop) + "_" + std::to_string(ite_p));
 
 				}

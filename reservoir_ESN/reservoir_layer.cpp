@@ -17,6 +17,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const int connection_degre
 	mt.seed(seed);
 }
 
+// 結合トポロジーや結合重みなどを設定する
 void reservoir_layer::generate_reservoir() {
 
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
@@ -76,6 +77,9 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		}
 	}
 }
+
+
+// リザーバーの入出力を書き出す(ToDo:関数を一つに統合する）
 void reservoir_layer::reservoir_update_show(const std::vector<double> input_signal, std::vector<std::vector<double>> output_node, const int t_size, const int wash_out, const std::string name) {
 
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
