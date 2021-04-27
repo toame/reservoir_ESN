@@ -47,5 +47,8 @@
     <None Include="graph.py">
       <Filter>script</Filter>
     </None>
+    <None Include="histgram.py">
+      <Filter>script</Filter>
+    </None>
   </ItemGroup>
 </Project>
