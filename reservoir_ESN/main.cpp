@@ -33,15 +33,15 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 }
 typedef void (*FUNC)();
 int main(void) {
-	const int TRIAL_NUM = 10;	// ループ回数
+	const int TRIAL_NUM = 1;	// ループ回数
 	const int step = 4000;
 	const int wash_out = 500;
 	const int task_size = 10;
-	std::vector<int> unit_sizes = { 100, 100, 100, 100, 100, 100, 100 };
-	std::vector<std::string> task_names = { "narma", "narma", "narma", "narma", "approx", "approx", "approx"};
+	std::vector<int> unit_sizes = {100, 100, 100, 100, 100, 100, 100, 100 };
+	std::vector<std::string> task_names = { "henon", "narma", "narma", "narma", "narma", "approx", "approx", "approx"};
 
-	std::vector<int> param1 = { 5, 10, 15, 20, 3, 5, 7 };
-	std::vector<double> param2 = { 0, 0, 0, 0, 3.0, 1.5, 1.0 };
+	std::vector<int> param1 = { 5, 5, 10, 15, 20, 3, 5, 7 };
+	std::vector<double> param2 = { 0, 0, 0, 0, 0, 3.0, 1.5, 1.0 };
 	std::string task_name;
 	std::string function_name;
 
@@ -69,6 +69,12 @@ int main(void) {
 				alpha_min = 0.005;
 				const int tau = param1[r];
 				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
+			}
+			else if (task_name == "henon") {
+				d_alpha = 5.0;
+				alpha_min = 2.0;
+				const int fstep = param1[r];
+				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "approx") {
 				d_alpha = 1.0;
@@ -107,7 +113,6 @@ int main(void) {
 #pragma omp parallel for
 					// 複数のリザーバーの時間発展をまとめて処理
 					for (int k = 0; k < 11 * 11; k++) {
-
 						const double p = ite_p * 0.1;
 						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
 						const double weight_factor = (k % 11 + 1) * 0.1;
@@ -146,7 +151,6 @@ int main(void) {
 							output_learning.ICCGSolver(unit_size + 1, itr, eps);
 							w[k][lm] = output_learning.w;
 							nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning.w, output_node[k][VAL], unit_size, wash_out, step, false);
-
 						}
 					}
 					std::vector<double> opt_w;
