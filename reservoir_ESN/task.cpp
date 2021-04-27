@@ -1,6 +1,9 @@
 #include "task.h"
 #include <cblas.h>
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <sstream>
 void generate_input_signal_random(std::vector<double>& input_signal, const int u_min, const int u_delta, const int step, const int seed) {
 	std::mt19937 mt(seed);
 	std::uniform_real_distribution<> rand_0to1(0, 1);
@@ -108,6 +111,29 @@ void generate_input_signal_henon_map(std::vector<double>& input_signal, const in
 
 void generate_henom_map_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
 	generate_input_signal_henon_map(input_signal, fstep, step, wash_out);
+	teacher_signal.resize(step);
+	for (int t = 0; t < step; t++) {
+		teacher_signal[t] = input_signal[t + fstep];
+	}
+}
+
+void generate_input_signal_laser(std::vector<double>& input_signal, const int fstep, const int step, const int wash_out) {
+	std::ifstream ifs("santafe.dat");
+
+	std::string line;
+	int cnt = wash_out;
+	while (std::getline(ifs, line)) {
+		cnt--;
+		if (cnt <= 0) {
+			double num = std::stoi(line) / 255.0;
+			//std::cerr << num << std::endl;
+			input_signal.push_back(num);
+		}
+	}
+}
+
+void generate_laser_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
+	generate_input_signal_laser(input_signal, fstep, step, wash_out);
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
 		teacher_signal[t] = input_signal[t + fstep];

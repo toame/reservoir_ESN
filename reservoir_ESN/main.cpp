@@ -34,14 +34,14 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 typedef void (*FUNC)();
 int main(void) {
 	const int TRIAL_NUM = 1;	// ループ回数
-	const int step = 4000;
+	const int step = 3000;
 	const int wash_out = 500;
 	const int task_size = 10;
-	std::vector<int> unit_sizes = {100, 100, 100, 100, 100, 100, 100, 100 };
-	std::vector<std::string> task_names = { "henon", "narma", "narma", "narma", "narma", "approx", "approx", "approx"};
-
-	std::vector<int> param1 = { 5, 5, 10, 15, 20, 3, 5, 7 };
-	std::vector<double> param2 = { 0, 0, 0, 0, 0, 3.0, 1.5, 1.0 };
+	std::vector<int> unit_sizes = {100, 100, 100, 100, 100, 100, 100, 100, 100 };
+	std::vector<std::string> task_names = { "laser", "henon", "henon", "narma", "narma", "narma", "narma", "approx", "approx", "approx"};
+	
+	std::vector<int> param1 = { 5, 5, 7, 10, 15, 20, 3, 5, 7 };
+	std::vector<double> param2 = { 0, 0, 0, 0, 0, 0, 3.0, 1.5, 1.0 };
 	std::string task_name;
 	std::string function_name;
 
@@ -56,11 +56,12 @@ int main(void) {
 		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 		// 入力信号 教師信号の生成
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
-			generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
+			
 			if (task_name == "narma") {
 				d_alpha = 0.01;
 				alpha_min = 0.005;
 				const int tau = param1[r];
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
 			}
 			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
@@ -68,6 +69,7 @@ int main(void) {
 				d_alpha = 0.01;
 				alpha_min = 0.005;
 				const int tau = param1[r];
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
 			}
 			else if (task_name == "henon") {
@@ -76,11 +78,21 @@ int main(void) {
 				const int fstep = param1[r];
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
+			else if (task_name == "laser") {
+				d_alpha = 0.2;
+				alpha_min = 0.1;
+				const int fstep = param1[r];
+				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
+				for (int i = 0; i < 100; i++) {
+					std::cerr << phase << " " << i << " " << input_signal[phase][i] << " " << teacher_signal[phase][i] << std::endl;
+				}
+			}
 			else if (task_name == "approx") {
 				d_alpha = 1.0;
 				alpha_min = 0.2;
 				const double nu = param1[r];
 				const int tau = param2[r];
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
 			}
 		}
