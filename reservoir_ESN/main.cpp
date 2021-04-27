@@ -33,15 +33,15 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 }
 typedef void (*FUNC)();
 int main(void) {
-	const int TRIAL_NUM = 1;	// ループ回数
+	const int TRIAL_NUM = 10;	// ループ回数
 	const int step = 3000;
 	const int wash_out = 500;
 	const int task_size = 10;
-	std::vector<int> unit_sizes = {100, 100, 100, 100, 100, 100, 100, 100, 100 };
+	std::vector<int> unit_sizes = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100 };
 	std::vector<std::string> task_names = { "laser", "henon", "henon", "narma", "narma", "narma", "narma", "approx", "approx", "approx"};
 	
-	std::vector<int> param1 = { 5, 5, 7, 10, 15, 20, 3, 5, 7 };
-	std::vector<double> param2 = { 0, 0, 0, 0, 0, 0, 3.0, 1.5, 1.0 };
+	std::vector<int> param1 = { 6, 5, 7, 5, 10, 15, 20, 3, 5, 7 };
+	std::vector<double> param2 = { 0, 0, 0, 0, 0, 0, 0, 3.0, 1.5, 1.0 };
 	std::string task_name;
 	std::string function_name;
 
@@ -83,9 +83,6 @@ int main(void) {
 				alpha_min = 0.1;
 				const int fstep = param1[r];
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
-				for (int i = 0; i < 100; i++) {
-					std::cerr << phase << " " << i << " " << input_signal[phase][i] << " " << teacher_signal[phase][i] << std::endl;
-				}
 			}
 			else if (task_name == "approx") {
 				d_alpha = 1.0;
@@ -112,8 +109,8 @@ int main(void) {
 			else if (function_name == "gauss") nonlinear = gauss;
 			else if (function_name == "oddsinc") nonlinear = oddsinc;
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {
-				std::vector<std::vector<std::vector<std::vector<double>>>> output_node(11 * 11, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
-				std::vector<reservoir_layer> reservoir_layer_v(11 * 11);
+				std::vector<std::vector<std::vector<std::vector<double>>>> output_node(21 * 11, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
+				std::vector<reservoir_layer> reservoir_layer_v(21 * 11);
 				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
 					double opt_nmse = 1e+10;
 					double opt_input_signal_factor = 0;
@@ -124,7 +121,7 @@ int main(void) {
 
 #pragma omp parallel for
 					// 複数のリザーバーの時間発展をまとめて処理
-					for (int k = 0; k < 11 * 11; k++) {
+					for (int k = 0; k < 21 * 11; k++) {
 						const double p = ite_p * 0.1;
 						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
 						const double weight_factor = (k % 11 + 1) * 0.1;
@@ -137,12 +134,12 @@ int main(void) {
 						reservoir_layer_v[k] = reservoir_layer1;
 					}
 					int lm;
-					std::vector<std::vector<std::vector<double>>> w(11 * 11, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
-					std::vector<std::vector<double>> nmse(11 * 11, std::vector<double>(10));						// 各リザーバーのnmseを格納
+					std::vector<std::vector<std::vector<double>>> w(21 * 11, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
+					std::vector<std::vector<double>> nmse(21 * 11, std::vector<double>(10));						// 各リザーバーのnmseを格納
 					int opt_k = 0;
 					//#pragma omp parallel for
 					// 重みの学習を行う
-					for (int k = 0; k < 11 * 11; k++) {
+					for (int k = 0; k < 21 * 11; k++) {
 						output_learning output_learning;
 						const double p = ite_p * 0.1;
 						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
@@ -167,7 +164,7 @@ int main(void) {
 					}
 					std::vector<double> opt_w;
 					// 検証データでもっとも性能の良いリザーバーを選択
-					for (int k = 0; k < 11 * 11; k++) {
+					for (int k = 0; k < 21 * 11; k++) {
 						for (int lm = 0; lm < 10; lm++) {
 							if (nmse[k][lm] < opt_nmse) {
 								opt_nmse = nmse[k][lm];
