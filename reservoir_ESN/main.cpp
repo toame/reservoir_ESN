@@ -70,7 +70,7 @@ int main(void) {
 				const int tau = param1[r];
 				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
 			}
-			else if (task_name == "apporx") {
+			else if (task_name == "approx") {
 				d_alpha = 1.0;
 				alpha_min = 0.2;
 				const double nu = param1[r];
