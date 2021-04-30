@@ -156,9 +156,10 @@ double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {
 }
 
 double calc_mean_squared_average(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
-	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show = false) {
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	double sum_squared_average = 0.0;
-	
+	std::ofstream outputfile("output_predict/" + name + ".txt");
+	outputfile << "t,teacher,predict" << std::endl;
 	for (int t = wash_out + 1; t < step; t++) {
 		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
 		double reservoir_predict_signal = 0.0;
@@ -167,13 +168,13 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		if (show) {
-			std::cout << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << std::endl;
+			outputfile << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << std::endl;
 		}
 	}
 	return sum_squared_average / (step - wash_out);
 }
 
 double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
-	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show) {
-	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show) / t_tt_calc(teacher_signal, wash_out, step));
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
 }
