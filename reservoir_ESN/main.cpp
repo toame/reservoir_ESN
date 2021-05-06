@@ -38,7 +38,7 @@ int main(void) {
 	const int step = 3000;
 	const int wash_out = 500;
 	const int task_size = 10;
-	std::vector<int> unit_sizes = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100,  100, 100, 100, 100 };
+	std::vector<int> unit_sizes = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100,  100, 100, 100 };
 	std::vector<std::string> task_names = { "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma2", "narma2", "narma2", "approx", "approx", "approx"};
 	if (unit_sizes.size() != task_names.size()) return 0;
 	std::vector<int> param1 = { 5, 7, 5, 7, 5, 10, 15, 5, 10, 15, 3, 5, 7 };
