@@ -57,11 +57,12 @@ void reservoir_layer::generate_reservoir() {
 	 * output_node[t][n] 時刻tにおけるn番目のノードの出力
 	 * t_size ステップ数
 	 **/
-void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size) {
-
+void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size, int seed) {
+	std::mt19937 mt2;
+	mt2.seed(seed);
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;
-	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt);
+	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
 	std::vector<double> input_sum_node(unit_size + 1, 0);
 	for (int t = 0; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {
@@ -71,10 +72,10 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			}
 			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0];
 		}
-		output_node[t + 1][0] = 1.0;
 		for (int n = 1; n <= unit_size; n++) {
 			output_node[t + 1][n] = activation_function(input_sum_node[n], node_type[n]);
 		}
+		output_node[t + 1][0] = 1.0;
 	}
 }
 
@@ -114,8 +115,8 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	auto output_node1 = std::vector<std::vector<double>>(wash_out + 2, std::vector<double>(unit_size + 1, 0));
 	auto output_node2 = std::vector<std::vector<double>>(wash_out + 2, std::vector<double>(unit_size + 1, 0));
 
-	reservoir_update(input_signal, output_node1, wash_out);
-	reservoir_update(input_signal, output_node2, wash_out);
+	reservoir_update(input_signal, output_node1, wash_out, 1);
+	reservoir_update(input_signal, output_node2, wash_out, 2);
 
 	double err_sum = 0.0;
 	for (int t = wash_out - 99; t <= wash_out; t++) {
