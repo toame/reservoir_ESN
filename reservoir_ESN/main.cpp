@@ -125,7 +125,7 @@ int main(void) {
 #pragma omp parallel for
 					// 複数のリザーバーの時間発展をまとめて処理
 					for (int k = 0; k < 21 * 11; k++) {
-						if (!reservoir_layer_v[k].is_echo_state_property(input_signal[VAL])) continue;
+						
 						const double p = ite_p * 0.1;
 						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
 						const double weight_factor = (k % 11 + 1) * 0.1;
@@ -170,6 +170,7 @@ int main(void) {
 					std::vector<double> opt_w;
 					// 検証データでもっとも性能の良いリザーバーを選択
 					for (int k = 0; k < 21 * 11; k++) {
+						if (!reservoir_layer_v[k].is_echo_state_property(input_signal[VAL])) continue;
 						for (int lm = 0; lm < 10; lm++) {
 							if (nmse[k][lm] < opt_nmse) {
 								opt_nmse = nmse[k][lm];
