@@ -158,8 +158,8 @@ int main(void) {
 						double opt_lm_nmse = 1e+9;
 						for (lm = 0; lm < 10; lm++) {
 							for (int j = 0; j <= unit_size; j++) {
-								output_learning.A[j][j] += pow(10, -16 + lm);
-								if (lm != 0) output_learning.A[j][j] -= pow(10, -16 + lm - 1);
+								output_learning.A[j][j] += pow(10, -12 + lm);
+								if (lm != 0) output_learning.A[j][j] -= pow(10, -12 + lm - 1);
 							}
 							output_learning.IncompleteCholeskyDecomp2(unit_size + 1);
 							double eps = 1e-12;
