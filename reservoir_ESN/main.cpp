@@ -38,11 +38,11 @@ int main(void) {
 	const int step = 3000;
 	const int wash_out = 500;
 	const int task_size = 10;
-	std::vector<int> unit_sizes = {100, 100, 100, 100, 100, 100, 100, 100, 100, 100,  100, 100, 100 };
-	std::vector<std::string> task_names = { "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma2", "narma2", "narma2", "approx", "approx", "approx"};
+	std::vector<int> unit_sizes = {300, 300, 300};
+	std::vector<std::string> task_names = {  "approx", "approx", "approx"};
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 5, 7, 5, 7, 5, 10, 15, 5, 10, 15, 3, 5, 7 };
-	std::vector<double> param2 = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3.0, 1.5, 1.0 };
+	std::vector<int> param1 = { 3, 5, 7 };
+	std::vector<double> param2 = { 3.0, 1.5, 1.0 };
 	if (param1.size() != param2.size()) return 0;
 	std::string task_name;
 	std::string function_name;
@@ -187,7 +187,7 @@ int main(void) {
 					}
 					/*** TEST phase ***/
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
-
+		
 					reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, true, output_name);
 					double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, true, output_name);
@@ -196,7 +196,42 @@ int main(void) {
 					
 					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse <<"," <<opt_nmse << "," << test_nmse << std::endl;
 					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << train_nmse <<"," <<opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
+					
+					for(int i = 0; test_nmse > 1.5; i++) {
+						input_signal[TEST].clear();
+						teacher_signal[TEST].clear();
+						if (task_name == "narma") {
+							const int tau = param1[r];
+							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step, TEST + i);
+							generate_narma_task(input_signal[TEST], teacher_signal[TEST], tau, step);
+						}
+						else if (task_name == "narma2") {
+							const int tau = param1[r];
+							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step, TEST + i);
+							generate_narma_task2(input_signal[TEST], teacher_signal[TEST], tau, step);
+						}
+						else if (task_name == "henon") {
+							break;
+						}
+						else if (task_name == "laser") {
+							break;
+						}
+						else if (task_name == "approx") {
+							const int tau = param1[r];
+							const double nu = param2[r];
+							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step, TEST + i);
+							task_for_function_approximation(input_signal[TEST], teacher_signal[TEST], nu, tau, step, TEST + i);
+						}
+						reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
+						test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, true, output_name);
+						double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, true, output_name);
+						end = std::chrono::system_clock::now();  // 計測終了時間
+						double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
+						outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse << "," << opt_nmse << "," << test_nmse << std::endl;
+						std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << train_nmse << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
+
+					}
 					// リザーバーのユニット入出力を表示
 					reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, output_name);
 
