@@ -35,8 +35,8 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 typedef void (*FUNC)();
 int main(void) {
 	const int TRIAL_NUM = 1;	// ループ回数
-	const int step = 3000;
-	const int wash_out = 500;
+	const int step[3] = { 15000, 2000, 10000 };
+	const int wash_out = 100;
 	const int task_size = 10;
 	std::vector<int> unit_sizes = {300, 300, 300};
 	std::vector<std::string> task_names = {  "approx", "approx", "approx"};
@@ -63,37 +63,37 @@ int main(void) {
 				d_alpha = 0.01;
 				alpha_min = 0.005;
 				const int tau = param1[r];
-				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
-				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step[phase], phase + 1);
+				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step[phase]);
 			}
 			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
 			else if (task_name == "narma2") {
 				d_alpha = 0.01;
 				alpha_min = 0.005;
 				const int tau = param1[r];
-				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
-				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step[phase], phase + 1);
+				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step[phase]);
 			}
 			else if (task_name == "henon") {
 				d_alpha = 5.0;
 				alpha_min = 2.0;
 				const int fstep = param1[r];
-				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
+				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step[phase], phase * step[TRAIN]);
 			}
 			else if (task_name == "laser") {
 				d_alpha = 0.2;
 				alpha_min = 0.1;
 				const int fstep = param1[r];
-				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
+				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step[phase], phase * step[phase]);
 			}
 			else if (task_name == "approx") {
-				d_alpha = 2.0;
-				alpha_min = 1.0;
+				d_alpha = 3.0;
+				alpha_min = 2.0;
 				const int tau = param1[r];
 				const double nu = param2[r];
 				
-				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
-				task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step[phase], phase + 1);
+				task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step[phase], phase);
 			}
 		}
 
@@ -112,7 +112,9 @@ int main(void) {
 			else if (function_name == "gauss") nonlinear = gauss;
 			else if (function_name == "oddsinc") nonlinear = oddsinc;
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {
-				std::vector<std::vector<std::vector<std::vector<double>>>> output_node(21 * 11, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
+				std::vector<std::vector<std::vector<double>>> output_node_TRAIN(21 * 11, std::vector<std::vector<double>>(step[TRAIN] + 2, std::vector<double>(unit_size + 1, 0)));
+				std::vector<std::vector<std::vector<double>>> output_node_VAL(21 * 11, std::vector<std::vector<double>>(step[VAL] + 2, std::vector<double>(unit_size + 1, 0)));
+				std::vector<std::vector<double>> output_node_TEST(step[TEST] + 2, std::vector<double>(unit_size + 1, 0));
 				std::vector<reservoir_layer> reservoir_layer_v(21 * 11);
 				std::vector<bool> is_echo_state_property(21 * 11);
 				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
@@ -128,14 +130,14 @@ int main(void) {
 					for (int k = 0; k < 21 * 11; k++) {
 						
 						const double p = ite_p * 0.1;
-						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
+						const double input_signal_factor = (k / 21) * d_alpha + alpha_min;
 						const double weight_factor = (k % 11 + 1) * 0.1;
 
 						reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, p, nonlinear, loop, wash_out);
 						reservoir_layer1.generate_reservoir();
 
-						reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
-						reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);
+						reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node_TRAIN[k], step[TRAIN]);
+						reservoir_layer1.reservoir_update(input_signal[VAL], output_node_VAL[k], step[VAL]);
 						is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 						reservoir_layer_v[k] = reservoir_layer1;
 					}
@@ -151,8 +153,8 @@ int main(void) {
 						const double p = ite_p * 0.1;
 						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
 						const double weight_factor = (k % 11) * 0.1;
-						output_learning.generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
-						output_learning.generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
+						output_learning.generate_simultaneous_linear_equationsA(output_node_TRAIN[k], wash_out, step[TRAIN], unit_size);
+						output_learning.generate_simultaneous_linear_equationsb(output_node_TRAIN[k], teacher_signal[TRAIN], wash_out, step[TRAIN], unit_size);
 
 						double opt_lm = 0;
 						double opt_lm_nmse = 1e+9;
@@ -166,7 +168,7 @@ int main(void) {
 							int itr = 10;
 							output_learning.ICCGSolver(unit_size + 1, itr, eps);
 							w[k][lm] = output_learning.w;
-							nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning.w, output_node[k][VAL], unit_size, wash_out, step, false);
+							nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning.w, output_node_VAL[k], unit_size, wash_out, step[VAL], false);
 						}
 					}
 					std::vector<double> opt_w;
@@ -188,27 +190,27 @@ int main(void) {
 					/*** TEST phase ***/
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
 		
-					reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
-					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, true, output_name);
-					double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, true, output_name);
+					reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node_TEST, step[TEST]);
+					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_TEST, unit_size, wash_out, step[TEST], true, output_name);
+					double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node_TRAIN[opt_k], unit_size, wash_out, step[TRAIN], true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 					
 					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse <<"," <<opt_nmse << "," << test_nmse << std::endl;
 					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << train_nmse <<"," <<opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
 					
-					for(int i = 0; test_nmse > 1.5; i++) {
+					for(int i = 0; test_nmse > 2.5 && i < 10; i++) {
 						input_signal[TEST].clear();
 						teacher_signal[TEST].clear();
 						if (task_name == "narma") {
 							const int tau = param1[r];
-							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step, TEST + i);
-							generate_narma_task(input_signal[TEST], teacher_signal[TEST], tau, step);
+							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step[TEST], TEST + i);
+							generate_narma_task(input_signal[TEST], teacher_signal[TEST], tau, step[TEST]);
 						}
 						else if (task_name == "narma2") {
 							const int tau = param1[r];
-							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step, TEST + i);
-							generate_narma_task2(input_signal[TEST], teacher_signal[TEST], tau, step);
+							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step[TEST], TEST + i);
+							generate_narma_task2(input_signal[TEST], teacher_signal[TEST], tau, step[TEST]);
 						}
 						else if (task_name == "henon") {
 							break;
@@ -219,12 +221,12 @@ int main(void) {
 						else if (task_name == "approx") {
 							const int tau = param1[r];
 							const double nu = param2[r];
-							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step, TEST + i);
-							task_for_function_approximation(input_signal[TEST], teacher_signal[TEST], nu, tau, step, TEST + i);
+							generate_input_signal_random(input_signal[TEST], -1.0, 2.0, step[TEST], TEST + i);
+							task_for_function_approximation(input_signal[TEST], teacher_signal[TEST], nu, tau, step[TEST], TEST + i);
 						}
-						reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
-						test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, true, output_name);
-						double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, true, output_name);
+						reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node_TEST, step[TEST]);
+						test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_TEST, unit_size, wash_out, step[TEST], true, output_name);
+						double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node_TRAIN[opt_k], unit_size, wash_out, step[TEST], true, output_name);
 						end = std::chrono::system_clock::now();  // 計測終了時間
 						double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
@@ -233,7 +235,7 @@ int main(void) {
 
 					}
 					// リザーバーのユニット入出力を表示
-					reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, output_name);
+					reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node_TEST, step[TEST], wash_out, output_name);
 
 				}
 
