@@ -114,6 +114,7 @@ int main(void) {
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {
 				std::vector<std::vector<std::vector<std::vector<double>>>> output_node(21 * 11, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
 				std::vector<reservoir_layer> reservoir_layer_v(21 * 11);
+				std::vector<bool> is_echo_state_property(21 * 11);
 				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
 					double opt_nmse = 1e+10;
 					double opt_input_signal_factor = 0;
@@ -135,6 +136,7 @@ int main(void) {
 
 						reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
 						reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);
+						is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 						reservoir_layer_v[k] = reservoir_layer1;
 					}
 					int lm;
@@ -144,7 +146,7 @@ int main(void) {
 					//#pragma omp parallel for
 					// 重みの学習を行う
 					for (int k = 0; k < 21 * 11; k++) {
-						if (!reservoir_layer_v[k].is_echo_state_property(input_signal[VAL])) continue;
+						if (!is_echo_state_property[k]) continue;
 						output_learning output_learning;
 						const double p = ite_p * 0.1;
 						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
@@ -170,7 +172,7 @@ int main(void) {
 					std::vector<double> opt_w;
 					// 検証データでもっとも性能の良いリザーバーを選択
 					for (int k = 0; k < 21 * 11; k++) {
-						if (!reservoir_layer_v[k].is_echo_state_property(input_signal[VAL])) continue;
+						if (!is_echo_state_property[k]) continue;
 						for (int lm = 0; lm < 10; lm++) {
 							if (nmse[k][lm] < opt_nmse) {
 								opt_nmse = nmse[k][lm];
