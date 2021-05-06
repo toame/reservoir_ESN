@@ -102,7 +102,7 @@ int main(void) {
 		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;
 		outputfile << "### input_signal_factor [" << alpha_min << ", " << alpha_min + d_alpha * 10 << "]" << std::endl;
 		outputfile << "### weight_factor [0.1, 1.1]" << std::endl;
-		outputfile << "function_name,seed,unit_size,p,input_singal_factor,weight_factor,lm,nmse,test_nmse" << std::endl;
+		outputfile << "function_name,seed,unit_size,p,input_singal_factor,weight_factor,lm,train_nmse,nmse,test_nmse" << std::endl;
 
 		std::chrono::system_clock::time_point  start, end; // 型は auto で可
 		for (auto function_name : function_names) {
@@ -190,11 +190,12 @@ int main(void) {
 
 					reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, true, output_name);
+					double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 					
-					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(1) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << opt_nmse << "," << test_nmse << std::endl;
-					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(1) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
+					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse <<"," <<opt_nmse << "," << test_nmse << std::endl;
+					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << train_nmse <<"," <<opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
 
 					// リザーバーのユニット入出力を表示
 					reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, output_name);
