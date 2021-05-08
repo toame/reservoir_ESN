@@ -37,11 +37,19 @@ int main(void) {
 	const int TRIAL_NUM = 10;	// ループ回数
 	const int step = 3000;
 	const int wash_out = 500;
-	std::vector<int> unit_sizes = { 100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100 };
-	std::vector<std::string> task_names = { "laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx"};
+	std::vector<int> unit_sizes = {
+									300, 300, 300,  300, 300,  300, 300, 300, 300,  300, 300, 300, 300,  300, 300, 300,
+									500, 500, 500,  500, 500,  500, 500, 500, 500,  500, 500, 500, 500,  500, 500, 500 };
+	std::vector<std::string> task_names = { "approx", "approx", "approx",
+											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",
+											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 =    { 1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7 };
-	std::vector<double> param2 = { 0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };
+	std::vector<int> param1 =    {
+								   1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,
+									1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7 };
+	std::vector<double> param2 = {
+									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,
+									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };
 	if (param1.size() != param2.size()) return 0;
 	std::string task_name;
 	std::string function_name;
@@ -95,7 +103,8 @@ int main(void) {
 				task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
 			}
 		}
-
+		const int alpha_step = 21;
+		const int sigma_step = 11;
 		// 設定出力
 		outputfile << "### task_name: " << task_name << std::endl;
 		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;
@@ -111,9 +120,9 @@ int main(void) {
 			else if (function_name == "gauss") nonlinear = gauss;
 			else if (function_name == "oddsinc") nonlinear = oddsinc;
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {
-				std::vector<std::vector<std::vector<std::vector<double>>>> output_node(21 * 11, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
-				std::vector<reservoir_layer> reservoir_layer_v(21 * 11);
-				std::vector<bool> is_echo_state_property(21 * 11);
+				std::vector<std::vector<std::vector<std::vector<double>>>> output_node(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(unit_size + 1, 0))));
+				std::vector<reservoir_layer> reservoir_layer_v(alpha_step * sigma_step);
+				std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
 				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
 					double opt_nmse = 1e+10;
 					double opt_input_signal_factor = 0;
@@ -124,11 +133,11 @@ int main(void) {
 
 #pragma omp parallel for
 					// 複数のリザーバーの時間発展をまとめて処理
-					for (int k = 0; k < 21 * 11; k++) {
+					for (int k = 0; k < alpha_step * sigma_step; k++) {
 						
 						const double p = ite_p * 0.1;
-						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
-						const double weight_factor = (k % 11 + 1) * 0.1;
+						const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+						const double weight_factor = (k % sigma_step + 1) * 0.1;
 
 						reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, p, nonlinear, loop, wash_out);
 						reservoir_layer1.generate_reservoir();
@@ -139,17 +148,17 @@ int main(void) {
 						reservoir_layer_v[k] = reservoir_layer1;
 					}
 					int lm;
-					std::vector<std::vector<std::vector<double>>> w(21 * 11, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
-					std::vector<std::vector<double>> nmse(21 * 11, std::vector<double>(10));						// 各リザーバーのnmseを格納
+					std::vector<std::vector<std::vector<double>>> w(alpha_step * sigma_step, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
+					std::vector<std::vector<double>> nmse(alpha_step * sigma_step, std::vector<double>(10));						// 各リザーバーのnmseを格納
 					int opt_k = 0;
 					//#pragma omp parallel for
 					// 重みの学習を行う
-					for (int k = 0; k < 21 * 11; k++) {
+					for (int k = 0; k < alpha_step * sigma_step; k++) {
 						if (!is_echo_state_property[k]) continue;
 						output_learning output_learning;
 						const double p = ite_p * 0.1;
-						const double input_signal_factor = (k / 11) * d_alpha + alpha_min;
-						const double weight_factor = (k % 11) * 0.1;
+						const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+						const double weight_factor = (k % sigma_step) * 0.1;
 						output_learning.generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
 						output_learning.generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
 
@@ -162,7 +171,7 @@ int main(void) {
 							}
 							output_learning.IncompleteCholeskyDecomp2(unit_size + 1);
 							double eps = 1e-12;
-							int itr = 10;
+							int itr = 20;
 							output_learning.ICCGSolver(unit_size + 1, itr, eps);
 							w[k][lm] = output_learning.w;
 							nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning.w, output_node[k][VAL], unit_size, wash_out, step, false);
@@ -170,13 +179,13 @@ int main(void) {
 					}
 					std::vector<double> opt_w;
 					// 検証データでもっとも性能の良いリザーバーを選択
-					for (int k = 0; k < 21 * 11; k++) {
+					for (int k = 0; k < alpha_step * sigma_step; k++) {
 						if (!is_echo_state_property[k]) continue;
 						for (int lm = 0; lm < 10; lm++) {
 							if (nmse[k][lm] < opt_nmse) {
 								opt_nmse = nmse[k][lm];
-								opt_input_signal_factor = (k / 11) * d_alpha + alpha_min;
-								opt_weight_factor = (k % 11 + 1) * 0.1;
+								opt_input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+								opt_weight_factor = (k % sigma_step + 1) * 0.1;
 								opt_lm2 = lm;
 								opt_k = k;
 								opt_w = w[k][lm];
@@ -189,7 +198,7 @@ int main(void) {
 
 					reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, true, output_name);
-					double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, true, output_name);
+					double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 					

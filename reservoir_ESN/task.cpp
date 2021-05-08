@@ -121,6 +121,20 @@ void generate_henom_map_task(std::vector<double>& input_signal, std::vector<doub
 	}
 }
 
+void generate_input_signal_wave(std::vector<double>& input_signal, const double nu, const int step, const int wash_out) {
+	for (int t = 0; t < step; t++) {
+		input_signal[t] = sin(nu * t + wash_out) + sin(nu * t / 10.0 + wash_out);
+	}
+}
+
+void generate_input_signal_wave(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
+	generate_input_signal_henon_map(input_signal, fstep, step, wash_out);
+	teacher_signal.resize(step);
+	for (int t = 0; t < step; t++) {
+		teacher_signal[t] = input_signal[t + fstep];
+	}
+}
+
 void generate_input_signal_laser(std::vector<double>& input_signal, const int fstep, const int step, const int wash_out) {
 	std::ifstream ifs("santafe.dat");
 
