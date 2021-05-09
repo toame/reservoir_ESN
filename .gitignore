@@ -346,3 +346,5 @@ healthchecksdb
 /reservoir_ESN/data
 /reservoir_ESN/output_predict
 /reservoir_ESN/png
+/reservoir_ESN/old_data/output_data
+/reservoir_ESN/old_data/output_predict
