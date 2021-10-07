@@ -158,6 +158,54 @@ void generate_laser_task(std::vector<double>& input_signal, std::vector<double>&
 	}
 }
 
+void task_for_calc_of_L(const std::vector<double>& input_signal, std::vector<double>& output_signal, const int tau, const int step) {
+	for (int t = 0; t <= step; t++) {
+		if (t - tau >= 0)
+			output_signal[t] = input_signal[t - tau];
+		else
+			output_signal[t] = 0.0;
+	}
+}
+void generate_d_sequence(std::vector<std::vector<int>>& d_vec, std::vector<int>& d, int d_sum_remain, int depth = 0) {
+	if (d_sum_remain <= 0) {
+		d_vec.push_back(d);
+		// for(auto& e: d) std::cerr << e << " ";
+		// std::cerr << std::endl;
+		return;
+	}
+	// std::cerr << d_sum_remain << " " << depth << std::endl;
+	d[depth]++;
+	generate_d_sequence(d_vec, d, d_sum_remain - 1, depth);
+	d[depth]--;
+	if (depth + 1 < d.size()) generate_d_sequence(d_vec, d, d_sum_remain, depth + 1);
+}
+
+void generate_d_sequence_set(std::vector<std::vector<std::vector<int>>>& d_vec) {
+	std::vector<int> d;
+	const int mode = 0;
+	d.resize(8); generate_d_sequence(d_vec[mode], d, 2);
+	d.resize(8); generate_d_sequence(d_vec[mode], d, 3);
+	d.resize(7); generate_d_sequence(d_vec[mode], d, 4);
+	d.resize(6); generate_d_sequence(d_vec[mode], d, 5);
+	d.resize(5); generate_d_sequence(d_vec[mode], d, 6);
+	d.resize(4); generate_d_sequence(d_vec[mode], d, 7);
+	d.resize(3); generate_d_sequence(d_vec[mode], d, 8);
+	for (int u = 9; u < 30; u++) {
+		d.resize(2);
+		generate_d_sequence(d_vec[mode], d, u);
+	}
+}
+
+void task_for_calc_of_NL(const std::vector<double>& input_signal, std::vector<double>& output_signal, std::vector<int>& d, const int step) {
+	for (int t = 0; t <= step; t++) {
+		double x = 1.0;
+		for (int i = 0; i < d.size(); i++) {
+			if (t - (i + 1) >= 0) x *= std::legendre(d[i], input_signal[t - (i + 1)]);
+		}
+		output_signal[t] = x;
+	}
+}
+
 inline double squared(const double x) {
 	return x * x;
 }
@@ -176,19 +224,19 @@ double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {
 double calc_mean_squared_average(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	double sum_squared_average = 0.0;
-	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);
-	if(show)
-		outputfile << "t,predict_test,teacher" << std::endl;
+	//std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);
+	//if(show)
+	//	outputfile << "t,predict_test,teacher" << std::endl;
 	for (int t = wash_out + 1; t < step; t++) {
-		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
-		double reservoir_predict_signal = 0.0;
-		for (int n = 0; n <= unit_size; n++) {
-			reservoir_predict_signal += weight[n] * output_node[t + 1][n];
-		}
+		const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
+		//double reservoir_predict_signal = 0.0;
+		//for (int n = 0; n <= unit_size; n++) {
+		//	reservoir_predict_signal += weight[n] * output_node[t + 1][n];
+		//}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
-		if (show) {
-			outputfile << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
-		}
+		//if (show) {
+		//	outputfile << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
+		//}
 	}
 	return sum_squared_average / (step - wash_out);
 }
