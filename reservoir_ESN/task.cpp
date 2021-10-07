@@ -66,11 +66,11 @@ void generate_narma_task2(std::vector<double> input_signal, std::vector<double>&
 	const double beta = 0.05;
 	const double gamma = 1.5;
 	double delta = 0.1;
+	tau--;
 	if (tau >= 10) delta = 0.01;
 	for (int t = 0; t < step; t++) {
 		input_signal[t] = (input_signal[t] + 1) / 4;
 	}
-	tau--;
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
 		double sum = 0.0;
