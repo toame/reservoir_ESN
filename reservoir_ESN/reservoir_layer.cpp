@@ -133,7 +133,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 
 double reservoir_layer::activation_function(const double x, const int type) {
 	if (type == LINEAR) {
-		return std::max(-100.0, std::min(100.0, x));
+		return std::max(-1000.0, std::min(1000.0, x));
 	}
 	else if (type == NON_LINEAR) {
 		return nonlinear(x);
