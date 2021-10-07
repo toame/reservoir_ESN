@@ -1,11 +1,12 @@
 ﻿#include "reservoir_layer.h"
 reservoir_layer::reservoir_layer() {}
-reservoir_layer::reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double p,
+reservoir_layer::reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double bias_factor, const double p,
 	double (*nonlinear)(double), unsigned int seed = 0, const int wash_out = 500) {
 	this->unit_size = unit_size;
 	this->connection_degree = connection_degree;
 	this->input_signal_factor = iss_factor;
 	this->weight_factor = weight_factor;
+	this->bias_factor = bias_factor;
 	this->p = p;
 	this->seed = seed;
 	this->nonlinear = nonlinear;
@@ -44,7 +45,7 @@ void reservoir_layer::generate_reservoir() {
 
 	for (int n = 1; n <= unit_size; n++) {
 		//リザーバー層の結合重みを決定
-		weight_reservoir[n][0] = input_signal_factor * weight_factor * rand_minus1toplus1(mt);
+		weight_reservoir[n][0] = rand_minus1toplus1(mt);
 		for (int k = 1; k <= connection_degree; k++)
 			weight_reservoir[n][k] = weight_factor * (1.0 / sqrt(connection_degree)) * (rand_0or1(mt) * 2 - 1);
 
@@ -70,7 +71,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			for (int k = 1; k <= connection_degree; k++) {
 				input_sum_node[n] += weight_reservoir[n][k] * output_node[t][adjacency_list[n][k]];
 			}
-			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0];
+			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0] * bias_factor;
 		}
 		for (int n = 1; n <= unit_size; n++) {
 			output_node[t + 1][n] = activation_function(input_sum_node[n], node_type[n]);
@@ -95,7 +96,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 			for (int k = 1; k <= connection_degree; k++) {
 				input_sum_node[n] += weight_reservoir[n][k] * output_node[t][adjacency_list[n][k]];
 			}
-			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0];
+			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0] * bias_factor;
 		}
 		output_node[t + 1][0] = 1.0;
 

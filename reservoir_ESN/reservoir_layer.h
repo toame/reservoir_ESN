@@ -16,6 +16,7 @@ public:
 	unsigned int connection_degree;						//	1ユニット当たりの接続数	(ノード数の1割程度で精度が飽和する）
 	double input_signal_factor;							//	入力の強さ
 	double weight_factor;								//	ユニット間接続の強さ
+	double bias_factor;									//	バイアスの重み強さ
 	std::vector<std::vector<double>> weight_reservoir;	//  リザーバー層の結合重み
 	std::vector<std::vector<int>> adjacency_list;		//  グラフにおける隣接リスト(隣接リスト:https://qiita.com/drken/items/4a7869c5e304883f539b)
 	std::vector<double> input_signal_strength;			//  入力層の重み結合の強さベクトル
@@ -27,7 +28,7 @@ public:
 	int wash_out;
 
 	reservoir_layer();
-	reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double p,
+	reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double bias_factor, const double p,
 		double (*nonlinear)(double), const unsigned int seed, const int wash_out);
 
 	void generate_reservoir();
