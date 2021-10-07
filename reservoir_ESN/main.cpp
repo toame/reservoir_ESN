@@ -75,14 +75,10 @@ int main(void) {
 		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 		// 入力信号 教師信号の生成
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
-			d_sigma = 0.1;
-			sigma_min = 0.1;
 			if (task_name == "narma") {
-				d_bias = 0.4;
-				d_alpha = 0.005;
-				alpha_min = 0.002;
-				d_sigma = 0.07;
-				sigma_min = 0.5;
+				d_bias = 0.4; 
+				d_alpha = 0.005; alpha_min = 0.002;
+				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
@@ -90,27 +86,23 @@ int main(void) {
 			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
 			else if (task_name == "narma2") {
 				d_bias = 0.4;
-				d_alpha = 0.005;
-				alpha_min = 0.002;
-				d_sigma = 0.07;
-				sigma_min = 0.5;
+				d_alpha = 0.005; alpha_min = 0.002;
+				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
 			}
 			else if (task_name == "henon") {
 				d_bias = 10.0;
-				d_alpha = 10.0;
-				alpha_min = 2.0;
-				d_sigma = 0.04;
-				sigma_min = 0.04;
+				d_alpha = 10.0; alpha_min = 2.0;
+				d_sigma = 0.04; sigma_min = 0.04;
 				const int fstep = param1[r];
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "laser") {
 				d_bias = 0.5;
-				d_alpha = 0.4;
-				alpha_min = 0.1;
+				d_alpha = 0.4; alpha_min = 0.1;
+				d_sigma = 0.1; sigma_min = 0.1;
 				const int fstep = param1[r];
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
@@ -167,11 +159,8 @@ int main(void) {
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-
-							
 							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
-							
 
 							reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);
 							reservoir_layer1.generate_reservoir();
@@ -189,7 +178,6 @@ int main(void) {
 #pragma omp parallel for  private(lm) num_threads(32)
 						// 重みの学習を行う
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-
 							if (!is_echo_state_property[k]) continue;
 
 							output_learning[k].generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
@@ -210,7 +198,6 @@ int main(void) {
 								nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
 							}
 						}
-
 
 						// 検証データでもっとも性能の良いリザーバーを選択
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
@@ -236,7 +223,6 @@ int main(void) {
 
 					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
-
 
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
