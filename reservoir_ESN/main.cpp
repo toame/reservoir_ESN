@@ -63,6 +63,7 @@ int main(void) {
 	std::vector<std::vector<std::vector<double>>> w(alpha_step * sigma_step, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
 	std::vector<std::vector<double>> nmse(alpha_step * sigma_step, std::vector<double>(10));						// 各リザーバーのnmseを格納
 	for (int r = 0; r < unit_sizes.size(); r++) {
+		if (r < 15 || r > 15) continue;
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
 
@@ -115,12 +116,11 @@ int main(void) {
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "approx") {
-				d_bias = 0.5;
 				const int tau = param1[r];
 				const double nu = param2[r];
-				if (tau == 7) { d_alpha = 0.5; alpha_min = 0.5; }
-				else if (tau == 5) { d_alpha = 1.0; alpha_min = 0.5; }
-				else if (tau == 3) { d_alpha = 5.0; alpha_min = 1.0; }
+				if (tau == 7) { d_alpha = 1.0; alpha_min = 0.1; d_bias = 0.5; d_sigma = 0.03; sigma_min = 0.1; }
+				else if (tau == 5) { d_alpha = 2.0; alpha_min = 0.5; d_bias = 1.0; d_sigma = 0.02; sigma_min = 0.02; }
+				else if (tau == 3) { d_alpha = 5.0; alpha_min = 1.0; d_bias = 4.0;  d_sigma = 0.02; sigma_min = 0.02; }
 				else {
 					std::cerr << "error! approx parameter is not setting" << std::endl;
 					return 0;
@@ -244,7 +244,7 @@ int main(void) {
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
 					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(4) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse << "," << opt_nmse << "," << test_nmse << std::endl;
-					std::cerr  << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << train_nmse << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
+					std::cerr  << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::setprecision(5) << train_nmse << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
 
 					// リザーバーのユニット入出力を表示
 					opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);
