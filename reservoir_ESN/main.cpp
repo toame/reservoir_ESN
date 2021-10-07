@@ -124,6 +124,10 @@ int main(void) {
 			else if (function_name == "tanh") nonlinear = tanh;
 			else if (function_name == "gauss") nonlinear = gauss;
 			else if (function_name == "oddsinc") nonlinear = oddsinc;
+			else {
+				std::cerr << "error! " << function_name << "is not found" << std::endl;
+				return 0;
+			}
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {
 				
 				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
@@ -134,7 +138,7 @@ int main(void) {
 					double test_nmse = 1e+10;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 
-#pragma omp parallel for
+					#pragma omp parallel for num_threads(32)
 					// 複数のリザーバーの時間発展をまとめて処理
 					for (int k = 0; k < alpha_step * sigma_step; k++) {
 						
@@ -154,32 +158,36 @@ int main(void) {
 					int lm;
 					
 					int opt_k = 0;
-					//#pragma omp parallel for
+
+					output_learning output_learning[341];
+					#pragma omp parallel for  private(lm) num_threads(32)
 					// 重みの学習を行う
 					for (int k = 0; k < alpha_step * sigma_step; k++) {
+
 						if (!is_echo_state_property[k]) continue;
-						output_learning output_learning;
+
 						const double p = ite_p * 0.1;
 						const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
 						const double weight_factor = (k % sigma_step) * 0.1;
-						output_learning.generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
-						output_learning.generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
+						output_learning[k].generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
+						output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
 
 						double opt_lm = 0;
 						double opt_lm_nmse = 1e+9;
 						for (lm = 0; lm < 10; lm++) {
 							for (int j = 0; j <= unit_size; j++) {
-								output_learning.A[j][j] += pow(10, -10 + lm/2.0);
-								if (lm != 0) output_learning.A[j][j] -= pow(10, -10 + lm/2.0 - 1);
+								output_learning[k].A[j][j] += pow(10, -15 + lm);
+								if (lm != 0) output_learning[k].A[j][j] -= pow(10, -16 + lm);
 							}
-							output_learning.IncompleteCholeskyDecomp2(unit_size + 1);
-							double eps = 1e-18;
-							int itr = 100;
-							output_learning.ICCGSolver(unit_size + 1, itr, eps);
-							w[k][lm] = output_learning.w;
-							nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning.w, output_node[k][VAL], unit_size, wash_out, step, false);
+							output_learning[k].IncompleteCholeskyDecomp2(unit_size + 1);
+							double eps = 1e-12;
+							int itr = 10;
+							output_learning[k].ICCGSolver(unit_size + 1, itr, eps);
+							w[k][lm] = output_learning[k].w;
+							nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
 						}
 					}
+
 					std::vector<double> opt_w;
 					// 検証データでもっとも性能の良いリザーバーを選択
 					for (int k = 0; k < alpha_step * sigma_step; k++) {
@@ -206,8 +214,8 @@ int main(void) {
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 					
-					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse <<"," <<opt_nmse << "," << test_nmse << std::endl;
-					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(2) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << train_nmse <<"," <<opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
+					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse <<"," <<opt_nmse << "," << test_nmse << std::endl;
+					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << train_nmse <<"," <<opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
 
 					// リザーバーのユニット入出力を表示
 					reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, output_name);
