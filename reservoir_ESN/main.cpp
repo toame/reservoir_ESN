@@ -13,6 +13,7 @@
 #define TRAIN (0)
 #define VAL (1)
 #define TEST (2)
+#define MAX_NODE_SIZE (500)
 double sinc(const double x) {
 	if (x == 0) return 1.0;
 	return sin(PI * x) / (PI * x);
@@ -55,7 +56,8 @@ int main(void) {
 	const int sigma_step = 11;
 	std::string task_name;
 	std::string function_name;
-	std::vector<std::vector<std::vector<std::vector<double>>>> output_node(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(500 + 1, 0))));
+	
+	std::vector<std::vector<std::vector<std::vector<double>>>> output_node(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0))));
 	std::vector<reservoir_layer> reservoir_layer_v(alpha_step * sigma_step);
 	std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
 	std::vector<std::vector<std::vector<double>>> w(alpha_step * sigma_step, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
@@ -135,6 +137,7 @@ int main(void) {
 					double opt_weight_factor = 0;
 					double opt_lm2 = 0;
 					double test_nmse = 1e+10;
+					reservoir_layer opt_reservoir_layer;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 
 					#pragma omp parallel for num_threads(32)
@@ -150,7 +153,7 @@ int main(void) {
 
 						reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
 						reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);
-						reservoir_layer1.reservoir_update(input_signal[TEST], output_node[k][TEST], step);
+						//reservoir_layer1.reservoir_update(input_signal[TEST], output_node[k][TEST], step);
 						is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 						reservoir_layer_v[k] = reservoir_layer1;
 					}
@@ -199,6 +202,7 @@ int main(void) {
 								opt_lm2 = lm;
 								opt_k = k;
 								opt_w = w[k][lm];
+								opt_reservoir_layer = reservoir_layer_v[k];
 							}
 						}
 
@@ -206,10 +210,11 @@ int main(void) {
 					/*** TEST phase ***/
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
 
-					//reservoir_layer_v[opt_k].reservoir_update(input_signal[TEST], output_node[opt_k][TEST], step);
+					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
+					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
 					
 					double train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false, output_name);
-					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node[opt_k][TEST], unit_size, wash_out, step, true, output_name);
+					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 					
@@ -217,7 +222,7 @@ int main(void) {
 					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << ite_p * 0.1 << "," << opt_input_signal_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(4) << train_nmse <<"," <<opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
 
 					// リザーバーのユニット入出力を表示
-					reservoir_layer_v[opt_k].reservoir_update_show(input_signal[TEST], output_node[opt_k][TEST], step, wash_out, output_name);
+					opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);
 					//if (test_nmse > 2.0) {
 					//	for (int k = 0; k < alpha_step * sigma_step; k++) {
 					//		if (!is_echo_state_property[k]) continue;
