@@ -153,7 +153,6 @@ int main(void) {
 
 						reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
 						reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);
-						//reservoir_layer1.reservoir_update(input_signal[TEST], output_node[k][TEST], step);
 						is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 						reservoir_layer_v[k] = reservoir_layer1;
 					}
