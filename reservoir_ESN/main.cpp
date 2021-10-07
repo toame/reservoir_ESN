@@ -63,7 +63,6 @@ int main(void) {
 	std::vector<std::vector<std::vector<double>>> w(alpha_step * sigma_step, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
 	std::vector<std::vector<double>> nmse(alpha_step * sigma_step, std::vector<double>(10));						// 各リザーバーのnmseを格納
 	for (int r = 0; r < unit_sizes.size(); r++) {
-		if (r < 15 || r > 15) continue;
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
 
