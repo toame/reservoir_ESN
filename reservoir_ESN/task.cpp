@@ -158,12 +158,13 @@ void generate_laser_task(std::vector<double>& input_signal, std::vector<double>&
 	}
 }
 
-void task_for_calc_of_L(const std::vector<double>& input_signal, std::vector<double>& output_signal, const int tau, const int step) {
-	for (int t = 0; t <= step; t++) {
+void task_for_calc_of_L(const std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int tau, const int step) {
+	teacher_signal.resize(step);
+	for (int t = 0; t < step; t++) {
 		if (t - tau >= 0)
-			output_signal[t] = input_signal[t - tau];
+			teacher_signal[t] = input_signal[t - tau];
 		else
-			output_signal[t] = 0.0;
+			teacher_signal[t] = 0.0;
 	}
 }
 void generate_d_sequence(std::vector<std::vector<int>>& d_vec, std::vector<int>& d, int d_sum_remain, int depth = 0) {
