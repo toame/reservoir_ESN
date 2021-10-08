@@ -14,6 +14,7 @@
 #define VAL (1)
 #define TEST (2)
 #define MAX_UNIT_SIZE (500)
+#define MAX_TASK_SIZE (2000)
 #define TRUNC_EPSILON (1.7e-4)
 double sinc(const double x) {
 	if (x == 0) return 1.0;
@@ -40,7 +41,7 @@ int main(void) {
 	const int step = 3000;
 	const int wash_out = 500;
 	std::vector<int> unit_sizes = { 50 };
-	std::vector<std::string> task_names = { "L" };
+	std::vector<std::string> task_names = { "NL" };
 	if (unit_sizes.size() != task_names.size()) return 0;
 	std::vector<int> param1 = {
 								   0 };
@@ -55,8 +56,8 @@ int main(void) {
 	std::vector<std::vector<std::vector<std::vector<double>>>> output_node(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(MAX_UNIT_SIZE + 1, 0))));
 	std::vector<reservoir_layer> reservoir_layer_v(alpha_step * sigma_step);
 	std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
-	std::vector < std::vector<std::vector<std::vector<double>>>> w(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(MAX_UNIT_SIZE, std::vector<std::vector<double>>(10))); // 各リザーバーの出力重み
-	std::vector<std::vector<std::vector<double>>> nmse(alpha_step * sigma_step, std::vector<std::vector<double>>(MAX_UNIT_SIZE, std::vector<double>(10)));						// 各リザーバーのnmseを格納
+	std::vector < std::vector<std::vector<std::vector<double>>>> w(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(MAX_TASK_SIZE, std::vector<std::vector<double>>(10))); // 各リザーバーの出力重み
+	std::vector<std::vector<std::vector<double>>> nmse(alpha_step * sigma_step, std::vector<std::vector<double>>(MAX_TASK_SIZE, std::vector<double>(10)));						// 各リザーバーのnmseを格納
 	for (int r = 0; r < unit_sizes.size(); r++) {
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
@@ -70,6 +71,8 @@ int main(void) {
 		double d_bias;
 		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 		// 入力信号 教師信号の生成
+		std::vector<std::vector<std::vector<int>>> d_vec(PHASE_NUM);
+		generate_d_sequence_set(d_vec);
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
 			if (task_name == "narma") {
 				d_bias = 0.4;
@@ -131,9 +134,23 @@ int main(void) {
 				d_sigma = 0.05; sigma_min = 0.5;
 				std::vector<double> tmp_teacher_signal;
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
+				//generate_henom_map_task(input_signal[phase], tmp_teacher_signal, 5, step, phase * step);
+				tmp_teacher_signal.clear();
 				for (int tau = 1; tau <= unit_size; tau++) {
-					
 					task_for_calc_of_L(input_signal[phase], tmp_teacher_signal, tau, step);
+					teacher_signals[phase].push_back(tmp_teacher_signal);
+				}
+			}
+			else if (task_name == "NL") {
+				d_bias = 4.0;
+				d_alpha = 2.0; alpha_min = 1.0;
+				d_sigma = 0.05; sigma_min = 0.5;
+				std::vector<double> tmp_teacher_signal;
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
+				std::cerr << "ok: " << d_vec[phase].size() << std::endl;
+				for (auto& d : d_vec[phase]) {
+					std::vector<double> tmp_teacher_signal;
+					task_for_calc_of_NL(input_signal[phase], tmp_teacher_signal, d, step);
 					teacher_signals[phase].push_back(tmp_teacher_signal);
 				}
 			}
@@ -157,8 +174,8 @@ int main(void) {
 				return 0;
 			}
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {
-				for (int ite_p = 0; ite_p <= 1; ite_p += 1) {
-					const double p = ite_p * 0.1 + 0.9;
+				for (int ite_p = 0; ite_p < 10; ite_p += 1) {
+					const double p = ite_p * 0.1 + 0.2;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					for (int ite_b = 0; ite_b <= 5; ite_b += 1) {
 						const double bias_factor = d_bias * ite_b;
@@ -193,11 +210,12 @@ int main(void) {
 
 						}
 						int i;
-						#pragma omp parallel for  private(lm, i) num_threads(8)
+						#pragma omp parallel for  private(lm, i) num_threads(14)
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
 							std::cerr <<k <<std::endl;
 							for (i = 0; i < teacher_signals[TRAIN].size(); i++) {
+								//std::cerr << k << "," << i << std::endl;
 								output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signals[TRAIN][i], wash_out, step, unit_size);
 								double opt_lm = 0;
 								double opt_lm_nmse = 1e+9;

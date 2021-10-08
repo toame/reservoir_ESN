@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#define PHASE_NUM (3)
 void generate_input_signal_random(std::vector<double>& input_signal, const int u_min, const int u_delta, const int step, const int seed) {
 	std::mt19937 mt(seed);
 	std::uniform_real_distribution<> rand_0to1(0, 1);
@@ -182,28 +183,30 @@ void generate_d_sequence(std::vector<std::vector<int>>& d_vec, std::vector<int>&
 }
 
 void generate_d_sequence_set(std::vector<std::vector<std::vector<int>>>& d_vec) {
-	std::vector<int> d;
-	const int mode = 0;
-	d.resize(8); generate_d_sequence(d_vec[mode], d, 2);
-	d.resize(8); generate_d_sequence(d_vec[mode], d, 3);
-	d.resize(7); generate_d_sequence(d_vec[mode], d, 4);
-	d.resize(6); generate_d_sequence(d_vec[mode], d, 5);
-	d.resize(5); generate_d_sequence(d_vec[mode], d, 6);
-	d.resize(4); generate_d_sequence(d_vec[mode], d, 7);
-	d.resize(3); generate_d_sequence(d_vec[mode], d, 8);
-	for (int u = 9; u < 30; u++) {
-		d.resize(2);
-		generate_d_sequence(d_vec[mode], d, u);
+	for (int mode = 0; mode < PHASE_NUM; mode++) {
+		std::vector<int> d;
+		d.resize(8); generate_d_sequence(d_vec[mode], d, 2);
+		d.resize(8); generate_d_sequence(d_vec[mode], d, 3);
+		d.resize(7); generate_d_sequence(d_vec[mode], d, 4);
+		d.resize(6); generate_d_sequence(d_vec[mode], d, 5);
+		d.resize(5); generate_d_sequence(d_vec[mode], d, 6);
+		d.resize(4); generate_d_sequence(d_vec[mode], d, 7);
+		d.resize(3); generate_d_sequence(d_vec[mode], d, 8);
+		for (int u = 9; u < 30; u++) {
+			d.resize(2);
+			generate_d_sequence(d_vec[mode], d, u);
+		}
 	}
 }
 
-void task_for_calc_of_NL(const std::vector<double>& input_signal, std::vector<double>& output_signal, std::vector<int>& d, const int step) {
-	for (int t = 0; t <= step; t++) {
+void task_for_calc_of_NL(const std::vector<double>& input_signal, std::vector<double>& teacher_signal, std::vector<int>& d, const int step) {
+	teacher_signal.resize(step);
+	for (int t = 0; t < step; t++) {
 		double x = 1.0;
 		for (int i = 0; i < d.size(); i++) {
 			if (t - (i + 1) >= 0) x *= std::legendre(d[i], input_signal[t - (i + 1)]);
 		}
-		output_signal[t] = x;
+		teacher_signal[t] = x;
 	}
 }
 
