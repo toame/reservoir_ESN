@@ -51,6 +51,17 @@ void output_learning::generate_simultaneous_linear_equationsb(const std::vector<
 		b[n1] /= count;
 	}
 }
+// 101; < 103 101, 102 103 - 100 = 103
+//˜A—§ˆêŽŸ•û’öŽ®Aw=b‚Ìb‚ð¶¬
+void output_learning::generate_simultaneous_linear_equationsb_fast(const std::vector<double>& output_node,
+	const std::vector<double>& yt_s, const int wash_out, const int step, const int n_size) {
+	b.resize(n_size + 1);
+	for (int n1 = 0; n1 <= n_size; n1++) {
+		b[n1] = 0.0;
+	}
+	const double alpha = 1.0 / (step - wash_out - 1), beta = 0.0;
+	cblas_dgemv(CblasRowMajor, CblasNoTrans, b.size(), step - wash_out - 1, alpha, output_node.data(), step - wash_out - 1, yt_s.data() + wash_out + 1, 1, beta, b.data(), 1);
+}
 
 // ˜A—§ˆêŽŸ•û’öŽ®Aw = b ‚ðw‚É‚Â‚¢‚ÄICCG‚Å‰ð‚­
 // void Learning(std::vector<double>& w, const std::vector<std::vector<double>>& A, const std::vector<double>& b, const double lambda,

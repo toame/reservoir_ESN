@@ -242,10 +242,27 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 		//	outputfile << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
 		//}
 	}
-	return sum_squared_average / (step - wash_out);
+	return sum_squared_average / (step - wash_out - 1);
 }
 
 double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
-	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
+	const double tmp1 = calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name);
+	const double tmp2 = t_tt_calc(teacher_signal, wash_out, step);
+	return tmp1 / tmp2;
+}
+double calc_mean_squared_average_fast(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+	const std::vector<double>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	double sum_squared_average = 0.0;
+	std::vector<double> reservoir_predict_signal(step);
+	const double alpha = 1.0, beta = 0.0;
+	cblas_dgemv(CblasRowMajor, CblasNoTrans, step, unit_size + 1, alpha, output_node.data(), unit_size + 1, weight.data(), 1, beta, reservoir_predict_signal.data(), 1);
+	for (int t = wash_out + 1; t < step; t++) {
+		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal[t]);
+	}
+	return sum_squared_average / (step - wash_out - 1);
+}
+double calc_nmse_fast(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+	const std::vector<double>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	return (calc_mean_squared_average_fast(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
 }

@@ -6,6 +6,11 @@
 #include <cblas.h>
 #include <chrono>
 #include <random>
+#include <algorithm>
+#include <cstring>
+#include <execution>
+#include <memory>
+#include <numeric>
 #include "reservoir_layer.h"
 #include "output_learning.h"
 #include "task.h"
@@ -36,11 +41,42 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 	return out.str();
 }
 typedef void (*FUNC)();
+
+void unit_test() {
+	const int M = 100, N = 3000;
+	std::vector<double> n(M, 0), n2(M, 0), y(N);
+	std::vector<std::vector<double>> r(N, std::vector<double>(M));
+	std::vector<std::vector<double>> r2(M, std::vector<double>(N));
+	std::vector<double> r3;
+
+	for (int t = 0; t < N; t++) y[t] = (t * 3 + 2) % 10 / 3.0 - 0.5;
+	for (int i = 0; i < M; i++) {
+		for (int t = 0; t < N; t++) {
+			r[t][i] = (t * 3 + 2 + i * 5) % 31 / 100.0 - 0.01;
+			r2[i][t] = (t * 3 + 2 + i * 5) % 31 / 100.0 - 0.01;
+		}
+	}
+	for (int i = 0; i < M * N; i++) {
+		r3.push_back(r[i % N][i / N]);
+	}
+	for (int i = 0; i < M; i++) {
+		for (int t = 0; t < N; t++) {
+			n[i] += r2[i][t] * y[t];
+		}
+	}
+	double alpha = 1.0, beta = 0.0;
+	cblas_dgemv(CblasRowMajor, CblasNoTrans, M, N, alpha, r3.data(), N, y.data(), 1, beta, n2.data(), 1);
+	for (int i = 0; i < M; i++) {
+		std::cerr << i << " " << n[i] << " " << n2[i] << std::endl;
+	}
+}
+
 int main(void) {
+	
 	const int TRIAL_NUM = 1;	// ループ回数
 	const int step = 3000;
 	const int wash_out = 500;
-	std::vector<int> unit_sizes = { 50 };
+	std::vector<int> unit_sizes = { 100 };
 	std::vector<std::string> task_names = { "NL" };
 	if (unit_sizes.size() != task_names.size()) return 0;
 	std::vector<int> param1 = {
@@ -182,7 +218,7 @@ int main(void) {
 						std::vector<std::vector<double>> opt_nmse(alpha_step * sigma_step, std::vector<double>(teacher_signals[TRAIN].size(), 1e+10));
 						std::vector < std::vector<double>> opt_lm2(alpha_step * sigma_step, std::vector<double>(teacher_signals[TRAIN].size()));
 						std::vector < std::vector <std::vector<double>>> opt_w(alpha_step * sigma_step, std::vector <std::vector<double>>(teacher_signals[TRAIN].size()));
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
@@ -202,7 +238,7 @@ int main(void) {
 						int opt_k = 0;
 
 						output_learning output_learning[341];
-#pragma omp parallel for num_threads(8)
+#pragma omp parallel for num_threads(32)
 						// 重みの学習を行う
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
@@ -210,13 +246,26 @@ int main(void) {
 
 						}
 						int i;
-						#pragma omp parallel for  private(lm, i) num_threads(14)
+						#pragma omp parallel for  private(lm, i) num_threads(32)
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
 							std::cerr <<k <<std::endl;
+							std::vector<double> output_node_T, output_node_N;
+							for (int i = 0; i <= unit_size; i++) {
+								for (int t = wash_out + 1; t < step; t++) {
+									output_node_T.push_back(output_node[k][TRAIN][t + 1][i]);
+								}
+							}
+							for (int t = 0; t < step; t++) {
+								for (int i = 0; i <= unit_size; i++) {
+									output_node_N.push_back(output_node[k][VAL][t + 1][i]);
+								}
+							}
 							for (i = 0; i < teacher_signals[TRAIN].size(); i++) {
 								//std::cerr << k << "," << i << std::endl;
-								output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signals[TRAIN][i], wash_out, step, unit_size);
+								//output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signals[TRAIN][i], wash_out, step, unit_size);
+								//for (int i = 0; i < 10; i++) std::cerr << i << " " << output_learning[k].b[i] << std::endl;
+								output_learning[k].generate_simultaneous_linear_equationsb_fast(output_node_T, teacher_signals[TRAIN][i], wash_out, step, unit_size);
 								double opt_lm = 0;
 								double opt_lm_nmse = 1e+9;
 								for (lm = 0; lm < 10; lm++) {
@@ -230,13 +279,14 @@ int main(void) {
 									output_learning[k].ICCGSolver(unit_size + 1, itr, eps);
 									w[k][i][lm] = output_learning[k].w;
 									nmse[k][i][lm] = calc_nmse(teacher_signals[VAL][i], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
+									//nmse[k][i][lm] = calc_nmse_fast(teacher_signals[VAL][i], output_learning[k].w, output_node_N, unit_size, wash_out, step, false);
+									//std::cerr << k << " " << i << " " << lm << " " << calc_nmse_fast(teacher_signals[VAL][i], output_learning[k].w, output_node_N, unit_size, wash_out, step, false) << " " << calc_nmse(teacher_signals[VAL][i], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false) << std::endl;
 								}
 							}
 						}
 
 						// 検証データでもっとも性能の良いリザーバーを選択
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							
 							if (!is_echo_state_property[k]) continue;
 							std::cerr << "*" << k << std::endl;
 							for (int i = 0; i < teacher_signals[TRAIN].size(); i++) {
@@ -250,23 +300,29 @@ int main(void) {
 								}
 							}
 						}
+						std::vector<double> L(alpha_step * sigma_step);
+						std::vector<double> train_L(alpha_step * sigma_step);
+						#pragma omp parallel for  private(i) num_threads(32)
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
-							double L = 0;
-							double train_L = 0;
-							for (int i = 0; i < teacher_signals[TEST].size(); i++) {
+							for (i = 0; i < teacher_signals[TEST].size(); i++) {
 								const double test_nmse = calc_nmse(teacher_signals[TEST][i], opt_w[k][i], output_node[k][TEST], unit_size, wash_out, step, false);
 								const double tmp_L = 1.0 - test_nmse;
-								if (tmp_L >= TRUNC_EPSILON) L += tmp_L;
+								if (tmp_L >= TRUNC_EPSILON) L[k] += tmp_L;
 
 								const double train_nmse = calc_nmse(teacher_signals[TRAIN][i], opt_w[k][i], output_node[k][TRAIN], unit_size, wash_out, step, false);
 								const double tmp_train_L = 1.0 - train_nmse;
-								if (tmp_train_L >= TRUNC_EPSILON) train_L += tmp_train_L;
+								if (tmp_train_L >= TRUNC_EPSILON) train_L[k] += tmp_train_L;
 							}
+							
+						}
+						for (int k = 0; k < alpha_step * sigma_step; k++) {
+							if (!is_echo_state_property[k]) continue;
 							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
-							std::cerr << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," << train_L << "," << L << std::endl;
+							std::cerr << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," << train_L[k] << "," << L[k] << std::endl;
 						}
+
 					}
 					/*** TEST phase ***/
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);

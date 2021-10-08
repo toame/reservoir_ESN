@@ -12,6 +12,9 @@ public:
     //˜A—§ˆêŸ•û’ö®Aw=b‚Ìb‚ğ¶¬
     void generate_simultaneous_linear_equationsb(const std::vector<std::vector<double>>& output_node, const std::vector<double>& yt_s, const int wash_out, const int step, const int n_size);
 
+    //˜A—§ˆêŸ•û’ö®Aw=b‚Ìb‚ğ¶¬
+    void generate_simultaneous_linear_equationsb_fast(const std::vector<double>& output_node, const std::vector<double>& yt_s, const int wash_out, const int step, const int n_size);
+
 
     // ˜A—§ˆêŸ•û’ö®Aw = b ‚ğw‚É‚Â‚¢‚ÄICCG‚Å‰ğ‚­
     // void Learning(std::vector<double>& w, const std::vector<std::vector<double>>& A, const std::vector<double>& b, const double lambda, const int n_size);
