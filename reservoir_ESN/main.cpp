@@ -320,7 +320,7 @@ int main(void) {
 							if (!is_echo_state_property[k]) continue;
 							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
-							std::cerr << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," << train_L[k] << "," << L[k] << std::endl;
+							outputfile << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," << train_L[k] << "," << L[k] << std::endl;
 						}
 
 					}
