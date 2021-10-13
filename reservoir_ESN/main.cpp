@@ -286,9 +286,11 @@ int main(void) {
 									if (tmp_train_L >= TRUNC_EPSILON) train_L[k] += tmp_train_L;
 								}
 								else {
-									const double tmp_NL = 1.0 - test_nmse;
+									int d_sum = 0;
+									for (auto& e : d_vec[TEST][i - task_size[2]]) d_sum += e;
+									const double tmp_NL = d_sum * (1.0 - test_nmse);
 									if (tmp_NL >= TRUNC_EPSILON) NL[k] += tmp_NL;
-									const double tmp_train_NL = 1.0 - train_nmse;
+									const double tmp_train_NL = d_sum * (1.0 - train_nmse);
 									if (tmp_train_NL >= TRUNC_EPSILON) train_NL[k] += tmp_train_NL;
 								}
 
