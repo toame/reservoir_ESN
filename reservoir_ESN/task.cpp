@@ -222,6 +222,7 @@ double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {
 	}
 	t_ave0 /= (step - wash_out);
 	tt_ave0 /= (step - wash_out);
+
 	return tt_ave0 - t_ave0 * t_ave0;
 }
 
