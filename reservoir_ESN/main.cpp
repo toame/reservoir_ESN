@@ -84,8 +84,8 @@ int main(void) {
 	std::vector<double> param2 = {
 									0 };
 	if (param1.size() != param2.size()) return 0;
-	const int alpha_step = 11;
-	const int sigma_step = 11;
+	const int alpha_step = 21;
+	const int sigma_step = 12;
 	std::string task_name;
 	std::string function_name;
 
@@ -94,6 +94,8 @@ int main(void) {
 	std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
 	std::vector < std::vector<std::vector<std::vector<double>>>> w(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(MAX_TASK_SIZE, std::vector<std::vector<double>>(10))); // 各リザーバーの出力重み
 	std::vector<std::vector<std::vector<double>>> nmse(alpha_step * sigma_step, std::vector<std::vector<double>>(MAX_TASK_SIZE, std::vector<double>(10)));						// 各リザーバーのnmseを格納
+	std::vector<double> approx_nu_set({ 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 });
+	std::vector<int> approx_tau_set({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20 });
 	for (int r = 0; r < unit_sizes.size(); r++) {
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
@@ -105,67 +107,60 @@ int main(void) {
 		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
 		double d_bias;
-		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
+		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".csv");
 		// 入力信号 教師信号の生成
 		std::vector<std::vector<std::vector<int>>> d_vec(PHASE_NUM);
+		std::vector<std::string> task_name2;
+		std::vector<int> task_size(4);
 		generate_d_sequence_set(d_vec);
+		d_bias = 1.5;
+		d_alpha = 0.05; alpha_min = 0.01;
+		d_sigma = 0.1; sigma_min = 0.1;
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
 			generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
-			if (task_name == "narma") {
-				d_bias = 0.4;
-				d_alpha = 0.005; alpha_min = 0.002;
-				d_sigma = 0.07; sigma_min = 0.5;
-				const int tau = param1[r];
-				
+			for (int tau = 5; tau <= 20; tau += 5) {
 				std::vector<double> tmp_teacher_signal;
-				generate_narma_task(input_signal[phase], tmp_teacher_signal, tau, step);
+				generate_narma_task2(input_signal[phase], tmp_teacher_signal, tau, step);
 				teacher_signals[phase].push_back(tmp_teacher_signal);
-			} else if (task_name == "approx") {
-				const int tau = param1[r];
-				const double nu = param2[r];
-				if (tau == 7) { d_alpha = 1.0; alpha_min = 0.1; d_bias = 0.5; d_sigma = 0.03; sigma_min = 0.1; }
-				else if (tau == 5) { d_alpha = 2.0; alpha_min = 0.5; d_bias = 1.0; d_sigma = 0.02; sigma_min = 0.02; }
-				else if (tau == 3) { d_alpha = 5.0; alpha_min = 1.0; d_bias = 4.0;  d_sigma = 0.02; sigma_min = 0.02; }
-				else {
-					std::cerr << "error! approx parameter is not setting" << std::endl;
-					return 0;
-				}
-				std::vector<double> tmp_teacher_signal;
-				task_for_function_approximation(input_signal[phase], tmp_teacher_signal, nu, tau, step, phase);
-				teacher_signals[phase].push_back(tmp_teacher_signal);
+				if(phase == TRAIN) task_name2.push_back("narma" + std::to_string(tau));
 			}
-			else if (task_name == "L") {
-				d_bias = 0.5;
-				d_alpha = 0.01; alpha_min = 0.005;
-				d_sigma = 0.05; sigma_min = 0.5;
-				std::vector<double> tmp_teacher_signal;
-				//generate_henom_map_task(input_signal[phase], tmp_teacher_signal, 5, step, phase * step);
-				tmp_teacher_signal.clear();
-				for (int tau = 1; tau <= unit_size; tau++) {
-					task_for_calc_of_L(input_signal[phase], tmp_teacher_signal, tau, step);
-					teacher_signals[phase].push_back(tmp_teacher_signal);
-				}
-			}
-			else if (task_name == "NL") {
-				d_bias = 4.0;
-				d_alpha = 2.0; alpha_min = 1.0;
-				d_sigma = 0.05; sigma_min = 0.5;
-				std::vector<double> tmp_teacher_signal;
-				std::cerr << "ok: " << d_vec[phase].size() << std::endl;
-				for (auto& d : d_vec[phase]) {
+			task_size[0] = teacher_signals[phase].size();
+			for (auto nu: approx_nu_set) {
+				for (auto tau : approx_tau_set) {
 					std::vector<double> tmp_teacher_signal;
-					task_for_calc_of_NL(input_signal[phase], tmp_teacher_signal, d, step);
+					task_for_function_approximation(input_signal[phase], tmp_teacher_signal, nu, tau, step, phase);
 					teacher_signals[phase].push_back(tmp_teacher_signal);
+					if (phase == TRAIN) task_name2.push_back("approx" + std::to_string(tau) + "_" + to_string_with_precision(nu, 1));
 				}
 			}
+			task_size[1] = teacher_signals[phase].size();
+			for (int tau = 1; tau <= unit_size; tau++) {
+				std::vector<double> tmp_teacher_signal;
+				task_for_calc_of_L(input_signal[phase], tmp_teacher_signal, tau, step);
+				teacher_signals[phase].push_back(tmp_teacher_signal);
+			}
+			task_size[2] = teacher_signals[phase].size();
+			std::cerr << "ok: " << d_vec[phase].size() << std::endl;
+			for (auto& d : d_vec[phase]) {
+				std::vector<double> tmp_teacher_signal;
+				task_for_calc_of_NL(input_signal[phase], tmp_teacher_signal, d, step);
+				teacher_signals[phase].push_back(tmp_teacher_signal);
+			}
+			task_size[3] = teacher_signals[phase].size();
 		}
 		// 設定出力
 		outputfile << "### task_name: " << task_name << std::endl;
 		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;
 		outputfile << "### input_signal_factor [" << alpha_min << ", " << alpha_min + d_alpha * (alpha_step - 1) << "]" << std::endl;
 		outputfile << "### weight_factor [0.1, 1.1]" << std::endl;
-		outputfile << "function_name,seed,unit_size,p,input_singal_factor,bias_factor,weight_factor,lm,train_nmse,nmse,test_nmse" << std::endl;
-
+		outputfile << "function_name,seed,unit_size,p,input_singal_factor,bias_factor,weight_factor,train_L,L,train_NL,NL";
+		for (int i = 0; i < task_name2.size(); i++) {
+			outputfile << "," << task_name2[i];
+		}
+		outputfile << std::endl;
+		std::cerr << teacher_signals[TRAIN].size() << std::endl;
+		for (int i = 0; i < 4; i++) std::cerr << task_size[i] << " ";
+		std::cerr << std::endl;
 		std::chrono::system_clock::time_point  start, end; // 型は auto で可
 		for (auto function_name : function_names) {
 			double (*nonlinear)(double);
@@ -178,10 +173,9 @@ int main(void) {
 				return 0;
 			}
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {
-				std::vector<double> L(alpha_step * sigma_step);
-				std::vector<double> train_L(alpha_step * sigma_step);
+				
 				for (int ite_p = 0; ite_p < 10; ite_p += 1) {
-					const double p = ite_p * 0.1 + 0.2;
+					const double p = ite_p * 0.1 + 0.1;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					for (int ite_b = 0; ite_b <= 5; ite_b += 1) {
 						const double bias_factor = d_bias * ite_b;
@@ -191,7 +185,8 @@ int main(void) {
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+							double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+							if (k / sigma_step > 10) input_signal_factor = (k / sigma_step - 10);
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
 							reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);
@@ -270,26 +265,53 @@ int main(void) {
 								}
 							}
 						}
-						
-#pragma omp parallel for  private(i) num_threads(32)
+						std::vector<double> L(alpha_step * sigma_step);
+						std::vector<double> train_L(alpha_step * sigma_step);
+						std::vector<double> NL(alpha_step * sigma_step);
+						std::vector<double> train_NL(alpha_step * sigma_step);
+						std::vector<std::vector<double>> narma_task(alpha_step * sigma_step);
+						std::vector<std::vector<double>> approx_task(alpha_step * sigma_step);
+						#pragma omp parallel for  private(i) num_threads(32)
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
 							for (i = 0; i < teacher_signals[TEST].size(); i++) {
 								const double test_nmse = calc_nmse(teacher_signals[TEST][i], opt_w[k][i], output_node[k][TEST], unit_size, wash_out, step, false);
-								const double tmp_L = 1.0 - test_nmse;
-								if (tmp_L >= TRUNC_EPSILON) L[k] += tmp_L;
-
 								const double train_nmse = calc_nmse(teacher_signals[TRAIN][i], opt_w[k][i], output_node[k][TRAIN], unit_size, wash_out, step, false);
-								const double tmp_train_L = 1.0 - train_nmse;
-								if (tmp_train_L >= TRUNC_EPSILON) train_L[k] += tmp_train_L;
+								if (i < task_size[0]) narma_task[k].push_back(test_nmse);
+								else if(i < task_size[1]) approx_task[k].push_back(test_nmse);
+								else if (i < task_size[2]) {
+									const double tmp_L = 1.0 - test_nmse;
+									if (tmp_L >= TRUNC_EPSILON) L[k] += tmp_L;
+									const double tmp_train_L = 1.0 - train_nmse;
+									if (tmp_train_L >= TRUNC_EPSILON) train_L[k] += tmp_train_L;
+								}
+								else {
+									const double tmp_NL = 1.0 - test_nmse;
+									if (tmp_NL >= TRUNC_EPSILON) NL[k] += tmp_NL;
+									const double tmp_train_NL = 1.0 - train_nmse;
+									if (tmp_train_NL >= TRUNC_EPSILON) train_NL[k] += tmp_train_NL;
+								}
+
+								
+								
 							}
 
 						}
+						
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
-							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+							double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+							if (k / sigma_step > 10) input_signal_factor = (k / sigma_step - 10);
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
-							outputfile << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," << train_L[k] << "," << L[k] << std::endl;
+							outputfile << function_name << "," << loop << "," << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," <<
+								train_L[k] << "," << L[k] << "," <<train_NL[k] << "," << NL[k];
+							for (int i = 0; i < narma_task[k].size(); i++) {
+								outputfile << "," << narma_task[k][i];
+							}
+							for (int i = 0; i < approx_task[k].size(); i++) {
+								outputfile << "," << approx_task[k][i];
+							}
+							outputfile << std::endl;
 						}
 
 					}
