@@ -305,7 +305,7 @@ int main(void) {
 							double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
 							if (k / sigma_step > 10) input_signal_factor = (k / sigma_step - 10);
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
-							outputfile << function_name << "," << loop << "," << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," <<
+							outputfile << function_name << "," << loop << "," << unit_size << "," << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," <<
 								train_L[k] << "," << L[k] << "," <<train_NL[k] << "," << NL[k];
 							for (int i = 0; i < narma_task[k].size(); i++) {
 								outputfile << "," << narma_task[k][i];
