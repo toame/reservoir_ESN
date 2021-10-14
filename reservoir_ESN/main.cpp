@@ -84,8 +84,11 @@ int main(void) {
 	std::vector<double> param2 = {
 									0 };
 	if (param1.size() != param2.size()) return 0;
-	const int alpha_step = 21;
-	const int sigma_step = 12;
+	std::vector<double> bias_set{ 0, 1, 2, 3, 5, 10, 20, 40};
+	std::vector<double> alpha_set{ 0.01, 0.02, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0, 2.0, 3.0, 5.0, 7.0, 10.0, 20.0, 30.0, 50.0, 70.0 };
+	std::vector<double> sigma_set{ 0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3 };
+	const int alpha_step = alpha_set.size();
+	const int sigma_step = sigma_set.size();
 	std::string task_name;
 	std::string function_name;
 
@@ -94,8 +97,8 @@ int main(void) {
 	std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
 	std::vector < std::vector<std::vector<std::vector<double>>>> w(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(MAX_TASK_SIZE, std::vector<std::vector<double>>(10))); // 各リザーバーの出力重み
 	std::vector<std::vector<std::vector<double>>> nmse(alpha_step * sigma_step, std::vector<std::vector<double>>(MAX_TASK_SIZE, std::vector<double>(10)));						// 各リザーバーのnmseを格納
-	std::vector<double> approx_nu_set({ 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0 });
-	std::vector<int> approx_tau_set({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20 });
+	std::vector<double> approx_nu_set({ 0.2, 0.5, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0 });
+	std::vector<int> approx_tau_set({ 1, 2, 3, 4, 5, 7, 9, 12, 15, 20 });
 	for (int r = 0; r < unit_sizes.size(); r++) {
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
@@ -106,16 +109,14 @@ int main(void) {
 		std::vector<std::string> function_names = { "tanh" , "sinc" };
 		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
-		double d_bias;
+		
 		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".csv");
 		// 入力信号 教師信号の生成
 		std::vector<std::vector<std::vector<int>>> d_vec(PHASE_NUM);
 		std::vector<std::string> task_name2;
 		std::vector<int> task_size(4);
 		generate_d_sequence_set(d_vec);
-		d_bias = 1.5;
-		d_alpha = 0.05; alpha_min = 0.01;
-		d_sigma = 0.1; sigma_min = 0.1;
+		
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
 			generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 			for (int tau = 5; tau <= 20; tau += 5) {
@@ -151,8 +152,9 @@ int main(void) {
 		// 設定出力
 		outputfile << "### task_name: " << task_name << std::endl;
 		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;
-		outputfile << "### input_signal_factor [" << alpha_min << ", " << alpha_min + d_alpha * (alpha_step - 1) << "]" << std::endl;
-		outputfile << "### weight_factor [0.1, 1.1]" << std::endl;
+		outputfile << "### input_signal_factor [" << alpha_set.front() << ", " << alpha_set.back() << "]" << std::endl;
+		outputfile << "### weight_factor [" << sigma_set.front() << ", " << sigma_set.back() << "]" << std::endl;
+		outputfile << "### bias_factor [" << bias_set.front() << ", " << bias_set.back() << "]" << std::endl;
 		outputfile << "function_name,seed,unit_size,p,input_singal_factor,bias_factor,weight_factor,train_L,L,train_NL,NL";
 		for (int i = 0; i < task_name2.size(); i++) {
 			outputfile << "," << task_name2[i];
@@ -177,17 +179,15 @@ int main(void) {
 				for (int ite_p = 0; ite_p < 10; ite_p += 1) {
 					const double p = ite_p * 0.1 + 0.1;
 					start = std::chrono::system_clock::now(); // 計測開始時間
-					for (int ite_b = 0; ite_b <= 5; ite_b += 1) {
-						const double bias_factor = d_bias * ite_b;
+					for (auto bias_factor: bias_set) {
 						std::vector<std::vector<double>> opt_nmse(alpha_step * sigma_step, std::vector<double>(teacher_signals[TRAIN].size(), 1e+10));
 						std::vector < std::vector<double>> opt_lm2(alpha_step * sigma_step, std::vector<double>(teacher_signals[TRAIN].size()));
 						std::vector < std::vector <std::vector<double>>> opt_w(alpha_step * sigma_step, std::vector <std::vector<double>>(teacher_signals[TRAIN].size()));
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
-							if (k / sigma_step > 10) input_signal_factor = (k / sigma_step - 10);
-							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
+							const double input_signal_factor = alpha_set[(k / sigma_step)];
+							const double weight_factor = sigma_set[(k % sigma_step)];
 
 							reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);
 							reservoir_layer1.generate_reservoir();
@@ -203,7 +203,7 @@ int main(void) {
 						int opt_k = 0;
 
 						output_learning output_learning[341];
-#pragma omp parallel for num_threads(32)
+#pragma omp parallel for num_threads(60)
 						// 重みの学習を行う
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
@@ -211,7 +211,7 @@ int main(void) {
 
 						}
 						int i;
-#pragma omp parallel for  private(lm, i) num_threads(32)
+#pragma omp parallel for  private(lm, i) num_threads(60)
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
 							std::cerr << k << std::endl;
@@ -227,16 +227,13 @@ int main(void) {
 								}
 							}
 							for (i = 0; i < teacher_signals[TRAIN].size(); i++) {
-								//std::cerr << k << "," << i << std::endl;
-								//output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signals[TRAIN][i], wash_out, step, unit_size);
-								//for (int i = 0; i < 10; i++) std::cerr << i << " " << output_learning[k].b[i] << std::endl;
 								output_learning[k].generate_simultaneous_linear_equationsb_fast(output_node_T, teacher_signals[TRAIN][i], wash_out, step, unit_size);
 								double opt_lm = 0;
 								double opt_lm_nmse = 1e+9;
-								for (lm = 0; lm < 10; lm++) {
+								for (lm = 0; lm < 5; lm++) {
 									for (int j = 0; j <= unit_size; j++) {
-										output_learning[k].A[j][j] += pow(10, -15 + lm);
-										if (lm != 0) output_learning[k].A[j][j] -= pow(10, -16 + lm);
+										output_learning[k].A[j][j] += pow(10, -15 + lm * 2);
+										if (lm != 0) output_learning[k].A[j][j] -= pow(10, -15 + (lm - 1) * 2);
 									}
 									output_learning[k].IncompleteCholeskyDecomp2(unit_size + 1);
 									double eps = 1e-12;
@@ -244,8 +241,6 @@ int main(void) {
 									output_learning[k].ICCGSolver(unit_size + 1, itr, eps);
 									w[k][i][lm] = output_learning[k].w;
 									nmse[k][i][lm] = calc_nmse(teacher_signals[VAL][i], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
-									//nmse[k][i][lm] = calc_nmse_fast(teacher_signals[VAL][i], output_learning[k].w, output_node_N, unit_size, wash_out, step, false);
-									//std::cerr << k << " " << i << " " << lm << " " << calc_nmse_fast(teacher_signals[VAL][i], output_learning[k].w, output_node_N, unit_size, wash_out, step, false) << " " << calc_nmse(teacher_signals[VAL][i], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false) << std::endl;
 								}
 							}
 						}
@@ -271,7 +266,7 @@ int main(void) {
 						std::vector<double> train_NL(alpha_step * sigma_step);
 						std::vector<std::vector<double>> narma_task(alpha_step * sigma_step);
 						std::vector<std::vector<double>> approx_task(alpha_step * sigma_step);
-						#pragma omp parallel for  private(i) num_threads(32)
+						#pragma omp parallel for  private(i) num_threads(60)
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
 							for (i = 0; i < teacher_signals[TEST].size(); i++) {
@@ -302,9 +297,8 @@ int main(void) {
 						
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
-							double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
-							if (k / sigma_step > 10) input_signal_factor = (k / sigma_step - 10);
-							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
+							const double input_signal_factor = alpha_set[(k / sigma_step)];
+							const double weight_factor = sigma_set[(k % sigma_step)];
 							outputfile << function_name << "," << loop << "," << unit_size << "," << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," <<
 								train_L[k] << "," << L[k] << "," <<train_NL[k] << "," << NL[k];
 							for (int i = 0; i < narma_task[k].size(); i++) {
