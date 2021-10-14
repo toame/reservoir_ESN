@@ -8,7 +8,10 @@
 #include <random>
 #include <vector>
 #include <iostream>
-
+#include <Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/LU>
+using Eigen::MatrixXd;
 #include "output_learning.h"
 
 output_learning::output_learning() {}
@@ -114,7 +117,37 @@ int output_learning::IncompleteCholeskyDecomp2(int n) {
  * @param[inout] eps ‹–—eŒë·(”½•œI—¹Œã,ÀÛ‚ÌŒë·‚ğ•Ô‚·)
  * @return 1:¬Œ÷,0:¸”s
  */
+/*
+0 0 0 0.15679
+0 0 1 0.193524
+0 0 2 0.252555
+0 0 3 0.472841
+0 0 4 0.57845
+0 0 5 0.596885
+0 0 6 0.60172
+0 0 7 0.607875
+0 0 8 0.613815
+0 0 9 0.642116s*/
 int output_learning::ICCGSolver(int n, int& max_iter, double& eps) {
+#if 1
+	MatrixXd m(A.size(), A.size());
+	MatrixXd nr(b.size(), 1);
+	for (int i = 0; i < A.size(); i++) {
+		for (int j = 0; j < A.size(); j++) {
+			m(i, j) = A[i][j];
+		}
+	}
+	for (int i = 0; i < b.size(); i++) {
+		nr(i, 0) = b[i];
+	}
+	MatrixXd w1 = m.colPivHouseholderQr().solve(nr);
+	w.assign(n, 0.0);
+	for (int i = 0; i < b.size(); i++) {
+		w[i] = w1(i, 0);
+	}
+	return 1;
+#endif
+#if 0
 	if (n <= 0) return 0;
 
 	std::vector<double> r(n), p(n), y(n), r2(n);
@@ -184,6 +217,7 @@ int output_learning::ICCGSolver(int n, int& max_iter, double& eps) {
 	eps = e;
 
 	return 1;
+#endif
 }
 
 /*!

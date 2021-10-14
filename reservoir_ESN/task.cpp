@@ -4,6 +4,10 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <Eigen/Dense>
+#include <Eigen/Core>
+#include <Eigen/LU>
+using Eigen::MatrixXd;
 #define PHASE_NUM (3)
 void generate_input_signal_random(std::vector<double>& input_signal, const int u_min, const int u_delta, const int step, const int seed) {
 	std::mt19937 mt(seed);
@@ -245,6 +249,20 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 	}
 	return sum_squared_average / (step - wash_out - 1);
 }
+
+
+//void calc_mean_squared_average2(const std::vector<std::vector<double>>& teacher_signal, const std::vector<std::vector<double>>& weight,
+//	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+//	double sum_squared_average = 0.0;
+//	//std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);
+//	//if(show)
+//	//	outputfile << "t,predict_test,teacher" << std::endl;
+//	for (int t = wash_out + 1; t < step; t++) {
+//		const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
+//		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
+//	}
+//	return sum_squared_average / (step - wash_out - 1);
+//}
 
 double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
