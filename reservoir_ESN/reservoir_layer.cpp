@@ -11,6 +11,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const int connection_degre
 	this->seed = seed;
 	this->nonlinear = nonlinear;
 	this->wash_out = wash_out;
+	if (bias_factor < -0.9) this->bias_factor = input_signal_factor * weight_factor;
 	node_type.resize(unit_size + 1);
 	adjacency_list.resize(unit_size + 1, std::vector<int>(connection_degree + 1));
 	weight_reservoir.resize(unit_size + 1, std::vector<double>(connection_degree + 1));

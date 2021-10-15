@@ -349,3 +349,4 @@ healthchecksdb
 /reservoir_ESN/old_data/output_data
 /reservoir_ESN/old_data/output_predict
 /reservoir_ESN/tmp/output_data
+/reservoir_ESN/ignore

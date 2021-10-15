@@ -18,6 +18,6 @@ for name in os.listdir(folder):
         plt.plot(data_x, data_y, marker="o", label = function_name)
     plt.legend(loc = "best")
     #plt.show()
-    plt.savefig(name + ".png", dpi = 300)
+    plt.savefig(name + ".png", dpi = 500)
     plt.cla()
 
