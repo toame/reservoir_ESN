@@ -157,7 +157,7 @@ int main(void) {
 		outputfile << "### input_signal_factor [" << alpha_set.front() << ", " << alpha_set.back() << "]" << std::endl;
 		outputfile << "### weight_factor [" << sigma_set.front() << ", " << sigma_set.back() << "]" << std::endl;
 		outputfile << "### bias_factor [" << bias_set.front() << ", " << bias_set.back() << "]" << std::endl;
-		outputfile << "function_name,seed,unit_size,p,input_singal_factor,bias_factor,weight_factor,train_L,L,train_NL,NL,NL_1";
+		outputfile << "function_name,seed,unit_size,p,input_signal_factor,bias_factor,weight_factor,train_L,L,train_NL,NL,NL_1";
 		for (int i = 2; i < 30; i++) {
 			outputfile << ",NL" << std::to_string(i);
 		}
@@ -306,7 +306,7 @@ int main(void) {
 							if (!is_echo_state_property[k]) continue;
 							const double input_signal_factor = alpha_set[(k / sigma_step)];
 							const double weight_factor = sigma_set[(k % sigma_step)];
-							outputfile << function_name << "," << loop << "," << unit_size << "," << p << "," << bias_factor << "," << input_signal_factor << "," << weight_factor << "," <<
+							outputfile << function_name << "," << loop << "," << unit_size << "," << p << "," << input_signal_factor << "," << bias_factor << "," << weight_factor << "," <<
 								train_L[k] << "," << L[k] << "," << train_NL[k] << "," << NL[k] << "," << NL_0[k];
 							for (int i = 2; i < 30; i++) {
 								outputfile << "," << sub_NL[k][i];
