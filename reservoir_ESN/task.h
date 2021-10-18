@@ -6,6 +6,7 @@ void generate_narma_task(std::vector<double>& input_signal, std::vector<double>&
 void generate_narma_task2(std::vector<double> input_signal, std::vector<double>& teacher_signal, const int tau, int step);
 void generate_input_signal_henon_map(std::vector<double>& input_signal, const int fstep, const int step, const int wash_out);
 void generate_henom_map_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out);
+void generate_legendre_task(const std::vector<double>& input_signal, std::vector<double>& teacher_signal, int nu, int tau, const int step);
 void generate_input_signal_laser(std::vector<double>& input_signal, const int fstep, const int step, const int wash_out);
 void generate_laser_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out);
 double t_tt_calc(std::vector<double> yt, const int wash_out, const int step);

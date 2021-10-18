@@ -135,6 +135,15 @@ void generate_input_signal_wave(std::vector<double>& input_signal, std::vector<d
 	}
 }
 
+void generate_legendre_task(const std::vector<double>& input_signal, std::vector<double>& teacher_signal,int nu,int tau, const int step) {
+	teacher_signal.resize(step);
+	for (int t = 0; t < step; t++) {
+		double x = 1.0;
+		if (t - tau >= 0) x *= std::legendre(nu, input_signal[t - tau]);
+		teacher_signal[t] = x;
+	}
+}
+
 void generate_input_signal_laser(std::vector<double>& input_signal, const int fstep, const int step, const int wash_out) {
 	std::ifstream ifs("santafe.dat");
 

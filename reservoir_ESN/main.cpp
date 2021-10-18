@@ -112,6 +112,9 @@ int main(void) {
 				if (tau == 7) { d_alpha = 1.0; alpha_min = 0.1; d_bias = 0.5; d_sigma = 0.03; sigma_min = 0.1; }
 				else if (tau == 5) { d_alpha = 2.0; alpha_min = 0.5; d_bias = 1.0; d_sigma = 0.02; sigma_min = 0.02; }
 				else if (tau == 3) { d_alpha = 5.0; alpha_min = 1.0; d_bias = 4.0;  d_sigma = 0.02; sigma_min = 0.02; }
+				else if (tau == 1) {
+					d_alpha = 10.0; alpha_min = 1.0; d_bias = 20.0;  d_sigma = 0.02; sigma_min = 0.02;
+				}
 				else {
 					std::cerr << "error! approx parameter is not setting" << std::endl;
 					return 0;
@@ -119,6 +122,23 @@ int main(void) {
 
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
+			}
+			else if (task_name == "legendre") {
+				const int tau = param1[r];
+				const double nu = param2[r];
+				if (tau == 7) { d_alpha = 1.0; alpha_min = 0.1; d_bias = 0.5; d_sigma = 0.03; sigma_min = 0.1; }
+				else if (tau == 5) { d_alpha = 2.0; alpha_min = 0.5; d_bias = 1.0; d_sigma = 0.02; sigma_min = 0.02; }
+				else if (tau == 3) { d_alpha = 5.0; alpha_min = 1.0; d_bias = 4.0;  d_sigma = 0.02; sigma_min = 0.02; }
+				else if (tau == 0) {
+					d_alpha = 30.0; alpha_min = 100.0; d_bias = 6.0;  d_sigma = 0.01; sigma_min = 0.00;
+				}
+				else {
+					std::cerr << "error! legendre parameter is not setting" << std::endl;
+					return 0;
+				}
+
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
+				generate_legendre_task(input_signal[phase], teacher_signal[phase], nu, tau, step);
 			}
 		}
 
