@@ -185,8 +185,8 @@ void generate_d_sequence(std::vector<std::vector<int>>& d_vec, std::vector<int>&
 void generate_d_sequence_set(std::vector<std::vector<std::vector<int>>>& d_vec) {
 	for (int mode = 0; mode < PHASE_NUM; mode++) {
 		std::vector<int> d;
-		d.resize(8); generate_d_sequence(d_vec[mode], d, 2);
-		d.resize(8); generate_d_sequence(d_vec[mode], d, 3);
+		d.resize(12); generate_d_sequence(d_vec[mode], d, 2);
+		d.resize(9); generate_d_sequence(d_vec[mode], d, 3);
 		d.resize(7); generate_d_sequence(d_vec[mode], d, 4);
 		d.resize(6); generate_d_sequence(d_vec[mode], d, 5);
 		d.resize(5); generate_d_sequence(d_vec[mode], d, 6);

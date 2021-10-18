@@ -89,15 +89,16 @@ int main(void) {
 	std::vector<double> sigma_set{ 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2 };
 	const int alpha_step = alpha_set.size();
 	const int sigma_step = sigma_set.size();
+	const int lambda_step = 5;
 	std::string task_name;
 	std::string function_name;
 
 	std::vector<std::vector<std::vector<std::vector<double>>>> output_node(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(MAX_UNIT_SIZE + 1, 0))));
 	std::vector<reservoir_layer> reservoir_layer_v(alpha_step * sigma_step);
 	std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
-	std::vector < std::vector<std::vector<std::vector<double>>>> w(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(MAX_TASK_SIZE, std::vector<std::vector<double>>(10))); // 各リザーバーの出力重み
-	std::vector<std::vector<std::vector<double>>> nmse(alpha_step * sigma_step, std::vector<std::vector<double>>(MAX_TASK_SIZE, std::vector<double>(10)));						// 各リザーバーのnmseを格納
-	std::vector<double> approx_nu_set({ 0.5, 0.7, 0.8, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0 });
+	std::vector < std::vector<std::vector<std::vector<double>>>> w(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(MAX_TASK_SIZE, std::vector<std::vector<double>>(lambda_step))); // 各リザーバーの出力重み
+	std::vector<std::vector<std::vector<double>>> nmse(alpha_step * sigma_step, std::vector<std::vector<double>>(MAX_TASK_SIZE, std::vector<double>(lambda_step)));						// 各リザーバーのnmseを格納
+	std::vector<double> approx_nu_set({ 0.5, 0.7, 0.8, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 7.0, 10.0 });
 	std::vector<int> approx_tau_set({ 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20 });
 	std::vector<int> narma_tau_set({ 5, 7, 8, 10, 12, 13, 15, 17, 18, 20 });
 	for (int r = 0; r < unit_sizes.size(); r++) {
@@ -107,7 +108,7 @@ int main(void) {
 		std::vector<std::vector<double>> input_signal(PHASE_NUM);
 		std::vector<std::vector<std::vector<double>>> teacher_signals(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "tanh", "sinc"};
+		std::vector<std::string> function_names = { "sinc", "tanh"};
 		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
 		
@@ -168,18 +169,17 @@ int main(void) {
 		for (int i = 0; i < 4; i++) std::cerr << task_size[i] << " ";
 		std::cerr << std::endl;
 		std::chrono::system_clock::time_point  start, end; // 型は auto で可
-		for (auto function_name : function_names) {
-			double (*nonlinear)(double);
-			if (function_name == "sinc") nonlinear = sinc;
-			else if (function_name == "tanh") nonlinear = tanh;
-			else if (function_name == "gauss") nonlinear = gauss;
-			else if (function_name == "oddsinc") nonlinear = oddsinc;
-			else {
-				std::cerr << "error! " << function_name << "is not found" << std::endl;
-				return 0;
-			}
-			for (int loop = 0; loop < TRIAL_NUM; loop++) {
-				
+		for (int loop = 0; loop < TRIAL_NUM; loop++) {
+			for (auto function_name : function_names) {
+				double (*nonlinear)(double);
+				if (function_name == "sinc") nonlinear = sinc;
+				else if (function_name == "tanh") nonlinear = tanh;
+				else if (function_name == "gauss") nonlinear = gauss;
+				else if (function_name == "oddsinc") nonlinear = oddsinc;
+				else {
+					std::cerr << "error! " << function_name << "is not found" << std::endl;
+					return 0;
+				}
 				for (int ite_p = 0; ite_p < 10; ite_p += 1) {
 					const double p = ite_p * 0.1 + 0.1;
 					start = std::chrono::system_clock::now(); // 計測開始時間
@@ -234,7 +234,7 @@ int main(void) {
 								output_learning[k].generate_simultaneous_linear_equationsb_fast(output_node_T, teacher_signals[TRAIN][i], wash_out, step, unit_size);
 								double opt_lm = 0;
 								double opt_lm_nmse = 1e+9;
-								for (lm = 0; lm < 5; lm++) {
+								for (lm = 0; lm < lambda_step; lm++) {
 									for (int j = 0; j <= unit_size; j++) {
 										output_learning[k].A[j][j] += pow(10, -15 + lm * 2);
 										if (lm != 0) output_learning[k].A[j][j] -= pow(10, -15 + (lm - 1) * 2);
@@ -254,12 +254,11 @@ int main(void) {
 							if (!is_echo_state_property[k]) continue;
 							std::cerr << "*" << k << std::endl;
 							for (int i = 0; i < teacher_signals[TRAIN].size(); i++) {
-								for (int lm = 0; lm < 10; lm++) {
+								for (int lm = 0; lm < lambda_step; lm++) {
 									if (nmse[k][i][lm] < opt_nmse[k][i]) {
 										opt_nmse[k][i] = nmse[k][i][lm];
 										opt_lm2[k][i] = lm;
 										opt_w[k][i] = w[k][i][lm];
-										//train_nmse = calc_nmse(teacher_signals[TRAIN][i], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
 									}
 								}
 							}
@@ -320,21 +319,8 @@ int main(void) {
 							}
 							outputfile << std::endl;
 						}
-
 					}
-					/*** TEST phase ***/
-					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
-
-					//std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_UNIT_SIZE + 1, 0));
-					//opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
-
-					end = std::chrono::system_clock::now();  // 計測終了時間
-					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
-
-					//outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(4) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse << "," << opt_nmse << "," << test_nmse << std::endl;
-					//std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::setprecision(5) << train_nmse << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
 				}
-
 			}
 		}
 		outputfile.close();
