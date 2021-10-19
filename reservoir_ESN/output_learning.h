@@ -7,10 +7,10 @@ public:
     output_learning();
 
     //˜A—§ˆêŸ•û’ö®Aw=b‚ÌA‚ğ¶¬
-    void generate_simultaneous_linear_equationsA(const std::vector<std::vector<double>>& output_node, const int wash_out, const int step, const int n_size);
+    void generate_simultaneous_linear_equationsA(const std::vector<std::vector<double>>& output_node, const int wash_out, const int class_num, const int task_num, const int step, const int n_size);
    
     //˜A—§ˆêŸ•û’ö®Aw=b‚Ìb‚ğ¶¬
-    void generate_simultaneous_linear_equationsb(const std::vector<std::vector<double>>& output_node, const std::vector<double>& yt_s, const int wash_out, const int step, const int n_size);
+    void generate_simultaneous_linear_equationsb(const std::vector<std::vector<double>>& output_node, const std::vector<std::vector<std::vector<double>>>& yt_s, const int wash_out, const int step, const int n_size);
 
 
     // ˜A—§ˆêŸ•û’ö®Aw = b ‚ğw‚É‚Â‚¢‚ÄICCG‚Å‰ğ‚­

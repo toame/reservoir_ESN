@@ -14,19 +14,30 @@
 output_learning::output_learning() {}
 
 //連立一次方程式Aw=bのAを生成
-void output_learning::generate_simultaneous_linear_equationsA(const std::vector<std::vector<double>>& output_node, const int wash_out, const int step, const int n_size) {
+// Y氏の卒論P.7を参照
+void output_learning::generate_simultaneous_linear_equationsA(const std::vector<std::vector<double>>& output_node, const int wash_out, const int class_num, const int task_num, const int step, const int n_size) {
 	std::vector<std::vector<double>> C(n_size + 1, std::vector<double>(n_size + 1));
 	A.resize(n_size + 1, std::vector<double>(n_size + 1));
-	int count = step - wash_out;
+	int count = (step * task_num * class_num);
 	std::vector<double> sub_output_node(count * (n_size + 1));
 	std::vector<double> B((n_size + 1) * (n_size + 1), 0.0);
-	for (int t = wash_out + 1; t < step; t++) {
-		for (int n1 = 0; n1 <= n_size; n1++) {
-			sub_output_node[(t - wash_out - 1) * (n_size + 1) + n1] = output_node[t + 1][n1];
+	// 2次元配列を１次元に変換
+	int sum_t = 0;
+	for (int class_itr = 0; class_itr < class_num; class_itr++) {
+		for (int i = 0; i < task_num; i++) {
+			for (int t = 0; t < step; t++) {
+				//std::cerr << sum_t << std::endl;
+				for (int n1 = 0; n1 <= n_size; n1++) {
+					sub_output_node[(sum_t - wash_out) * (n_size + 1) + n1] = output_node[sum_t + 1][n1];
+				}
+				sum_t++;
+				
+			}
 		}
 	}
-
+	// 行列計算
 	cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, n_size + 1, n_size + 1, count, 1.0 / count, sub_output_node.data(), n_size + 1, sub_output_node.data(), n_size + 1, 0.0, B.data(), n_size + 1);
+	// １次元配列を２次元に変換
 	for (int n1 = 0; n1 <= n_size; n1++) {
 		for (int n2 = 0; n2 <= n_size; n2++) {
 			A[n1][n2] = B[n1 * (n_size + 1) + n2];
@@ -35,16 +46,21 @@ void output_learning::generate_simultaneous_linear_equationsA(const std::vector<
 }
 //連立一次方程式Aw=bのbを生成
 void output_learning::generate_simultaneous_linear_equationsb(const std::vector<std::vector<double>>& output_node,
-	const std::vector<double>& yt_s, const int wash_out, const int step, const int n_size) {
+	const std::vector<std::vector<std::vector<double>>>& yt_s, const int wash_out, const int step, const int n_size) {
 	b.resize(n_size + 1);
 	for (int n1 = 0; n1 <= n_size; n1++) {
 		b[n1] = 0.0;
 	}
 	int count = 0;
-	for (int t = wash_out + 1; t < step; t++) {
-		count++;
-		for (int n1 = 0; n1 <= n_size; n1++) {
-			b[n1] += output_node[t + 1][n1] * yt_s[t];
+	for (int class_itr = 0; class_itr < yt_s.size(); class_itr++) {
+		for (int i = 0; i < yt_s[class_itr].size(); i++) {
+			for (int t = wash_out; t < step; t++) {
+				count++;
+				for (int n1 = 0; n1 <= n_size; n1++) {
+					b[n1] += output_node[count + 1][n1] * yt_s[class_itr][i][t];
+				}
+				//std::cerr << count << std::endl;
+			}
 		}
 	}
 	for (int n1 = 0; n1 <= n_size; n1++) {

@@ -58,25 +58,33 @@ void reservoir_layer::generate_reservoir() {
 	 * output_node[t][n] 時刻tにおけるn番目のノードの出力
 	 * t_size ステップ数
 	 **/
-void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size, int seed) {
+void reservoir_layer::reservoir_update(const std::vector<std::vector<std::vector<double>>>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size, int seed) {
 	std::mt19937 mt2;
 	mt2.seed(seed);
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;
-	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
+	for (int n = 1; n <= unit_size; n++) output_node[0][n] = 0.0;
 	std::vector<double> input_sum_node(unit_size + 1, 0);
-	for (int t = 0; t <= t_size; t++) {
-		for (int n = 1; n <= unit_size; n++) {
-			input_sum_node[n] = input_signal_strength[n] * input_signal[t];
-			for (int k = 1; k <= connection_degree; k++) {
-				input_sum_node[n] += weight_reservoir[n][k] * output_node[t][adjacency_list[n][k]];
+	int sum_t = 0;
+	for (int class_itr = 0; class_itr < input_signal.size(); class_itr++) {
+		for (int task_itr = 0; task_itr < input_signal[class_itr].size(); task_itr++) {
+			//std::cerr << task_itr << std::endl;
+			for (int t = 0; t < t_size; t++) {
+				for (int n = 1; n <= unit_size; n++) {
+					input_sum_node[n] = input_signal_strength[n] * input_signal[class_itr][task_itr][t];
+					for (int k = 1; k <= connection_degree; k++) {
+						input_sum_node[n] += weight_reservoir[n][k] * output_node[sum_t][adjacency_list[n][k]] * (t > 0);
+					}
+					// bias_factor:論文にはない新しいパラメーター
+					input_sum_node[n] += weight_reservoir[n][0] * output_node[sum_t][0] * bias_factor;
+				}
+				for (int n = 1; n <= unit_size; n++) {
+					output_node[sum_t + 1][n] = activation_function(input_sum_node[n], node_type[n]);
+				}
+				output_node[sum_t + 1][0] = 1.0;
+				sum_t++;
 			}
-			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0] * bias_factor;
 		}
-		for (int n = 1; n <= unit_size; n++) {
-			output_node[t + 1][n] = activation_function(input_sum_node[n], node_type[n]);
-		}
-		output_node[t + 1][0] = 1.0;
 	}
 }
 
@@ -113,23 +121,23 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 // Echo State Propertyを持つリザーバーであるとは、リザーバーの持つノードの初期値に依存しない状態を言う。
 //
 bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_signal) {
-	auto output_node1 = std::vector<std::vector<double>>(wash_out + 2, std::vector<double>(unit_size + 1, 0));
-	auto output_node2 = std::vector<std::vector<double>>(wash_out + 2, std::vector<double>(unit_size + 1, 0));
+	//auto output_node1 = std::vector<std::vector<double>>(wash_out + 2, std::vector<double>(unit_size + 1, 0));
+	//auto output_node2 = std::vector<std::vector<double>>(wash_out + 2, std::vector<double>(unit_size + 1, 0));
 
-	reservoir_update(input_signal, output_node1, wash_out, 1);
-	reservoir_update(input_signal, output_node2, wash_out, 2);
+	//reservoir_update(input_signal, output_node1, wash_out, 1);
+	//reservoir_update(input_signal, output_node2, wash_out, 2);
 
-	double err_sum = 0.0;
-	for (int t = wash_out - 99; t <= wash_out; t++) {
-		for (int n = 1; n <= unit_size; n++) {
-			const double err = (output_node1[t][n] - output_node2[t][n]);
-			err_sum += err * err;
-		}
-	}
-	// ノード初期値によって状態が等しくなるならば、EchoStatePropertyを持つ
-	double err_ave = err_sum / (unit_size * 10);
-	//std::cerr << err_sum << std::endl;
-	return err_ave <= 0.1;
+	//double err_sum = 0.0;
+	//for (int t = wash_out - 99; t <= wash_out; t++) {
+	//	for (int n = 1; n <= unit_size; n++) {
+	//		const double err = (output_node1[t][n] - output_node2[t][n]);
+	//		err_sum += err * err;
+	//	}
+	//}
+	//// ノード初期値によって状態が等しくなるならば、EchoStatePropertyを持つ
+	//double err_ave = err_sum / (unit_size * 10);
+	////std::cerr << err_sum << std::endl;
+	//return err_ave <= 0.1;
 }
 
 double reservoir_layer::activation_function(const double x, const int type) {
