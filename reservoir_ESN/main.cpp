@@ -178,7 +178,7 @@ int main(void) {
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					
-					for (int ite_b = 0; ite_b <= 0; ite_b += 1) {
+					for (int ite_b = 0; ite_b <= 5; ite_b += 1) {
 						const double bias_factor = d_bias * ite_b;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
@@ -191,7 +191,7 @@ int main(void) {
 
 							reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
 							reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);
-							//is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
+							is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 							reservoir_layer_v[k] = reservoir_layer1;
 						}
 						int lm;
@@ -202,7 +202,7 @@ int main(void) {
 #pragma omp parallel for  private(lm) num_threads(32)
 						// 重みの学習を行う
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							//if (!is_echo_state_property[k]) continue;
+							if (!is_echo_state_property[k]) continue;
 
 							output_learning[k].generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
 							output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
@@ -225,7 +225,7 @@ int main(void) {
 
 						// 検証データでもっとも性能の良いリザーバーを選択
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							//if (!is_echo_state_property[k]) continue;
+							if (!is_echo_state_property[k]) continue;
 							for (int lm = 0; lm < 10; lm++) {
 								if (nmse[k][lm] < opt_nmse) {
 									opt_nmse = nmse[k][lm];
@@ -237,7 +237,6 @@ int main(void) {
 									opt_w = w[k][lm];
 									opt_reservoir_layer = reservoir_layer_v[k];
 									train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
-									std::cerr << train_nmse << std::endl;
 								}
 							}
 
@@ -258,15 +257,6 @@ int main(void) {
 
 					// リザーバーのユニット入出力を表示
 					opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);
-					//if (test_nmse > 2.0) {
-					//	for (int k = 0; k < alpha_step * sigma_step; k++) {
-					//		if (!is_echo_state_property[k]) continue;
-					//		for (int lm = 0; lm < 10; lm++) {
-					//			std::cerr << k << " " << lm << " " << nmse[k][lm] << std::endl;
-					//		}
-					//	}
-					//}
-
 				}
 
 			}

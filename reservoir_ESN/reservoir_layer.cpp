@@ -113,14 +113,14 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 // Echo State Propertyを持つリザーバーであるとは、リザーバーの持つノードの初期値に依存しない状態を言う。
 //
 bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_signal) {
-	auto output_node1 = std::vector<std::vector<double>>(wash_out + 2, std::vector<double>(unit_size + 1, 0));
-	auto output_node2 = std::vector<std::vector<double>>(wash_out + 2, std::vector<double>(unit_size + 1, 0));
+	auto output_node1 = std::vector<std::vector<double>>(210, std::vector<double>(unit_size + 1, 0));
+	auto output_node2 = std::vector<std::vector<double>>(210, std::vector<double>(unit_size + 1, 0));
 
-	reservoir_update(input_signal, output_node1, wash_out, 1);
-	reservoir_update(input_signal, output_node2, wash_out, 2);
+	reservoir_update(input_signal, output_node1, 200, 1);
+	reservoir_update(input_signal, output_node2, 200, 2);
 
 	double err_sum = 0.0;
-	for (int t = wash_out - 99; t <= wash_out; t++) {
+	for (int t = 100; t < 200; t++) {
 		for (int n = 1; n <= unit_size; n++) {
 			const double err = (output_node1[t][n] - output_node2[t][n]);
 			err_sum += err * err;
