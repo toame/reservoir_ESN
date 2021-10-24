@@ -207,7 +207,7 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		if (show) {
-			outputfile << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
+			std::cerr << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
 		}
 	}
 	return sum_squared_average / (step - wash_out);
@@ -216,4 +216,25 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
+}
+
+double calc_correct_rate(const std::vector<double>& teacher_signal, const std::vector<double>& weight1, const std::vector<double>& weight2,
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	double count = 0.0;
+	for (int t = wash_out + 1; t < step; t++) {
+		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
+		double reservoir_predict_signal1 = 0.0;
+		double reservoir_predict_signal2 = 0.0;
+		for (int n = 0; n <= unit_size; n++) {
+			reservoir_predict_signal1 += weight1[n] * output_node[t + 1][n];
+			reservoir_predict_signal2 += weight2[n] * output_node[t + 1][n];
+		}
+		int choice = 0;
+		if (reservoir_predict_signal1 < reservoir_predict_signal2) choice = 1;
+		else choice = 0;
+		if (teacher_signal[t] == 1.0 && choice == 0) count++;
+		if (teacher_signal[t] == 0.0 && choice == 1) count++;
+		//std::cerr << t << " " << reservoir_predict_signal1 << " " << reservoir_predict_signal2 << " " << choice << " " << teacher_signal[t] << " " << count << std::endl;
+	}
+	return count;
 }
