@@ -60,6 +60,17 @@ void generate_narma_task(std::vector<double>& input_signal, std::vector<double>&
 	}
 }
 
+void generate_classification_task(std::vector<double>& input_signal, std::vector<std::vector<double>>& teacher_signals, int class_num, int class_type) {
+	for (int i = 0; i < class_num; i++) {
+		std::vector<double> teacher_signal;
+		for (int t = 0; t < input_signal.size(); t++) {
+			if (i == class_type) teacher_signal.push_back(1.0);
+			else teacher_signal.push_back(0.0);
+		}
+		teacher_signals.push_back(teacher_signal);
+	}
+}
+
 //  0.3, 0.05, 1.5, 0.1
 void generate_narma_task2(std::vector<double> input_signal, std::vector<double>& teacher_signal, int tau, int step) {
 	const double alpha = 0.3;

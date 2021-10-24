@@ -36,21 +36,14 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 typedef void (*FUNC)();
 int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
-	const int step = 3000;
-	const int wash_out = 500;
-	std::vector<int> unit_sizes = {
-									100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
-									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200 };
-	std::vector<std::string> task_names = {
-											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",
-											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx" };
+	const int step = 10000;
+	const int small_step = 200;
+	const int wash_out = 0;
+	std::vector<int> unit_sizes = {100};
+	std::vector<std::string> task_names = { "narma" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = {
-								   1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,
-									1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7 };
-	std::vector<double> param2 = {
-									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,
-									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };
+	std::vector<int> param1 = {10 };
+	std::vector<double> param2 = { 0.0};
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -80,8 +73,19 @@ int main(void) {
 				d_alpha = 0.005; alpha_min = 0.002;
 				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
-				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
-				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
+				for (int k = 0; k < 50; k++) {
+					std::vector<double> noise_signal(small_step), narma_signal(small_step);
+					std::vector<std::vector<double>> teacher_signal_tmp;
+					generate_input_signal_random(noise_signal, -1.0, 2.0, small_step, phase * 100 + k);
+					generate_narma_task(noise_signal, narma_signal, tau, small_step);
+					generate_classification_task(narma_signal, teacher_signal_tmp, 1, 0);
+					for (auto e : narma_signal) {
+						input_signal[phase].push_back(e);
+					}
+					for (auto e : teacher_signal_tmp[0]) {
+						teacher_signal[phase].push_back(e);
+					}
+				}
 			}
 			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
 			else if (task_name == "narma2") {
@@ -174,7 +178,7 @@ int main(void) {
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					
-					for (int ite_b = 0; ite_b <= 5; ite_b += 1) {
+					for (int ite_b = 0; ite_b <= 0; ite_b += 1) {
 						const double bias_factor = d_bias * ite_b;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
@@ -187,7 +191,7 @@ int main(void) {
 
 							reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
 							reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);
-							is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
+							//is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 							reservoir_layer_v[k] = reservoir_layer1;
 						}
 						int lm;
@@ -198,7 +202,7 @@ int main(void) {
 #pragma omp parallel for  private(lm) num_threads(32)
 						// 重みの学習を行う
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							if (!is_echo_state_property[k]) continue;
+							//if (!is_echo_state_property[k]) continue;
 
 							output_learning[k].generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
 							output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
@@ -221,7 +225,7 @@ int main(void) {
 
 						// 検証データでもっとも性能の良いリザーバーを選択
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							if (!is_echo_state_property[k]) continue;
+							//if (!is_echo_state_property[k]) continue;
 							for (int lm = 0; lm < 10; lm++) {
 								if (nmse[k][lm] < opt_nmse) {
 									opt_nmse = nmse[k][lm];
@@ -233,6 +237,7 @@ int main(void) {
 									opt_w = w[k][lm];
 									opt_reservoir_layer = reservoir_layer_v[k];
 									train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
+									std::cerr << train_nmse << std::endl;
 								}
 							}
 
