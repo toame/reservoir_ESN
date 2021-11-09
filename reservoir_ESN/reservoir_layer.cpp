@@ -93,7 +93,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 	output_node[0][0] = 1.0;//変更する要素
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt);
 
-	std::ofstream outputfile("output_unit/" + name + ".txt");//output_unit 発見！！！！！！！！！！！！！！！！！！
+	std::ofstream outputfile("output_unit/" + name + ".txt");//output_unit 発見！
 	outputfile << "t,unit,input,output" << std::endl;
 
 	const double e = 2.718281828459045;
