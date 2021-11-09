@@ -49,5 +49,6 @@
     <None Include="script\hist_graph.py">
       <Filter>ソース ファイル\script</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
