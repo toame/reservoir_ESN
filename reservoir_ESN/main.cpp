@@ -58,7 +58,7 @@ int main(void) {
 									1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7 };
 	std::vector<double> param2 = {
 									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,
-									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };
+									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };//a
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -160,11 +160,11 @@ int main(void) {
 		std::chrono::system_clock::time_point  start, end; // Œ^‚Í auto ‚Å‰Â
 		for (auto function_name : function_names) {
 			double (*nonlinear)(double, double, double, double);
-			if (function_name == "sinc") nonlinear = makkey;
+			if (function_name == "makkey") nonlinear = makkey;
 			//else if (function_name == "tanh") nonlinear = tanh;
 			//else if (function_name == "gauss") nonlinear = gauss;
 			//else if (function_name == "oddsinc") nonlinear = oddsinc;
-			else if (function_name == "makkey") nonlinear = sinc;
+			//else if (function_name == "sinc") nonlinear = sinc;
 			else {
 				std::cerr << "error! " << function_name << "is not found" << std::endl;
 				return 0;
