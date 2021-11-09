@@ -149,6 +149,10 @@
     <ClInclude Include="reservoir_layer.h" />
     <ClInclude Include="task.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="script\graph.py" />
+    <None Include="script\hist_graph.py" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
