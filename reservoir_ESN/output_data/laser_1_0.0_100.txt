@@ -1,0 +1,6 @@
+### task_name: laser
+### 1 0
+### input_signal_factor [0.1, 4.1]
+### weight_factor [0.1, 1.1]
+function_name,seed,unit_size,p,input_singal_factor,bias_factor,weight_factor,lm,train_nmse,nmse,test_nmse
+sinc,0,100,0.0000,0.1000,1.0000,0.9000,0.0000,0.16740636,0.15845617,0.21047426
