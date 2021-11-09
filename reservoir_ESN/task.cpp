@@ -100,7 +100,7 @@ void generate_input_signal_henon_map(std::vector<double>& input_signal, const in
 	double a = 0.1, b = 0.2, c = 0;
 	const double alpha = 1.4;
 	const double beta = 0.3;
-	input_signal.resize(step + fstep + 10);
+	input_signal.resize(step + fstep + 10);  //step 3000 wash_out 500 main　l41より　　　10は保険のためのもの
 	for (int t = 0; t < wash_out; t++) {
 		c = 1 - alpha * b * b + beta * a;
 		std::swap(a, b);
@@ -117,7 +117,7 @@ void generate_henom_map_task(std::vector<double>& input_signal, std::vector<doub
 	generate_input_signal_henon_map(input_signal, fstep, step, wash_out);
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
-		teacher_signal[t] = input_signal[t + fstep];
+		teacher_signal[t] = input_signal[t + fstep];//fstepは先の値を予測するのだから至極当たり前のことだった
 	}
 }
 
@@ -171,19 +171,19 @@ inline double squared(const double x) {
 	return x * x;
 }
 
-double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {
+double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {//論文式（１３）の下の部分
 	double t_ave0 = 0.0, tt_ave0 = 0.0;
 	for (int t = wash_out + 1; t < step; t++) {
 		t_ave0 += yt[t];
 		tt_ave0 += yt[t] * yt[t];
 	}
-	t_ave0 /= (step - wash_out);
+	t_ave0 /= (step - wash_out);//step-wash_outが論文でいう学習データ数Mかな？？
 	tt_ave0 /= (step - wash_out);
 	return tt_ave0 - t_ave0 * t_ave0;
 }
 
 double calc_mean_squared_average(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
-	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {//論文式（１３）の上の部分
 	double sum_squared_average = 0.0;
 	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);
 	if(show)

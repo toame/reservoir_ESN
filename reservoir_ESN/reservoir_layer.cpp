@@ -11,7 +11,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const int connection_degre
 	this->seed = seed;
 	this->nonlinear = nonlinear;
 	this->wash_out = wash_out;
-	node_type.resize(unit_size + 1);
+	node_type.resize(unit_size + 1);//???????????
 	adjacency_list.resize(unit_size + 1, std::vector<int>(connection_degree + 1));
 	weight_reservoir.resize(unit_size + 1, std::vector<double>(connection_degree + 1));
 	input_signal_strength.resize(unit_size + 1);
@@ -21,22 +21,22 @@ reservoir_layer::reservoir_layer(const int unit_size, const int connection_degre
 // 結合トポロジーや結合重みなどを設定する
 void reservoir_layer::generate_reservoir() {
 
-	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
-	std::uniform_int_distribution<> rand_0or1(0, 1);
+	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);//ランダム生成
+	std::uniform_int_distribution<> rand_0or1(0, 1);//intだから0か1
 
-	std::vector<int> permutation(unit_size + 1);
-	std::iota(permutation.begin(), permutation.end(), 1);
+	std::vector<int> permutation(unit_size + 1);      //?？？？？？？？permutation 順列　置換    
+	std::iota(permutation.begin(), permutation.end(), 1); //?？？？？　https://kaworu.jpn.org/cpp/std::iota
 	//リザーバー層の結合をランダムに生成
 	for (int n = 1; n <= unit_size; n++) {
-		std::shuffle(permutation.begin(), permutation.end(), mt);
+		std::shuffle(permutation.begin(), permutation.end(), mt); //?https://cpprefjp.github.io/reference/algorithm/shuffle.html
 		for (int k = 1; k <= connection_degree; k++) {
-			adjacency_list[n][k] = permutation[k];
+			adjacency_list[n][k] = permutation[k];   //?
 		}
 	}
 
 	//各ノードが線形か非線形かを決定
 	for (int n = 1; n <= unit_size; n++) {
-		if (permutation[n] <= unit_size * p) {
+		if (permutation[n] <= unit_size * p) {  //△
 			node_type[n] = NON_LINEAR;
 		}
 		else
@@ -44,13 +44,13 @@ void reservoir_layer::generate_reservoir() {
 	}
 
 	for (int n = 1; n <= unit_size; n++) {
-		//リザーバー層の結合重みを決定
-		weight_reservoir[n][0] = rand_minus1toplus1(mt);
+		//リザーバー層の結合重みを決定　　　　　　　　　　　　　　　　　　　　　　　　　　　　　△　論文P8　２．４結合行列
+		weight_reservoir[n][0] = rand_minus1toplus1(mt);   //??? mt部分
 		for (int k = 1; k <= connection_degree; k++)
-			weight_reservoir[n][k] = weight_factor * (1.0 / sqrt(connection_degree)) * (rand_0or1(mt) * 2 - 1);
+			weight_reservoir[n][k] = weight_factor * (1.0 / sqrt(connection_degree)) * (rand_0or1(mt) * 2 - 1);//なぜこういう式？？？？
 
 		// 入力層の結合重みを決定
-		input_signal_strength[n] = weight_factor * input_signal_factor * (rand_0or1(mt) * 2 - 1);
+		input_signal_strength[n] = weight_factor * input_signal_factor * (rand_0or1(mt) * 2 - 1);//最後のなぜこういう式？ あと論文を見る限りinput_signal_factor要素必要？
 	}
 }
 /** リザーバー層を時間発展させる
@@ -59,24 +59,24 @@ void reservoir_layer::generate_reservoir() {
 	 * t_size ステップ数
 	 **/
 void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size, int seed) {
-	std::mt19937 mt2;
-	mt2.seed(seed);
+	std::mt19937 mt2; // メルセンヌ・ツイスタの32ビット版
+	mt2.seed(seed);  //???????????????? seedの中rnd()じゃなくていいのか→ランダムだとデバックごとに変わる　（別プロジェクト参照）
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
-	std::vector<double> input_sum_node(unit_size + 1, 0);
+	std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
 	for (int t = 0; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {
 			input_sum_node[n] = input_signal_strength[n] * input_signal[t];
 			for (int k = 1; k <= connection_degree; k++) {
-				input_sum_node[n] += weight_reservoir[n][k] * output_node[t][adjacency_list[n][k]];
+				input_sum_node[n] += weight_reservoir[n][k] * output_node[t][adjacency_list[n][k]];    //????
 			}
 			input_sum_node[n] += weight_reservoir[n][0] * output_node[t][0] * bias_factor;
 		}
 		for (int n = 1; n <= unit_size; n++) {
 			output_node[t + 1][n] = activation_function(input_sum_node[n], node_type[n]);
 		}
-		output_node[t + 1][0] = 1.0;
+		output_node[t + 1][0] = 1.0;    //???? 必要なことを理解 やっぱり分からん
 	}
 }
 
@@ -87,7 +87,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt);
-	std::ofstream outputfile("output_unit/" + name + ".txt");
+	std::ofstream outputfile("output_unit/" + name + ".txt");//output_unit 発見！！！！！！！！！！！！！！！！！！
 	outputfile << "t,unit,input,output" << std::endl;
 	std::vector<double> input_sum_node(unit_size + 1, 0);
 	for (int t = 0; t <= t_size; t++) {
@@ -129,16 +129,16 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	// ノード初期値によって状態が等しくなるならば、EchoStatePropertyを持つ
 	double err_ave = err_sum / (unit_size * 10);
 	//std::cerr << err_sum << std::endl;
-	return err_ave <= 0.1;
+	return err_ave <= 0.1;//△△△
 }
 
 double reservoir_layer::activation_function(const double x, const int type) {
 	if (type == LINEAR) {
-		return std::max(-1000.0, std::min(1000.0, x));
+		return std::max(-1000.0, std::min(1000.0, x));  //?
 	}
 	else if (type == NON_LINEAR) {
 		return nonlinear(x);
 	}
-	assert(type != LINEAR && type != NON_LINEAR);
+	assert(type != LINEAR && type != NON_LINEAR);  //?
 	return -1.0;
 }
