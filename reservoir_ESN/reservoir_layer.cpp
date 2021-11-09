@@ -81,7 +81,8 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	for (int t = 1; t <= t_size; t++) {//t = 0¨t = 1‚É•ÏX
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
-			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//‚±‚±‚Ìˆø”‚à‚Á‚Æ‘‚¦‚é‚©‚à
+			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//‚±‚±‚Ìˆø”‚à‚Á‚Æ‘‚¦‚é‚©‚à
+			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			output_node[t][n] *= (1 - pow(e, -ƒÌ));
 			output_node[t][n] += pow(e, -ƒÌ) * (output_node[t][n - 1]);
 		}
@@ -112,7 +113,8 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 	for (int t = 1; t <= t_size; t++) {//t = 0¨t = 1‚É•ÏX
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
-			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//‚±‚±‚Ìˆø”‚à‚Á‚Æ‘‚¦‚é‚©‚à
+			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//‚±‚±‚Ìˆø”‚à‚Á‚Æ‘‚¦‚é‚©‚à
+			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			output_node[t][n] *= (1 - pow(e, -ƒÌ));
 			output_node[t][n] += pow(e, -ƒÌ) * (output_node[t][n - 1]);
 		}
@@ -146,13 +148,14 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 }
 
 
-double reservoir_layer::activation_function(const double x, const int type, const double J) {//‚±‚±‚Ìˆø”‚à‚Á‚Æ‘‚¦‚é‚©‚à
+//double reservoir_layer::activation_function(const double x, const int type, const double J) {//‚±‚±‚Ìˆø”‚à‚Á‚Æ‘‚¦‚é‚©‚à
+double reservoir_layer::activation_function(const double x, const int type) {
 	if (type == LINEAR) {
 		return std::max(-1000.0, std::min(1000.0, x));  //?
 	}
 	else if (type == NON_LINEAR) {
-		//return nonlinear(x);
-		return nonlinear(x, J, input_gain, feed_gain);
+		return nonlinear(x);
+		//return nonlinear(x, J, input_gain, feed_gain);
 		//‚à‚µ‚©‚·‚é‚Æ@nonlinear(x, input_gain, feed_gain, pa, J);‚È‚Ì‚©‚à
 	}
 	assert(type != LINEAR && type != NON_LINEAR);  //?

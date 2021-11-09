@@ -19,6 +19,7 @@ double makkey(const double x, double J, double input_gain, double feed_gain) {//
 	return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 2));//pa = 2-------------------------
 }
 
+
 //double Mackey_Grass(std::vector<std::vector<double>>& output_node, double input_gain, double feed_gain, double pa, std::vector<std::vector<double>>& J) {
 
 //}
@@ -164,7 +165,7 @@ int main(void) {
 			//else if (function_name == "tanh") nonlinear = tanh;
 			//else if (function_name == "gauss") nonlinear = gauss;
 			//else if (function_name == "oddsinc") nonlinear = oddsinc;
-			//else if (function_name == "sinc") nonlinear = sinc;
+			else if (function_name == "sinc") nonlinear = sinc;
 			else {
 				std::cerr << "error! " << function_name << "is not found" << std::endl;
 				return 0;
