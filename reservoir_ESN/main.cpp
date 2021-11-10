@@ -71,16 +71,20 @@ int main(void) {
 	const int sigma_step = 11;
 	std::string task_name;
 	std::string function_name;
-
+	std::cout << "成功２" << "\n";
+	std::cout << "成功３" << "\n";
 	std::vector<std::vector<std::vector<std::vector<double>>>> output_node(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0))));
+	std::cout << "成功4" << "\n";
 	std::vector<reservoir_layer> reservoir_layer_v(alpha_step * sigma_step);
 	std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
 	std::vector<std::vector<std::vector<double>>> w(alpha_step * sigma_step, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
-	std::vector<std::vector<double>> nmse(alpha_step * sigma_step, std::vector<double>(10));						// 各リザーバーのnmseを格納
+	std::vector<std::vector<double>> nmse(alpha_step * sigma_step, std::vector<double>(10));	// 各リザーバーのnmseを格納
+	std::cout << "成功5" << "\n";
 	for (int r = 0; r < unit_sizes.size(); r++) {
+		std::cout << "成功6" << "\n";
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
-
+		std::cout << "成功7" << "\n";
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);//この２つそれぞれが3種類の配列を持ってるということ？
 
 		std::vector<std::string> function_names = { "sinc" , "tanh" , "makkey"};//適宜他の非線形も入れていい
