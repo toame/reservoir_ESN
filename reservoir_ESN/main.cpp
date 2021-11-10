@@ -57,8 +57,8 @@ int main(void) {
 									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200 };
 
 	std::vector<std::string> task_names = {
-												 "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser",   "henon", "henon",
-												 "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser",   "henon", "henon"};
+												 "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon",  "henon",
+												 "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon", "henon"};
 	if (unit_sizes.size() != task_names.size()) return 0;
 	std::vector<int> param1 = {  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10,    5, 7,
 									  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10,     5, 7, };
@@ -96,7 +96,7 @@ int main(void) {
 			
 			if (task_name == "narma") {
 				d_bias = 0.4;
-				d_alpha = 0.02; alpha_min = 0.05;
+				d_alpha = 0.05; alpha_min = 0.10;
 				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
@@ -113,8 +113,8 @@ int main(void) {
 				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
 			}
 			else if (task_name == "henon") {
-				d_bias = 10.0;
-				d_alpha = 10.0; alpha_min = 2.0;
+				d_bias = 1.0;
+				d_alpha = 0.2; alpha_min = 0.1;
 				d_sigma = 0.04; sigma_min = 0.04;
 				const int fstep = param1[r];
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
@@ -188,7 +188,7 @@ int main(void) {
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 10; ite_p <= 10; ite_p++) {//論文　手順２
+				for (int ite_p = 5; ite_p <= 10; ite_p += 5) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  ここでは基準を作っている。 l233あたりで書き換えのコードがある。
 					double opt_input_signal_factor = 0;
