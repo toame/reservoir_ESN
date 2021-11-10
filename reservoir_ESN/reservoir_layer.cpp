@@ -160,7 +160,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	// ノード初期値によって状態が等しくなるならば、EchoStatePropertyを持つ
 	double err_ave = err_sum / (unit_size * 10);
 	//std::cerr << err_sum << std::endl;
-	return err_ave <= 0.1;//△△△
+	return err_ave <= 0.2;//△△△
 }
 
 
