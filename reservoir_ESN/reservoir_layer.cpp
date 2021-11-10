@@ -65,7 +65,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
 
 
-	const double e = 2.718281828459045;
+	const double e = 2.718;// 281828459045;
 	double ξ, d;
 	d = 1.0 / (double)unit_size;//分母 +1を消した  d = τ / N→現在τ（遅延時間）を1としているが論文では80としている場合もあった
 	ξ = log(1.0 + d);
@@ -97,7 +97,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 	std::ofstream outputfile("output_unit/" + name + ".txt");//output_unit 発見！
 	outputfile << "t,unit,input,output" << std::endl;
 
-	const double e = 2.718281828459045;
+	const double e = 2.718;// 281828459045;
 	double ξ, d;
 	d = 1.0 / (double)unit_size;//分母 +1を消した
 	ξ = log(1.0 + d);
