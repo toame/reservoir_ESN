@@ -1,7 +1,7 @@
 #include "reservoir_layer.h"
 reservoir_layer::reservoir_layer() {}
 reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, const double input_gain, const double feed_gain, const double p,
-	double (*nonlinear)(double, double, double, double), unsigned int seed = 0, const int wash_out = 500) {
+	double (*nonlinear)(double), unsigned int seed = 0, const int wash_out = 500) {//•ÏX‚µ‚½
 	this->unit_size = unit_size;
 	//this->connection_degree = connection_degree;
 	this->input_signal_factor = iss_factor;
