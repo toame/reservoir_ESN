@@ -96,7 +96,7 @@ int main(void) {
 			
 			if (task_name == "narma") {
 				d_bias = 0.4;
-				d_alpha = 0.05; alpha_min = 0.1;
+				d_alpha = 0.02; alpha_min = 0.05;
 				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
@@ -204,15 +204,15 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					//std::cout << "成功11" << "\n";
 
-					for (int ite_input = 1; ite_input <= 2; ite_input += 1) {//入力ゲイン
+					for (int ite_input = 1; ite_input <= 5; ite_input += 1) {//入力ゲイン
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
-						const double input_gain = 0.8 +  ite_input * 0.1;
-						for (int ite_feed = 1; ite_feed <= 2; ite_feed += 1) {
+						const double input_gain = 0.5 +  ite_input * 0.2;
+						for (int ite_feed = 1; ite_feed <= 5; ite_feed += 1) {
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
-							const double feed_gain = 0.8 + ite_feed * 0.1;
+							const double feed_gain = 0.5 + ite_feed * 0.2;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理
-							for (int k = 0; k < alpha_step * sigma_step; k++) {
+							for (int k = 0; k < alpha_step; k++) {
 								//std::cout << "成功12" << "\n";
 								const double input_signal_factor = k * d_alpha + alpha_min;//なぜこの計算なのか？
 								//const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
@@ -236,7 +236,7 @@ int main(void) {
 
 #pragma omp parallel for  private(lm) num_threads(32)//??
 							// 重みの学習を行う
-							for (int k = 0; k < alpha_step * sigma_step; k++) {
+							for (int k = 0; k < alpha_step; k++) {
 								//std::cout << "成功15" << "\n";
 								//if (!is_echo_state_property[k]) continue;     //　https://www.comp.sd.tmu.ac.jp/spacelab/c_lec2/node61.html
 								//std::cout << "成功16" << "\n";
@@ -264,12 +264,12 @@ int main(void) {
 							}
 
 							// 検証データでもっとも性能の良いリザーバーを選択
-							for (int k = 0; k < alpha_step * sigma_step; k++) {//論文　手順６
+							for (int k = 0; k < alpha_step; k++) {//論文　手順６
 								//if (!is_echo_state_property[k]) continue;
 								for (int lm = 0; lm < 10; lm++) {
 									if (nmse[k][lm] < opt_nmse) {
 										opt_nmse = nmse[k][lm];
-										opt_input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+										opt_input_signal_factor = d_alpha * k + alpha_min;
 										//opt_bias_factor = bias_factor;
 										//opt_weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 										opt_feed_gain = feed_gain;
@@ -279,6 +279,7 @@ int main(void) {
 										opt_w = w[k][lm];
 										opt_reservoir_layer = reservoir_layer_v[k];
 										train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
+										std::cerr << train_nmse << " " << opt_input_signal_factor << " " << opt_feed_gain << " " << opt_input_gain << std::endl;
 									}
 								}
 
