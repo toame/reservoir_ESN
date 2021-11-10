@@ -91,7 +91,9 @@ int main(void) {
 		double d_bias;
 		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 		// 入力信号 教師信号の生成
+		std::cout << "成功8" << "\n";
 		for (int phase = 0; phase < PHASE_NUM; phase++) {//論文　手順１
+			std::cout << "成功9" << "\n";
 			if (task_name == "narma") {
 				d_bias = 0.4;
 				d_alpha = 0.005; alpha_min = 0.002;
@@ -117,11 +119,13 @@ int main(void) {
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "laser") {
+				std::cout << "成功10" << "\n";
 				d_bias = 0.5;
 				d_alpha = 0.4; alpha_min = 0.1;
 				d_sigma = 0.1; sigma_min = 0.1;
 				const int fstep = param1[r];
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
+				std::cout << "成功11" << "\n";
 			}
 			else if (task_name == "approx") {
 				const int tau = param1[r];
@@ -158,6 +162,7 @@ int main(void) {
 				generate_legendre_task(input_signal[phase], teacher_signal[phase], nu, tau, step);
 			}
 		}
+		std::cout << "成功10" << "\n";
 		// 設定出力
 		outputfile << "### task_name: " << task_name << std::endl;
 		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;

@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 #include <cblas.h>
 #include <vector>
 class output_learning {

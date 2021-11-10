@@ -1,4 +1,4 @@
-#pragma once
+//#pragma once
 #include <random>
 #define PI (3.14159265358979)
 void generate_input_signal_random(std::vector<double>& input_signal, const int u_min, const int u_delta, const int step, const int seed);
