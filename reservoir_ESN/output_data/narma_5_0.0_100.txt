@@ -1,4 +1,4 @@
-### task_name: henon
+### task_name: narma
 ### 5 0
-### input_signal_factor [2, 102]
+### input_signal_factor [0.002, 0.052]
 function_name,seed,unit_size,p,input_singal_factor,input_gain,feed_gain,lm,train_nmse,nmse,test_nmse

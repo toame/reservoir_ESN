@@ -27,7 +27,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 
 // 結合トポロジーや結合重みなどを設定する  この後マスク信号作るかも｛２値or6値のランダム信号｝→今回は5値ランダム信号
 void reservoir_layer::generate_reservoir() {
-
+	 
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);//ランダム生成
 	std::uniform_int_distribution<> rand_0or1(-2, 2);//intだから0か1
 
@@ -37,6 +37,7 @@ void reservoir_layer::generate_reservoir() {
 	for (int n = 1; n <= unit_size; n++) {
 		std::shuffle(permutation.begin(), permutation.end(), mt); //?https://cpprefjp.github.io/reference/algorithm/shuffle.html
 	}
+	
  
 
 	//各ノードが線形か非線形かを決定
@@ -70,12 +71,12 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//std::vector<double> virtual_output_node(unit_size + 1, 0);
 
 
-	const double e = 2.718;// 281828459045;
+	const double e = 2.7182845;// 281828459045;
 	double ξ, d;
-	d = 2.0 / (double)unit_size;//分母 +1を消した  d = τ / N→現在τ（遅延時間）を1としているが論文では80としている場合もあった
+	d = 21 / (double)unit_size;//分母 +1を消した  d = τ / N→現在τ（遅延時間）を1としているが論文では80としている場合もあった
 	/*
-	d = 2　input_gainとfeed_gain　/50した　ほかにも変えてみてerr_sum　　の値が100になるにはどうすればよいか考える　　　  err_sum = 3000付近　　→　来週の発表これをまとめたやつ見せるのは？？？
-	
+	τ = 2　input_gainとfeed_gain　/50した　ほかにも変えてみてerr_sum　　の値が100になるにはどうすればよいか考える　　　  err_sum = 3000付近　　→　来週の発表これをまとめたやつ見せるのは？？？
+	τ　＝21  
 	*/
 	ξ = log(1.0 + d);
 
@@ -119,7 +120,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	const double e = 2.718;// 281828459045;
 	double ξ, d;
-	d = 1.0 / (double)unit_size;//分母 +1を消した
+	d = 0.1 / (double)unit_size;//分母 +1を消した
 	ξ = log(1.0 + d);
 
 	std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -164,7 +165,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	
 	// ノード初期値によって状態が等しくなるならば、EchoStatePropertyを持つ
 	double err_ave = err_sum / (unit_size * 10);
-	//std::cout << err_ave << "\n";
+	std::cout << err_ave << "\n";
 	//std::cerr << err_sum << std::endl;
 	return err_ave <= 0.2;//△△△
 }

@@ -57,13 +57,13 @@ int main(void) {
 									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200 };
 
 	std::vector<std::string> task_names = {
-												 "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon",
-												 "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser" };
+												 "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser",   "henon", "henon",
+												 "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser",   "henon", "henon"};
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10,
-									 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10};
-	std::vector<double> param2 = {  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,
-									  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0, };
+	std::vector<int> param1 = {  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10,    5, 7,
+									  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10,     5, 7, };
+	std::vector<double> param2 = {   0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,     0, 0,
+									  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,    0, 0, };
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -93,7 +93,7 @@ int main(void) {
 		// 入力信号 教師信号の生成
 		std::cout << "成功8" << "\n";
 		for (int phase = 0; phase < PHASE_NUM; phase++) {//論文　手順１
-			std::cout << "成功9" << "\n";
+			
 			if (task_name == "narma") {
 				d_bias = 0.4;
 				d_alpha = 0.005; alpha_min = 0.002;
@@ -101,6 +101,7 @@ int main(void) {
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
+				std::cout << "成功9" << "\n";
 			}
 			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
 			else if (task_name == "narma2") {
@@ -203,10 +204,12 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					//std::cout << "成功11" << "\n";
 
-					for (int ite_input = 0; ite_input <= 5; ite_input += 1) {//入力ゲイン
-						const double input_gain = d_bias * ite_input / 50.0;//d_biasの部分たぶん無くす　
-						for (int ite_feed = 0; ite_feed <= 5; ite_feed += 1) {
-							const double feed_gain = d_bias * ite_feed / 50.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
+					for (int ite_input = 1; ite_input <= 5; ite_input += 1) {//入力ゲイン
+						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
+						const double input_gain = 0.8 +  ite_input * 0.1;
+						for (int ite_feed = 1; ite_feed <= 5; ite_feed += 1) {
+							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
+							const double feed_gain = 0.8 + ite_feed * 0.1;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step * sigma_step; k++) {
