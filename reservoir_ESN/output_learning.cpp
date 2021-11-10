@@ -13,30 +13,30 @@
 
 output_learning::output_learning() {}
 
-//連立一次方程式Aw=bのAを生成  時間には関係なし？？→wは時間に関係なし？？
+//連立一次方程式Aw=bのAを生成
 void output_learning::generate_simultaneous_linear_equationsA(const std::vector<std::vector<double>>& output_node, const int wash_out, const int step, const int n_size) {
-	std::vector<std::vector<double>> C(n_size + 1, std::vector<double>(n_size + 1));//????
+	std::vector<std::vector<double>> C(n_size + 1, std::vector<double>(n_size + 1));
 	A.resize(n_size + 1, std::vector<double>(n_size + 1));
-	int count = step - wash_out;//ある程度先のものを使用？？している。それまでは「安定させるため」のモノらしい
+	int count = step - wash_out;
 	std::vector<double> sub_output_node(count * (n_size + 1));
-	std::vector<double> B((n_size + 1) * (n_size + 1), 0.0);//????
+	std::vector<double> B((n_size + 1) * (n_size + 1), 0.0);
 	for (int t = wash_out + 1; t < step; t++) {
 		for (int n1 = 0; n1 <= n_size; n1++) {
 			sub_output_node[(t - wash_out - 1) * (n_size + 1) + n1] = output_node[t + 1][n1];
 		}
 	}
-	//cblas_dgemm 行列演算
-	cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, n_size + 1, n_size + 1, count, 1.0 / count, sub_output_node.data(), n_size + 1, sub_output_node.data(), n_size + 1, 0.0, B.data(), n_size + 1);//https://qiita.com/nek0log/items/a90c337ea50a11dd71d4  qiita.comが分かりやすい(αAB+βCのCが必要ないから0.0にしている)
-	for (int n1 = 0; n1 <= n_size; n1++) {//https://www.xlsoft.com/jp/products/intel/perflib/mkl/11.2/mkl_tutorial_c/GUID-36BFBCE9-EB0A-43B0-ADAF-2B65275726EA.htm こっち
+
+	cblas_dgemm(CblasRowMajor, CblasTrans, CblasNoTrans, n_size + 1, n_size + 1, count, 1.0 / count, sub_output_node.data(), n_size + 1, sub_output_node.data(), n_size + 1, 0.0, B.data(), n_size + 1);
+	for (int n1 = 0; n1 <= n_size; n1++) {
 		for (int n2 = 0; n2 <= n_size; n2++) {
-			A[n1][n2] = B[n1 * (n_size + 1) + n2];//行列を1行に直して格納している。というのも上のcblas_dgemmのBは二次元配列ではないから...
+			A[n1][n2] = B[n1 * (n_size + 1) + n2];
 		}
 	}
 }
 //連立一次方程式Aw=bのbを生成
 void output_learning::generate_simultaneous_linear_equationsb(const std::vector<std::vector<double>>& output_node,
 	const std::vector<double>& yt_s, const int wash_out, const int step, const int n_size) {
-	b.resize(n_size + 1);//resizeは配列の箱の大きさを適宜決定する。
+	b.resize(n_size + 1);
 	for (int n1 = 0; n1 <= n_size; n1++) {
 		b[n1] = 0.0;
 	}

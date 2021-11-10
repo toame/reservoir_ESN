@@ -10,7 +10,7 @@
 #include "output_learning.h"
 #include "task.h"
 #define PHASE_NUM (3)
-#define TRAIN (0)//聞いた　　ただ0～2を文字で分かりやすくしただけ
+#define TRAIN (0)
 #define VAL (1)
 #define TEST (2)
 #define MAX_NODE_SIZE (500)
@@ -26,9 +26,7 @@ double oddsinc(double y) {
 #include <sstream>
 
 template <typename T>
-
-//std::stringクラスを用いることで、string型(文字列型)の宣言だけでなく、文字列の長さを取得できたり、文字の挿入削除などもできます。
-std::string to_string_with_precision(const T a_value, const int n = 6)//
+std::string to_string_with_precision(const T a_value, const int n = 6)
 {
 	std::ostringstream out;
 	out.precision(n);
@@ -36,20 +34,16 @@ std::string to_string_with_precision(const T a_value, const int n = 6)//
 	return out.str();
 }
 typedef void (*FUNC)();
-int main(void) {	
-	const int TRIAL_NUM = 3;	// ループ回数 constが付くと変数は書き換えができなくなり、読み取り専用となります。
+int main(void) {
+	const int TRIAL_NUM = 3;	// ループ回数
 	const int step = 3000;
-	const int wash_out = 500;//ここらの値は経験に基づく
-	/*1次元の配列変数として表現できる、同じ型のデータを一列に並べたデータ構造のことをベクタと呼ぶ場合がある。
-	 これと対比して、単体の値や変数のことは数学の用語に倣ってスカラと呼ぶ場合がある。
-	 C++言語やJavaなどでは、要素数を後から増減できる可変長配列を扱うことができるクラスのことをベクタ（vector / Vector）という。*/
+	const int wash_out = 500;
 	std::vector<int> unit_sizes = {
 									100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
 									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200 };
 	std::vector<std::string> task_names = {
 											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",
 											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx" };
-	                                        //laser   ,henon へノンマップ, narma naruma2 NARMAシステム同定問題, approx 関数近似問題
 	if (unit_sizes.size() != task_names.size()) return 0;
 	std::vector<int> param1 = {
 								   1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,
@@ -58,7 +52,7 @@ int main(void) {
 									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,
 									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };
 	if (param1.size() != param2.size()) return 0;
-	const int alpha_step = 11;//時間軸　この値は教授がこれくらいにしてたから
+	const int alpha_step = 11;
 	const int sigma_step = 11;
 	std::string task_name;
 	std::string function_name;
@@ -72,15 +66,15 @@ int main(void) {
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
 
-		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);//この２つそれぞれが3種類の配列を持ってるということ？
+		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "sinc" , "tanh" };//適宜他の非線形も入れていい
-		double alpha_min, d_alpha;//タスクによって最小値が変わる　
+		std::vector<std::string> function_names = { "sinc" , "tanh" };
+		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
 		double d_bias;
-		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");//ここから最後までにでた値が格納されて別に作ったフォルダの中にどんどん作られていく。それをコマンドプロンプトでグラフ化して完成
+		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 		// 入力信号 教師信号の生成
-		for (int phase = 0; phase < PHASE_NUM; phase++) {//論文　手順１
+		for (int phase = 0; phase < PHASE_NUM; phase++) {
 			if (task_name == "narma") {
 				d_bias = 0.4; 
 				d_alpha = 0.005; alpha_min = 0.002;
@@ -154,7 +148,7 @@ int main(void) {
 		outputfile << "### input_signal_factor [" << alpha_min << ", " << alpha_min + d_alpha * (alpha_step - 1) << "]" << std::endl;
 		outputfile << "### weight_factor [0.1, 1.1]" << std::endl;
 		outputfile << "function_name,seed,unit_size,p,input_singal_factor,bias_factor,weight_factor,lm,train_nmse,nmse,test_nmse" << std::endl;
-		//-------------------------------------------------------------------------------------------------------------------------------------------------------
+
 		std::chrono::system_clock::time_point  start, end; // 型は auto で可
 		for (auto function_name : function_names) {
 			double (*nonlinear)(double);
@@ -166,45 +160,45 @@ int main(void) {
 				std::cerr << "error! " << function_name << "is not found" << std::endl;
 				return 0;
 			}
-			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
+			for (int loop = 0; loop < TRIAL_NUM; loop++) {
+				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
 					const double p = ite_p * 0.1;
-					double opt_nmse = 1e+10;//opt 最適な値  ここでは基準を作っている。 l233あたりで書き換えのコードがある。
+					double opt_nmse = 1e+10;
 					double opt_input_signal_factor = 0;
 					double opt_bias_factor = 0;
 					double opt_weight_factor = 0;
-					double opt_lm2 = 0;//lmはλのこと
+					double opt_lm2 = 0;
 					double test_nmse = 1e+10;
 					double train_nmse = 1e+10;
 					reservoir_layer opt_reservoir_layer;
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					
-					for (int ite_b = 0; ite_b <= 5; ite_b += 1) {//やはりバイアスのこと
+					for (int ite_b = 0; ite_b <= 5; ite_b += 1) {
 						const double bias_factor = d_bias * ite_b;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;//なぜこの計算なのか？
+							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
 							reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);
 							reservoir_layer1.generate_reservoir();
 
-							reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　　　TRAINつまり0のものを引数にしている　？？？→l66でoutput_nodeを4次元の配列？を定義　　北村さんに確認（この行のoutput_nodeとreservoir_layerのoutput_nodeの引数。前者はパラメータと3つのうちのどれかを指す値。後者は時間と何番目かの値）
-							reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);//??論文　手順５　　一つ上のupdateを上書きするということではない？
+							reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
+							reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);
 							is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
-							reservoir_layer_v[k] = reservoir_layer1;//??
+							reservoir_layer_v[k] = reservoir_layer1;
 						}
 						int lm;
 
 						int opt_k = 0;
 
-						output_learning output_learning[341];//？？
-#pragma omp parallel for  private(lm) num_threads(32)//??
+						output_learning output_learning[341];
+#pragma omp parallel for  private(lm) num_threads(32)
 						// 重みの学習を行う
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
-							if (!is_echo_state_property[k]) continue;     //　https://www.comp.sd.tmu.ac.jp/spacelab/c_lec2/node61.html
+							if (!is_echo_state_property[k]) continue;
 
 							output_learning[k].generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
 							output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
@@ -213,20 +207,20 @@ int main(void) {
 							double opt_lm_nmse = 1e+9;
 							for (lm = 0; lm < 10; lm++) {
 								for (int j = 0; j <= unit_size; j++) {
-									output_learning[k].A[j][j] += pow(10, -15 + lm);//べき乗　10の-15+lm乗　論文の式(18)より
+									output_learning[k].A[j][j] += pow(10, -15 + lm);
 									if (lm != 0) output_learning[k].A[j][j] -= pow(10, -16 + lm);
 								}
 								output_learning[k].IncompleteCholeskyDecomp2(unit_size + 1);
 								double eps = 1e-12;
 								int itr = 10;
 								output_learning[k].ICCGSolver(unit_size + 1, itr, eps);
-								w[k][lm] = output_learning[k].w;//おそらく論文　手順４　　　　??????????????? [k][lm]→ある入力強み、ユニット間強みの中の、あるλの場合の重み
-								nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);//論文　手順5続き（論文の書き方がややこしくなってるけど、S1(t)を使って求めた重みとS2(t)を使って予測値を計算で求めてNMSEを出そう！！というだけだと思う。）
+								w[k][lm] = output_learning[k].w;
+								nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
 							}
 						}
 
 						// 検証データでもっとも性能の良いリザーバーを選択
-						for (int k = 0; k < alpha_step * sigma_step; k++) {//論文　手順６
+						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
 							for (int lm = 0; lm < 10; lm++) {
 								if (nmse[k][lm] < opt_nmse) {
@@ -244,21 +238,21 @@ int main(void) {
 
 						}
 					}
-					/*** TEST phase ***/  //論文　手順7
+					/*** TEST phase ***/
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
 
-					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));// △　+2とか MAX_NODE_SIZEとか
+					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
 
-					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);//l241と引数の数違うけど...
+					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
-					//下のoutputfileはどのファイルにかかれているか研究室で確認。std::cerrはデバックの時に表示されるやつかな
+
 					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(4) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse << "," << opt_nmse << "," << test_nmse << std::endl;
 					std::cerr  << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::setprecision(5) << train_nmse << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
 
 					// リザーバーのユニット入出力を表示
-					opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);//たぶん「output_unit」
+					opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);
 					//if (test_nmse > 2.0) {
 					//	for (int k = 0; k < alpha_step * sigma_step; k++) {
 					//		if (!is_echo_state_property[k]) continue;
