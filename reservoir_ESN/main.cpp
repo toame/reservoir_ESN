@@ -29,6 +29,11 @@ double makkey(const double x, double J, double input_gain, double feed_gain) {//
 	return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, pa));
 }*/
 
+double sinc(const double x) {
+	if (x == 0) return 1.0;
+	return sin(PI * x) / (PI * x);
+}
+
 
 #include <sstream>
 
@@ -160,8 +165,8 @@ int main(void) {
 		//-------------------------------------------------------------------------------------------------------------------------------------------------------
 		std::chrono::system_clock::time_point  start, end; // å^ÇÕ auto Ç≈â¬
 		for (auto function_name : function_names) {
-			double (*nonlinear)(double, double, double, double);
-			if (function_name == "makkey") nonlinear = makkey;
+			double (*nonlinear)(double);//ïœçX
+			if (function_name == "sinc") nonlinear = sinc;
 			//else if (function_name == "tanh") nonlinear = tanh;
 			//else if (function_name == "gauss") nonlinear = gauss;
 			//else if (function_name == "oddsinc") nonlinear = oddsinc;
