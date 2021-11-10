@@ -43,7 +43,7 @@ public:
 	//reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double bias_factor, const double p,
 		//double (*nonlinear)(double), const unsigned int seed, const int wash_out);
 	reservoir_layer (const int unit_size, const double iss_factor, const double input_gain, const double feed_gain, const double p, double (*nonlinear)(double),//ïœçXÇµÇΩ
-		const unsigned int seed, const int wash_out);
+		const unsigned int seed, const int wash_out, const int t_size);
 
 	void generate_reservoir();
 	void reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size, int seed = 0);

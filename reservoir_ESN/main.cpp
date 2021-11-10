@@ -214,7 +214,7 @@ int main(void) {
 								//const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
 								//reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);
-								reservoir_layer reservoir_layer1(unit_size, input_signal_factor, input_gain, feed_gain, p, nonlinear, loop, wash_out);
+								reservoir_layer reservoir_layer1(unit_size, input_signal_factor, input_gain, feed_gain, p, nonlinear, loop, wash_out, step);
 								
 								reservoir_layer1.generate_reservoir();
 								std::cout << "¬Œ÷13" << "\n";
