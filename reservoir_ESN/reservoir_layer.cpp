@@ -67,12 +67,16 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;//変更する要素
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
-	std::vector<double> virtual_output_node(unit_size + 1, 0);
+	//std::vector<double> virtual_output_node(unit_size + 1, 0);
 
 
 	const double e = 2.718;// 281828459045;
 	double ξ, d;
-	d = 1.0 / (double)unit_size;//分母 +1を消した  d = τ / N→現在τ（遅延時間）を1としているが論文では80としている場合もあった
+	d = 2.0 / (double)unit_size;//分母 +1を消した  d = τ / N→現在τ（遅延時間）を1としているが論文では80としている場合もあった
+	/*
+	d = 2　input_gainとfeed_gain　/50した　ほかにも変えてみてerr_sum　　の値が100になるにはどうすればよいか考える　　　  err_sum = 3000付近　　→　来週の発表これをまとめたやつ見せるのは？？？
+	
+	*/
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -157,8 +161,10 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 			err_sum += err * err;
 		}
 	}
+	
 	// ノード初期値によって状態が等しくなるならば、EchoStatePropertyを持つ
 	double err_ave = err_sum / (unit_size * 10);
+	//std::cout << err_ave << "\n";
 	//std::cerr << err_sum << std::endl;
 	return err_ave <= 0.2;//△△△
 }

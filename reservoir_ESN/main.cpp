@@ -201,16 +201,16 @@ int main(void) {
 					reservoir_layer opt_reservoir_layer;
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
-					std::cout << "成功11" << "\n";
+					//std::cout << "成功11" << "\n";
 
 					for (int ite_input = 0; ite_input <= 5; ite_input += 1) {//入力ゲイン
-						const double input_gain = d_bias * ite_input / 10.0;//d_biasの部分たぶん無くす　
+						const double input_gain = d_bias * ite_input / 50.0;//d_biasの部分たぶん無くす　
 						for (int ite_feed = 0; ite_feed <= 5; ite_feed += 1) {
-							const double feed_gain = d_bias * ite_feed / 10.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
+							const double feed_gain = d_bias * ite_feed / 50.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step * sigma_step; k++) {
-								std::cout << "成功12" << "\n";
+								//std::cout << "成功12" << "\n";
 								const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;//なぜこの計算なのか？
 								//const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
@@ -218,9 +218,9 @@ int main(void) {
 								reservoir_layer reservoir_layer1(unit_size, input_signal_factor, input_gain, feed_gain, p, nonlinear, loop, wash_out, step);
 								
 								reservoir_layer1.generate_reservoir();
-								std::cout << "成功13" << "\n";
+								//std::cout << "成功13" << "\n";
 								reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　　　TRAINつまり0のものを引数にしている　？？？→l66でoutput_nodeを4次元の配列？を定義　　北村さんに確認（この行のoutput_nodeとreservoir_layerのoutput_nodeの引数。前者はパラメータと3つのうちのどれかを指す値。後者は時間と何番目かの値）
-								std::cout << "成功14" << "\n";
+								//std::cout << "成功14" << "\n";
 								reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);//??論文　手順５　　一つ上のupdateを上書きするということではない？
 								is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 								reservoir_layer_v[k] = reservoir_layer1;//??
@@ -234,12 +234,12 @@ int main(void) {
 #pragma omp parallel for  private(lm) num_threads(32)//??
 							// 重みの学習を行う
 							for (int k = 0; k < alpha_step * sigma_step; k++) {
-								std::cout << "成功15" << "\n";
-								if (!is_echo_state_property[k]) continue;     //　https://www.comp.sd.tmu.ac.jp/spacelab/c_lec2/node61.html
-								std::cout << "成功16" << "\n";
+								//std::cout << "成功15" << "\n";
+								//if (!is_echo_state_property[k]) continue;     //　https://www.comp.sd.tmu.ac.jp/spacelab/c_lec2/node61.html
+								//std::cout << "成功16" << "\n";
 
 								output_learning[k].generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
-								std::cout << "成功17" << "\n";
+								//std::cout << "成功17" << "\n";
 								output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
 
 								double opt_lm = 0;
@@ -262,7 +262,7 @@ int main(void) {
 
 							// 検証データでもっとも性能の良いリザーバーを選択
 							for (int k = 0; k < alpha_step * sigma_step; k++) {//論文　手順６
-								if (!is_echo_state_property[k]) continue;
+								//if (!is_echo_state_property[k]) continue;
 								for (int lm = 0; lm < 10; lm++) {
 									if (nmse[k][lm] < opt_nmse) {
 										opt_nmse = nmse[k][lm];
@@ -280,8 +280,11 @@ int main(void) {
 								}
 
 							}
+							//std::cout << "成功18" << "\n";
 						}
+						//std::cout << "成功18" << "\n";
 					}
+					std::cout << "成功18" << "\n";
 
 					/*** TEST phase ***/  //論文　手順7
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
