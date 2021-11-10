@@ -305,7 +305,7 @@ int main(void) {
 					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << p << "," << opt_input_signal_factor << "," << opt_input_gain << "," << opt_feed_gain << "," << opt_lm2 << "," << std::setprecision(5) << train_nmse << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
 
 					// リザーバーのユニット入出力を表示
-					opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);//たぶん「output_unit」
+					opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);//「output_unit」
 					//if (test_nmse > 2.0) {
 					//	for (int k = 0; k < alpha_step * sigma_step; k++) {
 					//		if (!is_echo_state_property[k]) continue;
