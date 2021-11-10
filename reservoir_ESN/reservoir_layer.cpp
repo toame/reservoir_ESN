@@ -60,7 +60,7 @@ void reservoir_layer::generate_reservoir() {
 	 * output_node[t][n] 時刻tにおけるn番目のノードの出力
 	 * t_size ステップ数
 	 **/
-/*
+
 void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size, int seed) {
 	std::mt19937 mt2; // メルセンヌ・ツイスタの32ビット版
 	mt2.seed(seed);  
@@ -83,7 +83,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		}
 	}
 
-	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
+	/*for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
@@ -91,7 +91,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			output_node[t][n] *= (1 - pow(e, -ξ));
 			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
 		}
-	}
+	}*/
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -102,7 +102,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		}
 	}
 
-}*/
+}
 
 
 void reservoir_layer::reservoir_update_show(const std::vector<double> input_signal, std::vector<std::vector<double>> output_node, const int t_size, const int wash_out, const std::string name) {
