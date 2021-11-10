@@ -85,7 +85,7 @@ int main(void) {
 		std::cout << "成功7" << "\n";
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);//この２つそれぞれが3種類の配列を持ってるということ？
 
-		std::vector<std::string> function_names = { "sinc" , "tanh" , "makkey"};//適宜他の非線形も入れていい
+		std::vector<std::string> function_names = { "sinc" , "tanh" , "makkey"};//適宜他の
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
