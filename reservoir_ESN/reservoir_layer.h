@@ -25,8 +25,8 @@ public:
 	std::vector<double> input_signal_strength;			//  入力層の重み結合の強さベクトル  今回はマスク信号とinput_signal_factorをかけたものとする
 	unsigned int seed;									//	リザーバーの構造を決定するシード値（構造のシードと重みのシードなどの分割をしてもいいかも）
 	double p;											//	ノードで使用される活性化関数の非線形の割合
-	//double (*nonlinear)(double);	//	非線形関数の関数ポインタ
-	double(*nonlinear)(double, double, double, double);
+	double (*nonlinear)(double);	//	非線形関数の関数ポインタ
+	//double(*nonlinear)(double, double, double, double);
 	std::vector<int> node_type;							//	n番目のノードの線形/非線形の種類
 	std::mt19937 mt;
 	int wash_out;
@@ -42,7 +42,7 @@ public:
 	reservoir_layer();
 	//reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double bias_factor, const double p,
 		//double (*nonlinear)(double), const unsigned int seed, const int wash_out);
-	reservoir_layer (const int unit_size, const double iss_factor, const double input_gain, const double feed_gain, const double p, double (*nonlinear)(double, double, double, double),
+	reservoir_layer (const int unit_size, const double iss_factor, const double input_gain, const double feed_gain, const double p, double (*nonlinear)(double),//変更した
 		const unsigned int seed, const int wash_out);
 
 	void generate_reservoir();
