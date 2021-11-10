@@ -16,6 +16,8 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	weight_reservoir.resize(unit_size + 1, std::vector<double>(connection_degree + 1));
 	input_signal_strength.resize(unit_size + 1);
 	mt.seed(seed);
+	this->input_gain = input_gain;
+	this->feed_gain = feed_gain;
 
 
 	std::vector<std::vector<double>> J; //Jをリサイズしないとダメかも　J.resize(t_size, std::vector<double>(unit_size + 1));
