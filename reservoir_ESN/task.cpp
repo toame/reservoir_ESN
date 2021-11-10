@@ -192,7 +192,7 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
 		double reservoir_predict_signal = 0.0;
 		for (int n = 0; n <= unit_size; n++) {
-			reservoir_predict_signal += weight[n] * output_node[t + 1][n];
+			reservoir_predict_signal += weight[n] * output_node[t + 1][n];//—áŠO
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		if (show) {

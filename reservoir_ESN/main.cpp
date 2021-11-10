@@ -209,14 +209,17 @@ int main(void) {
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step * sigma_step; k++) {
+								std::cout << "成功12" << "\n";
 								const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;//なぜこの計算なのか？
 								//const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
 								//reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);
 								reservoir_layer reservoir_layer1(unit_size, input_signal_factor, input_gain, feed_gain, p, nonlinear, loop, wash_out);
+								
 								reservoir_layer1.generate_reservoir();
-
+								std::cout << "成功13" << "\n";
 								reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　　　TRAINつまり0のものを引数にしている　？？？→l66でoutput_nodeを4次元の配列？を定義　　北村さんに確認（この行のoutput_nodeとreservoir_layerのoutput_nodeの引数。前者はパラメータと3つのうちのどれかを指す値。後者は時間と何番目かの値）
+								std::cout << "成功14" << "\n";
 								reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);//??論文　手順５　　一つ上のupdateを上書きするということではない？
 								is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 								reservoir_layer_v[k] = reservoir_layer1;//??
@@ -230,13 +233,17 @@ int main(void) {
 #pragma omp parallel for  private(lm) num_threads(32)//??
 							// 重みの学習を行う
 							for (int k = 0; k < alpha_step * sigma_step; k++) {
+								std::cout << "成功15" << "\n";
 								if (!is_echo_state_property[k]) continue;     //　https://www.comp.sd.tmu.ac.jp/spacelab/c_lec2/node61.html
+								std::cout << "成功16" << "\n";
 
 								output_learning[k].generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
+								std::cout << "成功17" << "\n";
 								output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
 
 								double opt_lm = 0;
 								double opt_lm_nmse = 1e+9;
+								
 								for (lm = 0; lm < 10; lm++) {
 									for (int j = 0; j <= unit_size; j++) {
 										output_learning[k].A[j][j] += pow(10, -15 + lm);//べき乗　10の-15+lm乗　論文の式(18)より
@@ -249,6 +256,7 @@ int main(void) {
 									w[k][lm] = output_learning[k].w;//おそらく論文　手順４　　　　??????????????? [k][lm]→ある入力強み、ユニット間強みの中の、あるλの場合の重み
 									nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);//論文　手順5続き（論文の書き方がややこしくなってるけど、S1(t)を使って求めた重みとS2(t)を使って予測値を計算で求めてNMSEを出そう！！というだけだと思う。）
 								}
+								
 							}
 
 							// 検証データでもっとも性能の良いリザーバーを選択
@@ -279,8 +287,9 @@ int main(void) {
 
 					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));// △　+2とか MAX_NODE_SIZEとか
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
-
+					std::cout << "成功18" << "\n";
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);//l241と引数の数違うけど...
+					std::cout << "成功19" << "\n";
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
