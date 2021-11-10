@@ -20,7 +20,8 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	this->feed_gain = feed_gain;
 
 
-	std::vector<std::vector<double>> J; //Jをリサイズしないとダメかも　J.resize(t_size, std::vector<double>(unit_size + 1));
+	//std::vector<std::vector<double>> J; //Jをリサイズしないとダメかも　
+	//J.resize(t_size, std::vector<double>(unit_size + 1));
 	double pa = 2.0;//曖昧　ここで設定
 }
 
@@ -49,7 +50,7 @@ void reservoir_layer::generate_reservoir() {
 
 	for (int n = 1; n <= unit_size; n++) {
 		// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
-		input_signal_strength[n] = input_signal_factor * (rand_0or1(mt) / 2);//最後のなぜこういう式？ あと論文を見る限りinput_signal_factor要素必要？
+		input_signal_strength[n] = input_signal_factor * (rand_0or1(mt) / 2);
 	}
 }
 
@@ -61,10 +62,11 @@ void reservoir_layer::generate_reservoir() {
 	 **/
 void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size, int seed) {
 	std::mt19937 mt2; // メルセンヌ・ツイスタの32ビット版
-	mt2.seed(seed);  //???????????????? seedの中rnd()じゃなくていいのか→ランダムだとデバックごとに変わる　（別プロジェクト参照）
+	mt2.seed(seed);  
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;//変更する要素
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
+	std::vector<double> virtual_output_node(unit_size + 1, 0);
 
 
 	const double e = 2.718;// 281828459045;
@@ -72,7 +74,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	d = 1.0 / (double)unit_size;//分母 +1を消した  d = τ / N→現在τ（遅延時間）を1としているが論文では80としている場合もあった
 	ξ = log(1.0 + d);
 
-	std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
+	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
 
 	for (int t = 1; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {
@@ -80,6 +82,15 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		}
 	}
 
+	/*for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
+		output_node[t][0] = output_node[t - 1][unit_size];
+		for (int n = 1; n <= unit_size; n++) {
+			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
+			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
+			output_node[t][n] *= (1 - pow(e, -ξ));
+			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
+		}
+	}*/
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -89,6 +100,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
 		}
 	}
+
 }
 
 void reservoir_layer::reservoir_update_show(const std::vector<double> input_signal, std::vector<std::vector<double>> output_node, const int t_size, const int wash_out, const std::string name) {
