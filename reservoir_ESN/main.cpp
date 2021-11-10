@@ -29,10 +29,10 @@ double makkey(const double x, double J, double input_gain, double feed_gain) {//
 	return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, pa));
 }*/
 
-double sinc(const double x) {
+/*double sinc(const double x) {
 	if (x == 0) return 1.0;
 	return sin(PI * x) / (PI * x);
-}
+}*/
 
 
 #include <sstream>
@@ -85,7 +85,7 @@ int main(void) {
 		std::cout << "成功7" << "\n";
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);//この２つそれぞれが3種類の配列を持ってるということ？
 
-		std::vector<std::string> function_names = { "sinc" , "tanh" , "makkey"};//適宜他の
+		std::vector<std::string> function_names = {"makkey"};//適宜他の
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -174,12 +174,13 @@ int main(void) {
 		//-------------------------------------------------------------------------------------------------------------------------------------------------------
 		std::chrono::system_clock::time_point  start, end; // 型は auto で可
 		for (auto function_name : function_names) {
-			double (*nonlinear)(double);//変更
-			if (function_name == "sinc") nonlinear = sinc;
+			//double (*nonlinear)(double);//変更
+			double (*nonlinear)(double, double, double, double);
+			if (function_name == "makkey") nonlinear = makkey;
 			//else if (function_name == "tanh") nonlinear = tanh;
 			//else if (function_name == "gauss") nonlinear = gauss;
 			//else if (function_name == "oddsinc") nonlinear = oddsinc;
-			else if (function_name == "sinc") nonlinear = sinc;
+			//else if (function_name == "sinc") nonlinear = sinc;
 			else {
 				std::cerr << "error! " << function_name << "is not found" << std::endl;
 				return 0;

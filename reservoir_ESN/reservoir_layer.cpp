@@ -1,7 +1,7 @@
 #include "reservoir_layer.h"
 reservoir_layer::reservoir_layer() {}
 reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, const double input_gain, const double feed_gain, const double p,
-	double (*nonlinear)(double), unsigned int seed = 0, const int wash_out = 500, const int t_size = 3000) {//変更した
+	double (*nonlinear)(double, double, double, double), unsigned int seed = 0, const int wash_out = 500, const int t_size = 3000) {//変更した
 	this->unit_size = unit_size;
 	//this->connection_degree = connection_degree;
 	this->input_signal_factor = iss_factor;
@@ -21,7 +21,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 
 
 	//std::vector<std::vector<double>> J; //Jをリサイズしないとダメかも　
-	J.resize(t_size, std::vector<double>(unit_size + 1));
+	J.resize(t_size + 1, std::vector<double>(unit_size + 1));
 	double pa = 2.0;//曖昧　ここで設定
 }
 
@@ -78,11 +78,8 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
 
 	for (int t = 1; t <= t_size; t++) {
-		std::cout << "成功14" << "\n";
-		for (int n = 1; n <= unit_size; n++) {//例外発生
-			std::cout << "成功14_1" << "\n";
-			J[t][n] = input_signal[t - 1] * input_signal_strength[n];
-			std::cout << "成功14_2" << "\n";
+		for (int n = 1; n <= unit_size; n++) {
+			J[t][n] = input_signal[t - 1] * input_signal_strength[n];//例外発生
 		}
 	}
 
@@ -98,8 +95,8 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
-			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
-			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
+			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
+			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			output_node[t][n] *= (1 - pow(e, -ξ));
 			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
 		}
@@ -123,17 +120,17 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
 
-	/*for (int t = 1; t <= t_size; t++) {
+	for (int t = 1; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {
 			J[t][n] = input_signal[t - 1] * input_signal_strength[n];
 		}
-	}*/
+	}
 
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
-			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
-			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
+			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
+			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			output_node[t][n] *= (1 - pow(e, -ξ));
 			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
 		}
@@ -167,14 +164,14 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 }
 
 
-//double reservoir_layer::activation_function(const double x, const int type, const double J) {//ここの引数もっと増えるかも
-double reservoir_layer::activation_function(const double x, const int type) {
+double reservoir_layer::activation_function(const double x, const int type, const double J) {//ここの引数もっと増えるかも
+//double reservoir_layer::activation_function(const double x, const int type) {
 	if (type == LINEAR) {
 		return std::max(-1000.0, std::min(1000.0, x));  //?
 	}
 	else if (type == NON_LINEAR) {
-		return nonlinear(x);
-		//return nonlinear(x, J, input_gain, feed_gain);
+		//return nonlinear(x);
+		return nonlinear(x, J, input_gain, feed_gain);
 		//もしかすると　nonlinear(x, input_gain, feed_gain, pa, J);なのかも
 	}
 	assert(type != LINEAR && type != NON_LINEAR);  //?
