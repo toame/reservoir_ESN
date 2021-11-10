@@ -57,13 +57,13 @@ int main(void) {
 									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200 };
 
 	std::vector<std::string> task_names = {
-												"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",
-												"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx" };
+												 "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon",
+												 "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = {1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,
-									1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7 };
-	std::vector<double> param2 = {0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,
-									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };
+	std::vector<int> param1 = { 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10,
+									 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10};
+	std::vector<double> param2 = {  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,
+									  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0, };
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -124,8 +124,9 @@ int main(void) {
 				d_alpha = 0.4; alpha_min = 0.1;
 				d_sigma = 0.1; sigma_min = 0.1;
 				const int fstep = param1[r];
-				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 				std::cout << "成功11" << "\n";
+				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
+				std::cout << "成功12" << "\n";
 			}
 			else if (task_name == "approx") {
 				const int tau = param1[r];
@@ -199,6 +200,7 @@ int main(void) {
 					reservoir_layer opt_reservoir_layer;
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
+					std::cout << "成功11" << "\n";
 
 					for (int ite_input = 0; ite_input <= 5; ite_input += 1) {//入力ゲイン
 						const double input_gain = d_bias * ite_input / 10.0;//d_biasの部分たぶん無くす　

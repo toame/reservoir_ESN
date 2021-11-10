@@ -78,7 +78,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
 
 	for (int t = 1; t <= t_size; t++) {
-		for (int n = 1; n <= unit_size; n++) {
+		for (int n = 1; n <= unit_size; n++) {//例外発生
 			J[t][n] = input_signal[t - 1] * input_signal_strength[n];
 		}
 	}
