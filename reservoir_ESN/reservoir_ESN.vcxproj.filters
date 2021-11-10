@@ -50,5 +50,8 @@
       <Filter>ソース ファイル\script</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="..\..\reservoir_delay_based_ESN\reservoir_delay_based_ESN\santafe.dat">
+      <Filter>ソース ファイル</Filter>
+    </None>
   </ItemGroup>
 </Project>

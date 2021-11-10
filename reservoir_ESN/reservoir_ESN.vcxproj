@@ -151,6 +151,7 @@
     <ClInclude Include="task.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\reservoir_delay_based_ESN\reservoir_delay_based_ESN\santafe.dat" />
     <None Include="packages.config" />
     <None Include="script\graph.py" />
     <None Include="script\hist_graph.py" />
