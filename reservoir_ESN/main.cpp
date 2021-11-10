@@ -16,7 +16,7 @@
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
 double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-	return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 2));//pa = 2-------------------------
+	return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 5));//pa = 2-------------------------
 }
 
 
@@ -283,20 +283,20 @@ int main(void) {
 								}
 
 							}
-							//std::cout << "成功18" << "\n";
+							std::cout << "成功18" << "\n";
 						}
-						//std::cout << "成功18" << "\n";
+						std::cout << "成功19" << "\n";
 					}
-					std::cout << "成功18" << "\n";
+					std::cout << "成功20" << "\n";
 
 					/*** TEST phase ***/  //論文　手順7
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
 
 					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));// △　+2とか MAX_NODE_SIZEとか
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
-					std::cout << "成功18" << "\n";
+					std::cout << "成功21" << "\n";
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);//l241と引数の数違うけど...
-					std::cout << "成功19" << "\n";
+					std::cout << "成功22" << "\n";
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
