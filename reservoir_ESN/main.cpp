@@ -48,6 +48,7 @@ std::string to_string_with_precision(const T a_value, const int n = 6)//
 }
 typedef void (*FUNC)();
 int main(void) {
+	std::cout << "成功１" << "\n";
 	const int TRIAL_NUM = 3;	// ループ回数 constが付くと変数は書き換えができなくなり、読み取り専用となります。
 	const int step = 3000;
 	const int wash_out = 500; 
