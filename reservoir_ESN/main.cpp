@@ -96,7 +96,7 @@ int main(void) {
 			
 			if (task_name == "narma") {
 				d_bias = 0.4;
-				d_alpha = 0.005; alpha_min = 0.002;
+				d_alpha = 0.05; alpha_min = 0.1;
 				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
@@ -188,7 +188,7 @@ int main(void) {
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
+				for (int ite_p = 10; ite_p <= 10; ite_p++) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  ここでは基準を作っている。 l233あたりで書き換えのコードがある。
 					double opt_input_signal_factor = 0;
@@ -204,17 +204,17 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					//std::cout << "成功11" << "\n";
 
-					for (int ite_input = 1; ite_input <= 5; ite_input += 1) {//入力ゲイン
+					for (int ite_input = 1; ite_input <= 2; ite_input += 1) {//入力ゲイン
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						const double input_gain = 0.8 +  ite_input * 0.1;
-						for (int ite_feed = 1; ite_feed <= 5; ite_feed += 1) {
+						for (int ite_feed = 1; ite_feed <= 2; ite_feed += 1) {
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 							const double feed_gain = 0.8 + ite_feed * 0.1;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step * sigma_step; k++) {
 								//std::cout << "成功12" << "\n";
-								const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;//なぜこの計算なのか？
+								const double input_signal_factor = k * d_alpha + alpha_min;//なぜこの計算なのか？
 								//const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
 								//reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);

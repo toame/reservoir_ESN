@@ -338,3 +338,5 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/reservoir_ESN/output_unit
+/reservoir_ESN/output_predict

@@ -51,7 +51,7 @@ void reservoir_layer::generate_reservoir() {
 
 	for (int n = 1; n <= unit_size; n++) {
 		// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
-		input_signal_strength[n] = input_signal_factor * (rand_0or1(mt) / 2);
+		input_signal_strength[n] = input_signal_factor * (rand_0or1(mt) / 2.0);
 	}
 }
 
@@ -88,6 +88,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	for (int t = 1; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {
 			J[t][n] = input_signal[t - 1] * input_signal_strength[n];//例外発生
+			//if (n <= 10) std::cerr << t << " " << n << " " << J[t][n] << " " << input_signal[t - 1] << " " << input_signal_strength[n] << std::endl;
 		}
 	}
 
@@ -105,8 +106,11 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		for (int n = 1; n <= unit_size; n++) {
 			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
+			//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
 			output_node[t][n] *= (1 - pow(e, -ξ));
+			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
+			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 		}
 	}
 
@@ -163,6 +167,9 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 		for (int n = 1; n <= unit_size; n++) {
 			const double err = (output_node1[t][n] - output_node2[t][n]);
 			err_sum += err * err;
+			//if (n == 1) {
+			//	std::cerr << t << " " << err << std::endl;
+			//}
 		}
 	}
 	
@@ -170,6 +177,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	double err_ave = err_sum / (unit_size * 10);
 	//std::cout << err_ave << "\n";
 	std::cerr << err_sum << std::endl;
+	std::cerr << input_signal_factor << " " << input_gain << " " << feed_gain << std::endl;
 	return err_ave <= 0.2;//△△△
 }
 
@@ -181,7 +189,11 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 	}
 	else if (type == NON_LINEAR) {
 		//return nonlinear(x);
-		return nonlinear(x, J, input_gain, feed_gain);
+		///double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
+			return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 5));//pa = 2-------------------------
+		//}
+		
+		// return nonlinear(x, J, input_gain, feed_gain);
 		//もしかすると　nonlinear(x, input_gain, feed_gain, pa, J);なのかも
 	}
 	assert(type != LINEAR && type != NON_LINEAR);  //?
