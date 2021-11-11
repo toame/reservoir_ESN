@@ -43,15 +43,15 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="script\graph.py">
-      <Filter>ソース ファイル\script</Filter>
-    </None>
     <None Include="script\hist_graph.py">
       <Filter>ソース ファイル\script</Filter>
     </None>
     <None Include="packages.config" />
     <None Include="santafe.dat">
       <Filter>ソース ファイル</Filter>
+    </None>
+    <None Include="graph.py">
+      <Filter>ソース ファイル\script</Filter>
     </None>
   </ItemGroup>
 </Project>
