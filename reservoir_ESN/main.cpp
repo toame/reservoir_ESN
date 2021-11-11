@@ -52,11 +52,11 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数 constが付くと変数は書き換えができなくなり、読み取り専用となります。
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 40 };
+	std::vector<int> unit_sizes = { 400 };
 
-	std::vector<std::string> task_names = { "laser"};
+	std::vector<std::string> task_names = { "narma"};
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 1 };
+	std::vector<int> param1 = { 5 };
 	std::vector<double> param2 = { 0};
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
