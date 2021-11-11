@@ -54,9 +54,9 @@ int main(void) {
 	const int wash_out = 500; 
 	std::vector<int> unit_sizes = { 50 };
 
-	std::vector<std::string> task_names = { "narma"};
+	std::vector<std::string> task_names = { "laser"};
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 5 };
+	std::vector<int> param1 = { 1 };
 	std::vector<double> param2 = { 0};
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
