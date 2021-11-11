@@ -29,7 +29,9 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 void reservoir_layer::generate_reservoir() {
 	 
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);//ランダム生成
-	std::uniform_int_distribution<> rand_0or1(-2, 2);//intだから0か1
+	//std::uniform_int_distribution<> rand_minus2toplus2(-2, 2);//intだから0か1
+	std::uniform_int_distribution<> rand_minus1orplus1(-2, 2);
+	//std::uniform_int_distribution<> rand_0or5(-2, 3);
 
 	std::vector<int> permutation(unit_size + 1);      //?？？？？？？？permutation 順列　置換    
 	std::iota(permutation.begin(), permutation.end(), 1); //?？？？？　https://kaworu.jpn.org/cpp/std::iota
@@ -51,7 +53,7 @@ void reservoir_layer::generate_reservoir() {
 
 	for (int n = 1; n <= unit_size; n++) {
 		// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
-		input_signal_strength[n] = input_signal_factor * (rand_0or1(mt) / 2.0);
+		input_signal_strength[n] = input_signal_factor * (double)(rand_minus1orplus1(mt) / 2.0);
 	}
 }
 
@@ -71,15 +73,24 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//std::vector<double> virtual_output_node(unit_size + 1, 0);
 
 
-	const double e = 2.718;// 281828459045;
+	const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
-	d = 95 / (double)unit_size;//分母 +1を消した  d = τ / N→現在τ（遅延時間）を1としているが論文では80としている場合もあった
+	d = 31.4 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
 	/*
-	τ = 2　input_gainとfeed_gain　/50した　ほかにも変えてみてerr_sum　　の値が100になるにはどうすればよいか考える　　　  err_sum = 3000付近　　→　来週の発表これをまとめたやつ見せるのは？？？
-	τ　＝21  input_gain feed_gainは0.8基準で0.1ずつ増加
-	τ = 25でerr 0.24
-	27で更新
 	τ = 95 err_ave  0.1345
+
+	11/11(木)
+	50.0でnarmaタスクのnmse0.020(ちなみにゲインは入力1.3付近　フィードは0.3付近にしている)
+	30で　　　　　　　　　 0.018
+	31.4                   0.01645(pa = 2, d_alpha = 0.05; alpha_min = 0.80 )
+
+	気づいたこと
+	　input_gainは1～1.3で言い性能がでやすそう
+	  feed_gainは0.3付近　
+	  paは低めのほうがよさそう(大体2の時性能がいい)
+	  
+
+
 	*/
 	ξ = log(1.0 + d);
 
@@ -125,9 +136,9 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 	std::ofstream outputfile("output_unit/" + name + ".txt");//output_unit 発見！
 	outputfile << "t,unit,input,output" << std::endl;
 
-	const double e = 2.718;// 281828459045;
+	const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 95 / (double)unit_size;//分母 +1を消した
+	d = 31.4 / (double)unit_size;//分母 +1を消した
 	ξ = log(1.0 + d);
 
 	std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -191,7 +202,7 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 	else if (type == NON_LINEAR) {
 		//return nonlinear(x);
 		///double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-			return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 2));//pa = 2-------------------------
+			return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 2.0));//pa = 2-------------------------
 		//}
 		
 		// return nonlinear(x, J, input_gain, feed_gain);

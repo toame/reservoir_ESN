@@ -96,7 +96,8 @@ int main(void) {
 			
 			if (task_name == "narma") {
 				d_bias = 0.4;
-				d_alpha = 0.05; alpha_min = 0.10;
+				//d_alpha = 0.05; alpha_min = 0.10; 現状これ
+				d_alpha = 0.05; alpha_min = 0.80;//τ = 30の時こっちのほうが良い性能だった
 				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
@@ -204,12 +205,14 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					//std::cout << "成功11" << "\n";
 
-					for (int ite_input = 1; ite_input <= 20; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
+					for (int ite_input = 1; ite_input <= 10; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
-						const double input_gain = 0.3 +  ite_input * 0.05;
-						for (int ite_feed = 1; ite_feed <= 20; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
+						const double input_gain = 1.0 +  ite_input * 0.1;
+						//const double input_gain = 0.2 + ite_input * 0.03;
+						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
-							const double feed_gain = 0.3 + ite_feed * 0.05;
+							const double feed_gain = 0.2 + ite_feed * 0.03;
+							//const double feed_gain = 1.0 + ite_feed * 0.1;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step; k++) {
