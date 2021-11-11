@@ -204,12 +204,12 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					//std::cout << "成功11" << "\n";
 
-					for (int ite_input = 1; ite_input <= 5; ite_input += 1) {//入力ゲイン
+					for (int ite_input = 1; ite_input <= 20; ite_input += 1) {//入力ゲイン
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
-						const double input_gain = 0.5 +  ite_input * 0.2;
-						for (int ite_feed = 1; ite_feed <= 5; ite_feed += 1) {
+						const double input_gain = 0.3 +  ite_input * 0.05;
+						for (int ite_feed = 1; ite_feed <= 20; ite_feed += 1) {
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
-							const double feed_gain = 0.5 + ite_feed * 0.2;
+							const double feed_gain = 0.3 + ite_feed * 0.05;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step; k++) {

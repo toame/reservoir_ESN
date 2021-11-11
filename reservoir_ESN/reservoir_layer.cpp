@@ -148,7 +148,8 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 		}
 		for (int n = 1; n <= unit_size; n++) {
 			if (t >= wash_out && t < wash_out + 200)
-				outputfile << t << "," << n << "," << input_sum_node[n] << "," << output_node[t + 1][n] << std::endl;
+				//outputfile << t << "," << n << "," << input_sum_node[n] << "," << output_node[t + 1][n] << std::endl;
+				outputfile << t << "," << n << "," << output_node[t][n] << std::endl;
 		}
 	}
 	outputfile.close();
