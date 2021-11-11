@@ -7,7 +7,7 @@ for name in os.listdir(folder):
     name = os.path.splitext(os.path.basename(name))[0]
     df = pd.read_csv(folder + name + '.txt', sep=',',comment='#')
     p_list = df["p"].unique()
-    function_names = ["sinc", "tanh", "gauss", "oddsinc"]
+    function_names = ["makkey"]
     for function_name in function_names:
         data_x, data_y = [], []
         for p in p_list:
