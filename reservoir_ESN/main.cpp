@@ -15,8 +15,8 @@
 #define TEST (2)
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
-double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-	return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 5));//pa = 2-------------------------
+double mackey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
+	return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 2));//pa = 2-------------------------
 }
 
 
@@ -48,7 +48,7 @@ std::string to_string_with_precision(const T a_value, const int n = 6)//
 }
 typedef void (*FUNC)();
 int main(void) {
-	std::cout << "成功１" << "\n";
+	//std::cout << "成功１" << "\n";
 	const int TRIAL_NUM = 3;	// ループ回数 constが付くと変数は書き換えができなくなり、読み取り専用となります。
 	const int step = 3000;
 	const int wash_out = 500; 
@@ -69,29 +69,29 @@ int main(void) {
 	const int sigma_step = 11;
 	std::string task_name;
 	std::string function_name;
-	std::cout << "成功２" << "\n";
-	std::cout << "成功３" << "\n";
+	//std::cout << "成功２" << "\n";
+	//std::cout << "成功３" << "\n";
 	std::vector<std::vector<std::vector<std::vector<double>>>> output_node(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(PHASE_NUM, std::vector<std::vector<double>>(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0))));
-	std::cout << "成功4" << "\n";
+	//std::cout << "成功4" << "\n";
 	std::vector<reservoir_layer> reservoir_layer_v(alpha_step * sigma_step);
 	std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
 	std::vector<std::vector<std::vector<double>>> w(alpha_step * sigma_step, std::vector<std::vector<double>>(10)); // 各リザーバーの出力重み
 	std::vector<std::vector<double>> nmse(alpha_step * sigma_step, std::vector<double>(10));	// 各リザーバーのnmseを格納
-	std::cout << "成功5" << "\n";
+	//std::cout << "成功5" << "\n";
 	for (int r = 0; r < unit_sizes.size(); r++) {
-		std::cout << "成功6" << "\n";
+		//std::cout << "成功6" << "\n";
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
-		std::cout << "成功7" << "\n";
+		//std::cout << "成功7" << "\n";
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);//この２つそれぞれが3種類の配列を持ってるということ？
 
-		std::vector<std::string> function_names = {"makkey"};//適宜他の
+		std::vector<std::string> function_names = {"mackey"};//適宜他の
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
 		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 		// 入力信号 教師信号の生成
-		std::cout << "成功8" << "\n";
+		//std::cout << "成功8" << "\n";
 		for (int phase = 0; phase < PHASE_NUM; phase++) {//論文　手順１
 			
 			if (task_name == "narma") {
@@ -101,7 +101,7 @@ int main(void) {
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
-				std::cout << "成功9" << "\n";
+				//std::cout << "成功9" << "\n";
 			}
 			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
 			else if (task_name == "narma2") {
@@ -120,14 +120,14 @@ int main(void) {
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "laser") {
-				std::cout << "成功10" << "\n";
+				//std::cout << "成功10" << "\n";
 				d_bias = 0.5;
 				d_alpha = 0.4; alpha_min = 0.1;
 				d_sigma = 0.1; sigma_min = 0.1;
 				const int fstep = param1[r];
-				std::cout << "成功11" << "\n";
+				//std::cout << "成功11" << "\n";
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
-				std::cout << "成功12" << "\n";
+				//std::cout << "成功12" << "\n";
 			}
 			else if (task_name == "approx") {
 				const int tau = param1[r];
@@ -164,7 +164,7 @@ int main(void) {
 				generate_legendre_task(input_signal[phase], teacher_signal[phase], nu, tau, step);
 			}
 		}
-		std::cout << "成功10" << "\n";
+		//std::cout << "成功10" << "\n";
 		// 設定出力
 		outputfile << "### task_name: " << task_name << std::endl;
 		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;
@@ -177,7 +177,7 @@ int main(void) {
 		for (auto function_name : function_names) {
 			//double (*nonlinear)(double);//変更
 			double (*nonlinear)(double, double, double, double);
-			if (function_name == "makkey") nonlinear = makkey;
+			if (function_name == "mackey") nonlinear = mackey;
 			//else if (function_name == "tanh") nonlinear = tanh;
 			//else if (function_name == "gauss") nonlinear = gauss;
 			//else if (function_name == "oddsinc") nonlinear = oddsinc;
@@ -188,7 +188,7 @@ int main(void) {
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 5; ite_p <= 10; ite_p += 5) {//論文　手順２
+				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  ここでは基準を作っている。 l233あたりで書き換えのコードがある。
 					double opt_input_signal_factor = 0;
@@ -284,20 +284,20 @@ int main(void) {
 								}
 
 							}
-							std::cout << "成功18" << "\n";
+							//std::cout << "成功18" << "\n";
 						}
-						std::cout << "成功19" << "\n";
+						//std::cout << "成功19" << "\n";
 					}
-					std::cout << "成功20" << "\n";
+					//std::cout << "成功20" << "\n";
 
 					/*** TEST phase ***/  //論文　手順7
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
 
 					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));// △　+2とか MAX_NODE_SIZEとか
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
-					std::cout << "成功21" << "\n";
+					//std::cout << "成功21" << "\n";
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);//l241と引数の数違うけど...
-					std::cout << "成功22" << "\n";
+					//std::cout << "成功22" << "\n";
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
