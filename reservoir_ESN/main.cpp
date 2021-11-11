@@ -204,10 +204,10 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					//std::cout << "成功11" << "\n";
 
-					for (int ite_input = 1; ite_input <= 20; ite_input += 1) {//入力ゲイン
+					for (int ite_input = 1; ite_input <= 20; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						const double input_gain = 0.3 +  ite_input * 0.05;
-						for (int ite_feed = 1; ite_feed <= 20; ite_feed += 1) {
+						for (int ite_feed = 1; ite_feed <= 20; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 							const double feed_gain = 0.3 + ite_feed * 0.05;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
@@ -222,7 +222,7 @@ int main(void) {
 								
 								reservoir_layer1.generate_reservoir();
 								//std::cout << "成功13" << "\n";
-								reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　　　TRAINつまり0のものを引数にしている　？？？→l66でoutput_nodeを4次元の配列？を定義　　北村さんに確認（この行のoutput_nodeとreservoir_layerのoutput_nodeの引数。前者はパラメータと3つのうちのどれかを指す値。後者は時間と何番目かの値）
+								reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　　　TRAINつまり0のものを引数にしている　？？？→l66でoutput_nodeを4次元の配列？を定義　　北村さんに確認（この行のoutput_nodeとreservoir_layerのoutput_nodeの引数。前者は
 								//std::cout << "成功14" << "\n";
 								reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);//??論文　手順５　　一つ上のupdateを上書きするということではない？
 								is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
@@ -279,7 +279,7 @@ int main(void) {
 										opt_w = w[k][lm];
 										opt_reservoir_layer = reservoir_layer_v[k];
 										train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
-										std::cerr << train_nmse << " " << opt_input_signal_factor << " " << opt_feed_gain << " " << opt_input_gain << std::endl;
+										//std::cerr << train_nmse << " " << opt_input_signal_factor << " " << opt_feed_gain << " " << opt_input_gain << std::endl;
 									}
 								}
 
