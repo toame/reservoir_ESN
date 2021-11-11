@@ -87,7 +87,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt);
-	std::ofstream outputfile("output_unit/" + name + ".txt");
+	std::ofstream outputfile("output_unit2/" + name + ".txt");
 	outputfile << "t,unit,input,output" << std::endl;
 	std::vector<double> input_sum_node(unit_size + 1, 0);
 	for (int t = 0; t <= t_size; t++) {

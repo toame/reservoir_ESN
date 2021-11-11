@@ -72,7 +72,7 @@ int main(void) {
 		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
 		double d_bias;
-		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
+		std::ofstream outputfile("output_data2/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 		// 入力信号 教師信号の生成
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
 			if (task_name == "narma") {
