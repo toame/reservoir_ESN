@@ -52,7 +52,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数 constが付くと変数は書き換えができなくなり、読み取り専用となります。
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 50 };
+	std::vector<int> unit_sizes = { 40 };
 
 	std::vector<std::string> task_names = { "laser"};
 	if (unit_sizes.size() != task_names.size()) return 0;
@@ -183,7 +183,7 @@ int main(void) {
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 7; ite_p <= 10; ite_p += 1) {//論文　手順２
+				for (int ite_p = 9; ite_p <= 9; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  ここでは基準を作っている。 l233あたりで書き換えのコードがある。
 					double opt_input_signal_factor = 0;
@@ -201,11 +201,11 @@ int main(void) {
 
 					for (int ite_input = 1; ite_input <= 10; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
-						const double input_gain = 1.0 +  ite_input * 0.1;
+						const double input_gain = 1.2 +  ite_input * 0.04;
 						//const double input_gain = 0.2 + ite_input * 0.03;
 						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
-							const double feed_gain = 0.2 + ite_feed * 0.05;
+							const double feed_gain = 0.65 + ite_feed * 0.01;
 							//const double feed_gain = 1.0 + ite_feed * 0.1;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理

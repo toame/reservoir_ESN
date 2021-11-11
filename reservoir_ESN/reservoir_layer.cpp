@@ -30,7 +30,7 @@ void reservoir_layer::generate_reservoir() {
 	 
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);//ランダム生成
 	//std::uniform_int_distribution<> rand_minus2toplus2(-2, 2);//intだから0か1
-	std::uniform_int_distribution<> rand_minus1orplus1(-2, 2);
+	std::uniform_int_distribution<> rand_minus1orplus1(-10, 10);
 	//std::uniform_int_distribution<> rand_0or5(-2, 3);
 
 	std::vector<int> permutation(unit_size + 1);      //?？？？？？？？permutation 順列　置換    
