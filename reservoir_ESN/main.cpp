@@ -52,18 +52,12 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数 constが付くと変数は書き換えができなくなり、読み取り専用となります。
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = {
-									100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
-									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200 };
+	std::vector<int> unit_sizes = { 50 };
 
-	std::vector<std::string> task_names = {
-												 "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon",  "henon",
-												 "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon", "henon"};
+	std::vector<std::string> task_names = { "narma"};
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = {  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10,    5, 7,
-									  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10,     5, 7, };
-	std::vector<double> param2 = {   0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,     0, 0,
-									  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,    0, 0, };
+	std::vector<int> param1 = { 5 };
+	std::vector<double> param2 = { 0};
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -189,7 +183,7 @@ int main(void) {
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
+				for (int ite_p = 7; ite_p <= 10; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  ここでは基準を作っている。 l233あたりで書き換えのコードがある。
 					double opt_input_signal_factor = 0;
@@ -211,7 +205,7 @@ int main(void) {
 						//const double input_gain = 0.2 + ite_input * 0.03;
 						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
-							const double feed_gain = 0.2 + ite_feed * 0.03;
+							const double feed_gain = 0.2 + ite_feed * 0.05;
 							//const double feed_gain = 1.0 + ite_feed * 0.1;
 #pragma omp parallel for num_threads(32)//ここも変えないとダメ
 						// 複数のリザーバーの時間発展をまとめて処理
