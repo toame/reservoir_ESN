@@ -20,9 +20,13 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	this->feed_gain = feed_gain;
 
 
-	//std::vector<std::vector<double>> J; //Jをリサイズしないとダメかも　
+
+	//std::vector<std::vector<double>> J; //Jをリサイズしないと
 	J.resize(t_size + 1, std::vector<double>(unit_size + 1));
 	//double pa = 2.0;//曖昧　ここで設定
+	a.resize(6);
+	b.resize(2);
+
 }
 
 // 結合トポロジーや結合重みなどを設定する  この後マスク信号作るかも｛２値or6値のランダム信号｝→今回は5値ランダム信号
@@ -32,6 +36,8 @@ void reservoir_layer::generate_reservoir() {
 	//std::uniform_int_distribution<> rand_minus2toplus2(-2, 2);//intだから0か1
 	std::uniform_int_distribution<> rand_minus1orplus1(-10, 10);
 	//std::uniform_int_distribution<> rand_0or5(-2, 3);
+	a = { -1.0, -0.6, -0.2, 0.2, 0.6, 1.0 };
+	b = {0,1};
 
 	std::vector<int> permutation(unit_size + 1);      //?？？？？？？？permutation 順列　置換    
 	std::iota(permutation.begin(), permutation.end(), 1); //?？？？？　https://kaworu.jpn.org/cpp/std::iota
@@ -50,10 +56,20 @@ void reservoir_layer::generate_reservoir() {
 		else
 			node_type[n] = LINEAR;
 	}
+	/*for (int n = 1; n <= unit_size; n++) {
+
+		if (b[rand() % b.size()] == 1) {
+			node_type[n] = NON_LINEAR;
+		}
+		else
+			node_type[n] = LINEAR;
+	}*/
+
 
 	for (int n = 1; n <= unit_size; n++) {
 		// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
 		input_signal_strength[n] = input_signal_factor * (double)(rand_minus1orplus1(mt) / 2.0);
+		//input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
 	}
 }
 
@@ -68,14 +84,15 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	std::mt19937 mt2; // メルセンヌ・ツイスタの32ビット版
 	mt2.seed(seed);  
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
-	output_node[0][0] = 1.0;//変更する要素
+	output_node[0][0] = 0.5;//変更する要素
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
+
 	//std::vector<double> virtual_output_node(unit_size + 1, 0);
 
 
 	const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
-	d = 31.4 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
+	d = 30.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
 	/*
 	τ = 95 err_ave  0.1345
 
@@ -96,11 +113,18 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
 
+	
 	for (int t = 1; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {
 			J[t][n] = input_signal[t - 1] * input_signal_strength[n];//例外発生
 			//if (n <= 10) std::cerr << t << " " << n << " " << J[t][n] << " " << input_signal[t - 1] << " " << input_signal_strength[n] << std::endl;
 		}
+	}
+	for (int n = 1; n <= unit_size; n++) {
+		J[0][n] = input_signal_strength[n];
+		output_node[0][n] = activation_function(output_node[0][n], node_type[n], J[0][n]);
+		output_node[0][n] *= (1 - pow(e, -ξ));
+		output_node[0][n] += pow(e, -ξ) * (output_node[0][n - 1]);
 	}
 
 	/*for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
@@ -138,15 +162,22 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 31.4 / (double)unit_size;//分母 +1を消した
+	d = 30.0 / (double)unit_size;//分母 +1を消した
 	ξ = log(1.0 + d);
 
-	std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
+	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
 
 	for (int t = 1; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {
 			J[t][n] = input_signal[t - 1] * input_signal_strength[n];
 		}
+	}
+
+	for (int n = 1; n <= unit_size; n++) {
+		J[0][n] = input_signal_strength[n];
+		output_node[0][n] = activation_function(output_node[0][n], node_type[n], J[0][n]);
+		output_node[0][n] *= (1 - pow(e, -ξ));
+		output_node[0][n] += pow(e, -ξ) * (output_node[0][n - 1]);
 	}
 
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
@@ -190,7 +221,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	//std::cout << err_ave << "\n";
 	//std::cerr << err_sum << std::endl;
 	//std::cerr << input_signal_factor << " " << input_gain << " " << feed_gain << std::endl;
-	return err_ave <= 0.2;//△△△
+	return err_ave <= 0.1;//△△△
 }
 
 
@@ -202,7 +233,7 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 	else if (type == NON_LINEAR) {
 		//return nonlinear(x);
 		///double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-			return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 2.0));//pa = 2-------------------------
+			return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 2.0));//ρ = 2-------------------------
 		//}
 		
 		// return nonlinear(x, J, input_gain, feed_gain);

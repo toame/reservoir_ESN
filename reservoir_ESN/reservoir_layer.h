@@ -36,7 +36,9 @@ public:
 
 	std::vector<std::vector<double>> J;
 	//double pa;
-	
+
+	std::vector<double> a;
+	std::vector<int> b;
 
 
 	reservoir_layer();
