@@ -68,8 +68,8 @@ void reservoir_layer::generate_reservoir() {
 
 	for (int n = 1; n <= unit_size; n++) {
 		// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
-		input_signal_strength[n] = input_signal_factor * (double)(rand_minus1orplus1(mt) / 2.0);
-		//input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
+		//input_signal_strength[n] = input_signal_factor * (double)(rand_minus1orplus1(mt) / 2.0);
+		input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
 	}
 }
 
@@ -92,7 +92,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 
 	const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
-	d = 30.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
+	d = 20.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
 	/*
 	τ = 95 err_ave  0.1345
 
@@ -162,7 +162,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 30.0 / (double)unit_size;//分母 +1を消した
+	d = 20.0 / (double)unit_size;//分母 +1を消した
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
