@@ -48,22 +48,22 @@ void reservoir_layer::generate_reservoir() {
 	
  
 
-	/*//各ノードが線形か非線形かを決定
+	//各ノードが線形か非線形かを決定
 	for (int n = 1; n <= unit_size; n++) {
 		if (permutation[n] <= unit_size * p) {  
 			node_type[n] = NON_LINEAR;
 		}
 		else
 			node_type[n] = LINEAR;
-	}*/
-	for (int n = 1; n <= unit_size; n++) {
+	}
+	/*for (int n = 1; n <= unit_size; n++) {
 
 		if (b[rand() % b.size()] == 1) {
 			node_type[n] = NON_LINEAR;
 		}
 		else
 			node_type[n] = LINEAR;
-	}
+	}*/
 
 
 	for (int n = 1; n <= unit_size; n++) {
@@ -92,7 +92,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 
 	const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
-	d = 40.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
+	d = 10.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
 	/*
 	τ = 95 err_ave  0.1345
 
@@ -162,7 +162,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 40.0 / (double)unit_size;//分母 +1を消した
+	d = 12.0 / (double)unit_size;//分母 +1を消した
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
