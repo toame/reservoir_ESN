@@ -233,7 +233,9 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 	else if (type == NON_LINEAR) {
 		//return nonlinear(x);
 		///double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-			return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 2.0));//ƒÏ = 2-------------------------
+			//return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 2.0));//ƒÏ = 2-------------------------
+			//return feed_gain * sin(x + input_gain * J) * sin(x + input_gain * J);
+		return   feed_gain * pow(sin(x + input_gain * J), 2.0);
 		//}
 		
 		// return nonlinear(x, J, input_gain, feed_gain);
