@@ -107,7 +107,7 @@ int main(void) {
 				const int fstep = param1[r];
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
-			else if (task_name == "laser") {
+			else if (task_name == "laser") {//Àƒf[ƒ^‚É‹ß‚¢
 				//std::cout << "¬Œ÷10" << "\n";
 				d_bias = 0.5;
 				d_alpha = 0.4; alpha_min = 0.1;
