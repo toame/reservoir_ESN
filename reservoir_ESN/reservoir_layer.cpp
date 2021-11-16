@@ -29,15 +29,15 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 
 }
 
-// 結合トポロジーや結合重みなどを設定する  この後マスク信号作るかも｛２値or6値のランダム信号｝→今回は5値ランダム信号
+// 結合トポロジーや結合重みなどを設定する  この後マスク信号作るかも｛２値or6値のランダム信号｝
 void reservoir_layer::generate_reservoir() {
 	 
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);//ランダム生成
 	//std::uniform_int_distribution<> rand_minus2toplus2(-2, 2);//intだから0か1
-	std::uniform_int_distribution<> rand_minus1orplus1(-10, 10);
+	//std::uniform_int_distribution<> rand_minus1orplus1(-10, 10);
 	//std::uniform_int_distribution<> rand_0or5(-2, 3);
 	a = { -1.0, -0.6, -0.2, 0.2, 0.6, 1.0 };
-	b = {0,1};
+	//b = {0,1};
 
 	std::vector<int> permutation(unit_size + 1);      //?？？？？？？？permutation 順列　置換    
 	std::iota(permutation.begin(), permutation.end(), 1); //?？？？？　https://kaworu.jpn.org/cpp/std::iota
@@ -233,7 +233,7 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 	else if (type == NON_LINEAR) {
 		//return nonlinear(x);
 		///double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-			return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, 2.0));//ρ = 2-------------------------
+			return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 2.0));//ρ = 2-------------------------
 		//}
 		
 		// return nonlinear(x, J, input_gain, feed_gain);
