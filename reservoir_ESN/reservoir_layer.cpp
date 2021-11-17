@@ -25,7 +25,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	J.resize(t_size + 1, std::vector<double>(unit_size + 1));
 	//double pa = 2.0;//曖昧　ここで設定
 	a.resize(6);
-	//b.resize(2);
+	b.resize(2);
 
 
 }
@@ -38,7 +38,7 @@ void reservoir_layer::generate_reservoir() {
 	//std::uniform_int_distribution<> rand_minus1orplus1(-10, 10);
 	//std::uniform_int_distribution<> rand_0or5(-2, 3);
 	a = { -1.0, -0.6, -0.2, 0.2, 0.6, 1.0 };
-	//b = {0,1};
+	b = {-1.0,1.0};
 
 	std::vector<int> permutation(unit_size + 1);      //?？？？？？？？permutation 順列　置換    
 	std::iota(permutation.begin(), permutation.end(), 1); //?？？？？　https://kaworu.jpn.org/cpp/std::iota
@@ -68,7 +68,8 @@ void reservoir_layer::generate_reservoir() {
 	// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
 	for (int n = 1; n <= unit_size; n++) {
 		//input_signal_strength[n] = input_signal_factor * (double)(rand_minus1orplus1(mt) / 2.0);
-		input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
+		//input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
+		input_signal_strength[n] = input_signal_factor * b[rand() % b.size()];///////////////////////////変更要素//////////////////////
 	}
 }
 
@@ -84,18 +85,18 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	mt2.seed(seed);  
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	double exp(double x);
-	output_node[0][0] = 1;//変更する要素
-	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
+	output_node[0][0] = 1.0;//変更する要素
+	for (int n = 1; n <= unit_size; n++) output_node[0][n] = (double)rand_minus1toplus1(mt2);
 
 	//std::vector<double> virtual_output_node(unit_size + 1, 0);
 
 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
-
 	//τ = (double) unit_size * 0.2;
-	d = 9.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...
+	d = 9.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
+
 
 	/*
 	τ = 95 err_ave  0.1345
@@ -121,23 +122,24 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			//if (n <= 10) std::cerr << t << " " << n << " " << J[t][n] << " " << input_signal[t - 1] << " " << input_signal_strength[n] << std::endl;
 		}
 	}
-	for (int n = 1; n <= unit_size; n++) {
+	/*for (int n = 1; n <= unit_size; n++) {
 		J[0][n] = input_signal_strength[n];
 		output_node[0][n] = activation_function(output_node[0][n], node_type[n], J[0][n]);
 		//output_node[0][n] *= (1.0 - pow(e, -ξ));
 		output_node[0][n] *= (1.0 - exp(-ξ));
 		output_node[0][n] += exp(-ξ) * (output_node[0][n - 1]);
-	}
+	}*/
 
 	/*for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
-			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
+			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);
 			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			output_node[t][n] *= (1 - pow(e, -ξ));
 			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
 		}
 	}*/
+
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -145,7 +147,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
 			//output_node[t][n] *= (1.0 - pow(e, -ξ));
-			output_node[t][n] *= (1.0 - pow(e, -ξ));
+			output_node[t][n] *= (1.0 - exp(-ξ));
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
 			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
@@ -159,14 +161,15 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 void reservoir_layer::reservoir_update_show(const std::vector<double> input_signal, std::vector<std::vector<double>> output_node, const int t_size, const int wash_out, const std::string name) {
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;//変更する要素
-	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt);
+	for (int n = 1; n <= unit_size; n++) output_node[0][n] = (double)rand_minus1toplus1(mt);
 
 	std::ofstream outputfile("output_unit/" + name + ".txt");//output_unit 発見！
-	outputfile << "t,unit,input,output" << std::endl;
+	//outputfile << "t,unit,input,output" << std::endl;
+	outputfile << "t,unit,output" << std::endl;
 
-	const double e = 2.7182818;// 281828459045;
+	//const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 12.0 / (double)unit_size;//分母 +1を消した
+	d = 9.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////////////////変更要素//////////////////
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -177,20 +180,23 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 		}
 	}
 
+	/*
 	for (int n = 1; n <= unit_size; n++) {
 		J[0][n] = input_signal_strength[n];
 		output_node[0][n] = activation_function(output_node[0][n], node_type[n], J[0][n]);
 		output_node[0][n] *= (1.0 - pow(e, -ξ));
 		output_node[0][n] += pow(e, -ξ) * (output_node[0][n - 1]);
-	}
+	}*/
 
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
 			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
-			output_node[t][n] *= (1.0 - pow(e, -ξ));
-			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] *= (1.0 - pow(e, -ξ));
+			output_node[t][n] *= (1.0 - exp(-ξ));
+			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
+			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
 		}
 		for (int n = 1; n <= unit_size; n++) {
 			if (t >= wash_out && t < wash_out + 200)

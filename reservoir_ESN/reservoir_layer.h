@@ -38,7 +38,7 @@ public:
 	//double pa;
 
 	std::vector<double> a;
-	std::vector<int> b;
+	std::vector<double> b;
 
 
 
