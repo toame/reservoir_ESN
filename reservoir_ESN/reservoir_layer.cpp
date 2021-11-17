@@ -18,17 +18,16 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	mt.seed(seed);
 	this->input_gain = input_gain;
 	this->feed_gain = feed_gain;
-
-
-
-	//std::vector<std::vector<double>> J; //Jをリサイズしないと
+	//std::vector<std::vector<double>> J; 
 	J.resize(t_size + 1, std::vector<double>(unit_size + 1));
-	//double pa = 2.0;//曖昧　ここで設定
+	//double ρ = 2.0;//曖昧　ここで設定
 	a.resize(6);
 	b.resize(2);
-
-
 }
+
+
+
+
 
 // 結合トポロジーや結合重みなどを設定する.  ｛２値or6値のランダム信号作る｝
 void reservoir_layer::generate_reservoir() {
@@ -250,7 +249,7 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 		//}
 		
 		// return nonlinear(x, J, input_gain, feed_gain);
-		//もしかすると　nonlinear(x, input_gain, feed_gain, pa, J);なのかも
+		//　nonlinear(x, input_gain, feed_gain, pa, J);なのかも
 	}
 	assert(type != LINEAR && type != NON_LINEAR);  //?
 	return -1.0;

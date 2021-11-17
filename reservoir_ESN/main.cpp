@@ -10,7 +10,7 @@
 #include "output_learning.h"
 #include "task.h"
 #define PHASE_NUM (3)
-#define TRAIN (0)//聞いた　　ただ0～2を文字で分かりやすくしただけ
+#define TRAIN (0)//　ただ0～2を文字で分かりやすくしただけ
 #define VAL (1)
 #define TEST (2)
 #define MAX_NODE_SIZE (500)
@@ -24,13 +24,6 @@ double ikeda50(const double x, double J, double input_gain, double feed_gain) {
 
 
 //double Mackey_Grass(std::vector<std::vector<double>>& output_node, double input_gain, double feed_gain, double pa, std::vector<std::vector<double>>& J) {
-
-//}
-//↑l 155の部分変える必要あるか？？　もしくはこうしなくてもできるか？？ 下で値を決めたinput_gain, feed_gainやreservoir_layer.hで定義したpa,Jを引数にするには
-
-/*double m(const double x) {
-	return (feed_gain * (x + input_gain * J)) / (1 + pow(x + input_gain * J, pa));
-}*/
 
 /*double sinc(const double x) {
 	if (x == 0) return 1.0;
@@ -111,14 +104,11 @@ int main(void) {
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "laser") {//実データに近い
-				//std::cout << "成功10" << "\n";
 				d_bias = 0.5;
 				d_alpha = 0.4; alpha_min = 0.1;
 				d_sigma = 0.1; sigma_min = 0.1;
 				const int fstep = param1[r];
-				//std::cout << "成功11" << "\n";
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
-				//std::cout << "成功12" << "\n";
 			}
 			else if (task_name == "approx") {
 				const int tau = param1[r];
@@ -155,7 +145,7 @@ int main(void) {
 				generate_legendre_task(input_signal[phase], teacher_signal[phase], nu, tau, step);
 			}
 		}
-		//std::cout << "成功10" << "\n";
+
 		// 設定出力
 		outputfile << "### task_name: " << task_name << std::endl;
 		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;
@@ -182,7 +172,7 @@ int main(void) {
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
 				for (int ite_p = 0; ite_p <= 9; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
-					double opt_nmse = 1e+10;//opt 最適な値  ここでは基準を作っている。 l233あたりで書き換えのコードがある。
+					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
 					//double opt_bias_factor = 0;
 					//double opt_weight_factor = 0;
@@ -194,7 +184,6 @@ int main(void) {
 					reservoir_layer opt_reservoir_layer;
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
-					//std::cout << "成功11" << "\n";
 
 					for (int ite_input = 1; ite_input <= 5; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
@@ -207,21 +196,19 @@ int main(void) {
 							//const double feed_gain = 0.75 + ite_feed * 0.05;
 							const double feed_gain = 0.89 + ite_feed * 0.002;
 							//const double feed_gain = 0.1 + ite_feed * 0.2;
-#pragma omp parallel for num_threads(32)//ここも変えないとダメ
+#pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step; k++) {
 								//std::cout << "成功12" << "\n";
-								const double input_signal_factor = k * d_alpha + alpha_min;//なぜこの計算なのか？
+								const double input_signal_factor = k * d_alpha + alpha_min;
 								//const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
 								//reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);
 								reservoir_layer reservoir_layer1(unit_size, input_signal_factor, input_gain, feed_gain, p, nonlinear, loop, wash_out, step);
 								
 								reservoir_layer1.generate_reservoir();
-								//std::cout << "成功13" << "\n";
-								reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　　　TRAINつまり0のものを引数にしている　？？？→l66でoutput_nodeを4次元の配列？を定義　　北村さんに確認（この行のoutput_nodeとreservoir_layerのoutput_nodeの引数。前者は
-								//std::cout << "成功14" << "\n";
-								reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);//??論文　手順５　　一つ上のupdateを上書きするということではない？
+								reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　　
+								reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);//??論文　手順５　
 								is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 								reservoir_layer_v[k] = reservoir_layer1;//??
 							}
@@ -234,12 +221,8 @@ int main(void) {
 #pragma omp parallel for  private(lm) num_threads(32)//??
 							// 重みの学習を行う
 							for (int k = 0; k < alpha_step; k++) {
-								//std::cout << "成功15" << "\n";
-								//if (!is_echo_state_property[k]) continue;     //　https://www.comp.sd.tmu.ac.jp/spacelab/c_lec2/node61.html
-								//std::cout << "成功16" << "\n";
-
+								if (!is_echo_state_property[k]) continue;     //　https://www.comp.sd.tmu.ac.jp/spacelab/c_lec2/node61.html
 								output_learning[k].generate_simultaneous_linear_equationsA(output_node[k][TRAIN], wash_out, step, unit_size);
-								//std::cout << "成功17" << "\n";
 								output_learning[k].generate_simultaneous_linear_equationsb(output_node[k][TRAIN], teacher_signal[TRAIN], wash_out, step, unit_size);
 
 								double opt_lm = 0;
@@ -262,7 +245,7 @@ int main(void) {
 
 							// 検証データでもっとも性能の良いリザーバーを選択
 							for (int k = 0; k < alpha_step; k++) {//論文　手順６
-								//if (!is_echo_state_property[k]) continue;
+								if (!is_echo_state_property[k]) continue;
 								for (int lm = 0; lm < 10; lm++) {
 									if (nmse[k][lm] < opt_nmse) {
 										opt_nmse = nmse[k][lm];
@@ -281,20 +264,15 @@ int main(void) {
 								}
 
 							}
-							//std::cout << "成功18" << "\n";
 						}
-						//std::cout << "成功19" << "\n";
 					}
-					//std::cout << "成功20" << "\n";
 
 					/*** TEST phase ***/  //論文　手順7
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
 
 					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));// △　+2とか MAX_NODE_SIZEとか
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
-					//std::cout << "成功21" << "\n";
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);//l241と引数の数違うけど...
-					//std::cout << "成功22" << "\n";
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
