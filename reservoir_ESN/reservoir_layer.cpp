@@ -25,7 +25,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	J.resize(t_size + 1, std::vector<double>(unit_size + 1));
 	//double pa = 2.0;//曖昧　ここで設定
 	a.resize(6);
-	b.resize(2);
+	//b.resize(2);
 
 
 }
@@ -33,7 +33,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 // 結合トポロジーや結合重みなどを設定する  この後マスク信号作るかも｛２値or6値のランダム信号｝
 void reservoir_layer::generate_reservoir() {
 	 
-	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);//ランダム生成
+	//std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);//ランダム生成
 	//std::uniform_int_distribution<> rand_minus2toplus2(-2, 2);//intだから0か1
 	//std::uniform_int_distribution<> rand_minus1orplus1(-10, 10);
 	//std::uniform_int_distribution<> rand_0or5(-2, 3);
@@ -47,7 +47,6 @@ void reservoir_layer::generate_reservoir() {
 		std::shuffle(permutation.begin(), permutation.end(), mt); //?https://cpprefjp.github.io/reference/algorithm/shuffle.html
 	}
 	
- 
 
 	//各ノードが線形か非線形かを決定
 	for (int n = 1; n <= unit_size; n++) {
@@ -66,9 +65,8 @@ void reservoir_layer::generate_reservoir() {
 			node_type[n] = LINEAR;
 	}*/
 
-
+	// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
 	for (int n = 1; n <= unit_size; n++) {
-		// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
 		//input_signal_strength[n] = input_signal_factor * (double)(rand_minus1orplus1(mt) / 2.0);
 		input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
 	}
@@ -86,15 +84,19 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	mt2.seed(seed);  
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	double exp(double x);
-	output_node[0][0] = 0.5;//変更する要素
+	output_node[0][0] = 1;//変更する要素
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
 
 	//std::vector<double> virtual_output_node(unit_size + 1, 0);
 
 
-	const double e = 2.7182818;// 2.718281828459045;
+	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
-	d = 9.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
+
+	//τ = (double) unit_size * 0.2;
+	d = 9.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...
+	ξ = log(1.0 + d);
+
 	/*
 	τ = 95 err_ave  0.1345
 
@@ -107,11 +109,8 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	　input_gainは1～1.3で言い性能がでやすそう
 	  feed_gainは0.3付近　
 	  paは低めのほうがよさそう(大体2の時性能がいい)
-	  
-
-
 	*/
-	ξ = log(1.0 + d);
+
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
 
