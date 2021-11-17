@@ -41,6 +41,7 @@ public:
 	std::vector<int> b;
 
 
+
 	reservoir_layer();
 	//reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double bias_factor, const double p,
 		//double (*nonlinear)(double), const unsigned int seed, const int wash_out);

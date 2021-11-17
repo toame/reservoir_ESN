@@ -27,6 +27,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	a.resize(6);
 	b.resize(2);
 
+
 }
 
 // 結合トポロジーや結合重みなどを設定する  この後マスク信号作るかも｛２値or6値のランダム信号｝
@@ -84,6 +85,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	std::mt19937 mt2; // メルセンヌ・ツイスタの32ビット版
 	mt2.seed(seed);  
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
+	double exp(double x);
 	output_node[0][0] = 0.5;//変更する要素
 	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
 
@@ -123,8 +125,9 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	for (int n = 1; n <= unit_size; n++) {
 		J[0][n] = input_signal_strength[n];
 		output_node[0][n] = activation_function(output_node[0][n], node_type[n], J[0][n]);
-		output_node[0][n] *= (1.0 - pow(e, -ξ));
-		output_node[0][n] += pow(e, -ξ) * (output_node[0][n - 1]);
+		//output_node[0][n] *= (1.0 - pow(e, -ξ));
+		output_node[0][n] *= (1.0 - exp(-ξ));
+		output_node[0][n] += exp(-ξ) * (output_node[0][n - 1]);
 	}
 
 	/*for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
@@ -142,9 +145,11 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
+			//output_node[t][n] *= (1.0 - pow(e, -ξ));
 			output_node[t][n] *= (1.0 - pow(e, -ξ));
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
-			output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
+			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 		}
 	}
