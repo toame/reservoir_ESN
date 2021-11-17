@@ -30,7 +30,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 
 }
 
-// 結合トポロジーや結合重みなどを設定する  この後マスク信号作るかも｛２値or6値のランダム信号｝
+// 結合トポロジーや結合重みなどを設定する.  ｛２値or6値のランダム信号作る｝
 void reservoir_layer::generate_reservoir() {
 	 
 	//std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);//ランダム生成
@@ -68,8 +68,8 @@ void reservoir_layer::generate_reservoir() {
 	// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
 	for (int n = 1; n <= unit_size; n++) {
 		//input_signal_strength[n] = input_signal_factor * (double)(rand_minus1orplus1(mt) / 2.0);
-		//input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
-		input_signal_strength[n] = input_signal_factor * b[rand() % b.size()];///////////////////////////変更要素//////////////////////
+		input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
+		//input_signal_strength[n] = input_signal_factor * b[rand() % b.size()];///////////////////////////変更要素//////////////////////
 	}
 }
 
@@ -94,7 +94,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
 	//τ = (double) unit_size * 0.2;
-	d = 9.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
+	d = 12.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
 
 
