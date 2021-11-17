@@ -92,7 +92,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 
 	const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
-	d = 12.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
+	d = 9.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合もあった
 	/*
 	τ = 95 err_ave  0.1345
 
