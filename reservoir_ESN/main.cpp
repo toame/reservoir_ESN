@@ -31,6 +31,10 @@ double sinc(const double x, double J, double input_gain, double feed_gain) {
 	return feed_gain * (sin(PI * (x + input_gain * J)) / (PI * (x + input_gain * J)));
 }
 
+double expsin(const double x, double J, double input_gain, double feed_gain) {
+	return feed_gain * exp(-x) * sin(x + input_gain * J);
+}
+
 
 //double Mackey_Grass(std::vector<std::vector<double>>& output_node, double input_gain, double feed_gain, double pa, std::vector<std::vector<double>>& J) {
 
@@ -77,7 +81,7 @@ int main(void) {
 		const std::string task_name = task_names[r];
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "mackey100","ikeda100",};//適宜他の
+		std::vector<std::string> function_names = { "expsin", "mackey100","ikeda100",};//適宜他の
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -89,7 +93,7 @@ int main(void) {
 				d_bias = 0.2;
 				//d_alpha = 0.05; alpha_min = 0.10; 現状これ(NARMA10も含めると)
 				//d_alpha = 0.05; alpha_min = 0.80;NARMA5に限ってはこっち
-				d_alpha = 0.1; alpha_min = 0.20;//τ = 30の時こっちのほうが良い性能だった
+				d_alpha = 0.02; alpha_min = 0.4;//τ = 30の時こっちのほうが良い性能だった
 				//d_alpha = 0.0; alpha_min = 0.0;
 				d_sigma = 0.07; sigma_min = 0.4;
 				const int tau = param1[r];
@@ -175,13 +179,14 @@ int main(void) {
 			//else if (function_name == "oddsinc") nonlinear = oddsinc;
 			//else if (function_name == "sinc") nonlinear = sinc;
 			else if (function_name == "ikeda100") nonlinear = ikeda100;
+			else if (function_name == "expsin") nonlinear = expsin;
 			else {
 				std::cerr << "error! " << function_name << "is not found" << std::endl;
 				return 0;
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 4; ite_p <= 9; ite_p += 1) {//論文　手順２
+				for (int ite_p = 1; ite_p <= 9; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
@@ -196,16 +201,17 @@ int main(void) {
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 
-					for (int ite_input = 1; ite_input <= 5; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
+					for (int ite_input = 1; ite_input <= 4; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.8 + ite_input * 0.02;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
-						const double input_gain = 0.1 + ite_input * 0.01;
+						//const double input_gain = 0.1 + ite_input * 0.2;
 						//const double input_gain = 0.1 + ite_input * 0.1;
-						for (int ite_feed = 1; ite_feed <= 5; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
+						const double input_gain = 0.45 + ite_input * 0.02;
+						for (int ite_feed = 1; ite_feed <= 4; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 							//const double feed_gain = 0.75 + ite_feed * 0.05;
-							const double feed_gain = 0.9 + ite_feed * 0.05;
+							const double feed_gain = 0.72 + ite_feed * 0.04;
 							//const double feed_gain = 0.1 + ite_feed * 0.2;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理

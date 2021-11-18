@@ -67,8 +67,8 @@ void reservoir_layer::generate_reservoir() {
 	// 入力層の結合重みを決定 マスク信号と入力の強みをここで一緒にしている
 	for (int n = 1; n <= unit_size; n++) {
 		//input_signal_strength[n] = input_signal_factor * (double)(rand_minus1orplus1(mt) / 2.0);
-		//input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
-		input_signal_strength[n] = input_signal_factor * b[rand() % b.size()];///////////////////////////変更要素//////////////////////
+		input_signal_strength[n] = input_signal_factor * a[rand() % a.size()];
+		//input_signal_strength[n] = input_signal_factor * b[rand() % b.size()];///////////////////////////変更要素//////////////////////
 	}
 }
 
@@ -93,7 +93,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
 	//τ = (double) unit_size * 0.2;
-	d = 30.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
+	d = 17.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
 
 
@@ -125,10 +125,10 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		J[0][n] = input_signal_strength[n];
 		output_node[0][n] = activation_function(output_node[0][n], node_type[n], J[0][n]);
 		//output_node[0][n] *= (1.0 - pow(e, -ξ));
-		//output_node[0][n] *= d / (1.0 + d); /////////////////////////////////////////////////////変更要素//////////////////////
-		output_node[0][n] *= (1.0 - exp(-ξ));
-		output_node[0][n] += exp(-ξ) * (output_node[0][n - 1]);
-		//output_node[0][n] += (1.0 / (1.0 + d)) * (output_node[0][n - 1]);/////////////////////////////////////////変更要素////////////////////
+		output_node[0][n] *= d / (1.0 + d); /////////////////////////////////////////////////////変更要素//////////////////////
+		//output_node[0][n] *= (1.0 - exp(-ξ));
+		//output_node[0][n] += exp(-ξ) * (output_node[0][n - 1]);
+		output_node[0][n] += (1.0 / (1.0 + d)) * (output_node[0][n - 1]);/////////////////////////////////////////変更要素////////////////////
 	}
 
 	/*for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
@@ -148,10 +148,12 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
 			//output_node[t][n] *= (1.0 - pow(e, -ξ));
-			output_node[t][n] *= (1.0 - exp(-ξ));
+			//output_node[t][n] *= (1.0 - exp(-ξ));
+			output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
-			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 		}
 	}
@@ -170,7 +172,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	//const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 20.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////////////////変更要素//////////////////
+	d = 17.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -195,9 +197,11 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//output_node[t][n] *= (1.0 - pow(e, -ξ));
-			output_node[t][n] *= (1.0 - exp(-ξ));
+			//output_node[t][n] *= (1.0 - exp(-ξ));
+			output_node[t][n] *= (d / (1.0 + d));///////////////////////////////////////////////////////////////
 			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
-			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);////////////////////////////////////
 		}
 		for (int n = 1; n <= unit_size; n++) {
 			if (t >= wash_out && t < wash_out + 200)
@@ -232,7 +236,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	//std::cout << err_ave << "\n";
 	//std::cerr << err_sum << std::endl;
 	//std::cerr << input_signal_factor << " " << input_gain << " " << feed_gain << std::endl;
-	return err_ave <= 0.1;//△△△
+	return err_ave <= 0.05;//△△△
 }
 
 
@@ -244,10 +248,11 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 	else if (type == NON_LINEAR) {
 		//return nonlinear(x);
 		///double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-		return feed_gain * (x + input_gain * J) / (1.0 + pow(x + input_gain * J, 4.0));//指数ρ = 2-------------------------
+		//return feed_gain * (x + input_gain * J) / (1.0 + pow(x + input_gain * J, 2.0));//指数ρ = 2-------------------------
 		//return feed_gain * sin(x + input_gain * J + 0.7) * sin(x + input_gain * J + 0.7);
 
 		//return feed_gain * pow(sin(x + input_gain * J + 0.3), 2.0);//池田モデル  φ:オフセット位相
+		return feed_gain * exp(-x) * sin(x + input_gain * J);//expsin ρパラメータの調整必要なし 結構良かった
 		//}
 		
 		// return nonlinear(x, J, input_gain, feed_gain);
