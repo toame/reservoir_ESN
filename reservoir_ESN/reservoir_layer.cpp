@@ -23,6 +23,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	//double ρ = 2.0;//曖昧　ここで設定
 	a.resize(6);
 	b.resize(2);
+	this->j = j;
 }
 
 
@@ -142,8 +143,8 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		}
 	}*/
 
-/*
-	//通常の時間遅延システム型時間発展式
+
+	/*//通常の時間遅延システム型時間発展式
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -159,35 +160,44 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 		}
-	}
-	*/
+	}*/
+	
 
 
-	const int j = 10 ;
+	j = 90 ;
 	//二次の時間遅延システム型時間発展式
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
-			if (n >= j + 1) {
-				output_node[t][n] *= activation_function2()
-
+			if (t == 1) {
+				output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);
+				//if (n == 5) std::cerr << t << " " << output_node[t][n] << std::endl;
+			}else if(t >= 2) {
+				if (n >= j + 1) {
+					output_node[t][n] = activation_function2(output_node[t - 1][n], output_node[t - 1][n - j], node_type[n], J[t][n]);
+					//if (n == 5) std::cerr << t << " " << output_node[t][n] << std::endl;
+				}
+				else {
+					output_node[t][n] = activation_function2(output_node[t - 1][n], output_node[t - 2][unit_size - j + n], node_type[n], J[t][n]);
+					//if (n == 1) std::cerr << t << " " << output_node[t][n] << "_" << output_node[t - 2][unit_size - j + n] << std::endl;
+				}
 
 			}
+			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 
-			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
 			//output_node[t][n] *= (1.0 - pow(e, -ξ));
-			//output_node[t][n] *= (1.0 - exp(-ξ));
-			output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
+			output_node[t][n] *= (1.0 - exp(-ξ));
+			//output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
-			//output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
-			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
+			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
+			//if (n == unit_size) std::cerr << t << " " << output_node[t][n] << std::endl;
 		}
 	}
-
 }
 
 
@@ -221,6 +231,9 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 		output_node[0][n] += exp(-ξ) * (output_node[0][n - 1]);
 	}
 
+
+	/*
+	//通常の時間遅延システム型時間発展式
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -233,10 +246,36 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 			//output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
 			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);////////////////////////////////////
 		}
+		*/
+	//二次の時間遅延システム型時間発展式
+	const int j = 2;
+	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
+		output_node[t][0] = output_node[t - 1][unit_size];
+		for (int n = 1; n <= unit_size; n++) {
+			if (t == 1) 
+				output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);
+			else{
+				if (n >= j + 1)
+					output_node[t][n] = activation_function2(output_node[t - 1][n], output_node[t - 1][n - j], node_type[n], J[t][n]);
+				else
+					output_node[t][n] = activation_function2(output_node[t - 1][n], output_node[t - 2][unit_size - j + n], node_type[n], J[t][n]);
+			}
+				//ここの引数もっと増えるかも
+				//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
+				//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
+				//output_node[t][n] *= (1.0 - pow(e, -ξ));
+		    output_node[t][n] *= (1.0 - exp(-ξ));
+			//output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
+			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
+			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
+			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
+			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
+		}
 		for (int n = 1; n <= unit_size; n++) {
 			if (t >= wash_out && t < wash_out + 200)
-				//outputfile << t << "," << n << "," << input_sum_node[n] << "," << output_node[t + 1][n] << std::endl;
-				outputfile << t << "," << n << "," << output_node[t][n] << std::endl;
+			//outputfile << t << "," << n << "," << input_sum_node[n] << "," << output_node[t + 1][n] << std::endl;
+			outputfile << t << "," << n << "," << output_node[t][n] << std::endl;
 		}
 	}
 	outputfile.close();
@@ -292,10 +331,13 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 	return -1.0;
 }
 
-double reservoir_layer::activation_function2(const double x1,const double x2 const int type, const double J) {//ここの引数もっと増えるかも
+double reservoir_layer::activation_function2(const double x1,const double x2, const int type, const double J) {//ここの引数もっと増えるかも
 //double reservoir_layer::activation_function(const double x, const int type) {
+	double x;
+	x = x1 + x2;
+
 	if (type == LINEAR) {
-		return std::max(-1000.0, std::min(1000.0, x));  //?
+		return std::max(-1000.0, std::min(1000.0, x)); 
 	}
 	else if (type == NON_LINEAR) {
 		//return nonlinear(x);

@@ -93,7 +93,7 @@ int main(void) {
 				d_bias = 0.2;
 				//d_alpha = 0.05; alpha_min = 0.10; 現状これ(NARMA10も含めると)
 				//d_alpha = 0.05; alpha_min = 0.80;NARMA5に限ってはこっち
-				d_alpha = 0.02; alpha_min = 0.4;//τ = 30の時こっちのほうが良い性能だった
+				d_alpha = 0.05; alpha_min = 0.2;//τ = 30の時こっちのほうが良い性能だった
 				//d_alpha = 0.0; alpha_min = 0.0;
 				d_sigma = 0.07; sigma_min = 0.4;
 				const int tau = param1[r];
@@ -186,7 +186,7 @@ int main(void) {
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 1; ite_p <= 9; ite_p += 1) {//論文　手順２
+				for (int ite_p = 7; ite_p <= 10; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
@@ -201,17 +201,17 @@ int main(void) {
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
 
-					for (int ite_input = 1; ite_input <= 4; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
+					for (int ite_input = 1; ite_input <= 10; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.8 + ite_input * 0.02;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
 						//const double input_gain = 0.1 + ite_input * 0.2;
 						//const double input_gain = 0.1 + ite_input * 0.1;
-						const double input_gain = 0.45 + ite_input * 0.02;
-						for (int ite_feed = 1; ite_feed <= 4; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
+						const double input_gain = 0.5 + ite_input * 0.05;
+						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 							//const double feed_gain = 0.75 + ite_feed * 0.05;
-							const double feed_gain = 0.72 + ite_feed * 0.04;
+							const double feed_gain = 0.3 + ite_feed * 0.02;
 							//const double feed_gain = 0.1 + ite_feed * 0.2;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
@@ -223,7 +223,9 @@ int main(void) {
 								reservoir_layer reservoir_layer1(unit_size, input_signal_factor, input_gain, feed_gain, p, nonlinear, loop, wash_out, step);
 								
 								reservoir_layer1.generate_reservoir();
-								reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　　
+								reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);//論文　手順３　
+								//std::cout << "成功" << "\n";
+
 								reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);//??論文　手順５　
 								is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
 								reservoir_layer_v[k] = reservoir_layer1;//??
@@ -253,17 +255,23 @@ int main(void) {
 									double eps = 1e-12;
 									int itr = 10;
 									output_learning[k].ICCGSolver(unit_size + 1, itr, eps);
+									//std::cout << "成功2" << "\n";
 									w[k][lm] = output_learning[k].w;//おそらく論文　手順４　　　　??????????????? [k][lm]→ある入力強み、ユニット間強みの中の、あるλの場合の重み
+									//std::cout << "成功3" << "\n";
 									nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);//論文　手順5続き（論文の書き方がややこしくなってるけど、S1(t)を使って求めた重みとS2(t)を使って予測値を計算で求めてNMSEを出そう！！というだけだと思う。）
+									//std::cout << "成功4" << "\n";
 								}
 								
 							}
-
+							//std::cout << "成功5" << "\n";
 							// 検証データでもっとも性能の良いリザーバーを選択
 							for (int k = 0; k < alpha_step; k++) {//論文　手順６
 								if (!is_echo_state_property[k]) continue;
+								
 								for (int lm = 0; lm < 10; lm++) {
+									//std::cout << "成功6" << "\n";
 									if (nmse[k][lm] < opt_nmse) {
+										//std::cout << "成功7" << "\n";
 										opt_nmse = nmse[k][lm];
 										opt_input_signal_factor = d_alpha * k + alpha_min;
 										//opt_bias_factor = bias_factor;
@@ -274,7 +282,9 @@ int main(void) {
 										opt_k = k;
 										opt_w = w[k][lm];
 										opt_reservoir_layer = reservoir_layer_v[k];
+										
 										train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
+										//std::cout << "成功8" << "\n";
 										//std::cerr << train_nmse << " " << opt_input_signal_factor << " " << opt_feed_gain << " " << opt_input_gain << std::endl;
 									}
 								}
@@ -288,7 +298,9 @@ int main(void) {
 
 					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));// △　+2とか MAX_NODE_SIZEとか
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
+					//std::cout << "成功9" << "\n";
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);//l241と引数の数違うけど...
+					
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 

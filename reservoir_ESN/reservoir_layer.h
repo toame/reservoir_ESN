@@ -39,6 +39,7 @@ public:
 
 	std::vector<double> a;
 	std::vector<double> b;
+	double j;
 
 
 

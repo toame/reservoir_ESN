@@ -17,7 +17,7 @@ output_learning::output_learning() {}
 void output_learning::generate_simultaneous_linear_equationsA(const std::vector<std::vector<double>>& output_node, const int wash_out, const int step, const int n_size) {
 	std::vector<std::vector<double>> C(n_size + 1, std::vector<double>(n_size + 1));//????
 	A.resize(n_size + 1, std::vector<double>(n_size + 1));
-	int count = step - wash_out;//ある程度先のものを使用？？している。それまでは「安定させるため」のモノらしい
+	int count = step - wash_out;//ある程度先のものを使用？？している。それまでは「安定させるため」
 	std::vector<double> sub_output_node(count * (n_size + 1));
 	std::vector<double> B((n_size + 1) * (n_size + 1), 0.0);//????
 	for (int t = wash_out + 1; t < step; t++) {
