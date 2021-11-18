@@ -171,7 +171,7 @@ inline double squared(const double x) {
 	return x * x;
 }
 
-double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {
+double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {//https://www.osapublishing.org/osac/fulltext.cfm?uri=osac-4-3-1086&id=449229
 	double t_ave0 = 0.0, tt_ave0 = 0.0;
 	for (int t = wash_out + 1; t < step; t++) {
 		t_ave0 += yt[t];

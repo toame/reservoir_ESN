@@ -125,8 +125,10 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		J[0][n] = input_signal_strength[n];
 		output_node[0][n] = activation_function(output_node[0][n], node_type[n], J[0][n]);
 		//output_node[0][n] *= (1.0 - pow(e, -ξ));
+		//output_node[0][n] *= d / (1.0 + d); /////////////////////////////////////////////////////変更要素//////////////////////
 		output_node[0][n] *= (1.0 - exp(-ξ));
 		output_node[0][n] += exp(-ξ) * (output_node[0][n - 1]);
+		//output_node[0][n] += (1.0 / (1.0 + d)) * (output_node[0][n - 1]);/////////////////////////////////////////変更要素////////////////////
 	}
 
 	/*for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
@@ -242,7 +244,7 @@ double reservoir_layer::activation_function(const double x, const int type, cons
 	else if (type == NON_LINEAR) {
 		//return nonlinear(x);
 		///double makkey(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-		return feed_gain * (x + input_gain * J) / (1.0 + pow(x + input_gain * J, 2.0));//ρ = 2-------------------------
+		return feed_gain * (x + input_gain * J) / (1.0 + pow(x + input_gain * J, 4.0));//指数ρ = 2-------------------------
 		//return feed_gain * sin(x + input_gain * J + 0.7) * sin(x + input_gain * J + 0.7);
 
 		//return feed_gain * pow(sin(x + input_gain * J + 0.3), 2.0);//池田モデル  φ:オフセット位相
