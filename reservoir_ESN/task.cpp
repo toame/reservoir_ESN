@@ -195,6 +195,7 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 			reservoir_predict_signal += weight[n] * output_node[t + 1][n];//—áŠO
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
+		//sum_squared_average = sqrt(sum_squared_average);
 		if (show) {
 			outputfile << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
 		}
@@ -204,5 +205,6 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 
 double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	//return (sqrt(calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step)));
 	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
 }
