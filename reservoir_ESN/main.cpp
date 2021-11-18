@@ -23,7 +23,7 @@ double ikeda100(const double x, double J, double input_gain, double feed_gain) {
 }
 
 double tanh(const double x, double J, double input_gain, double feed_gain) {
-	return feed_gain * ;
+	return feed_gain * tanh(x + input_gain * J);
 }
 
 
