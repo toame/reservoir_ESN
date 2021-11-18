@@ -26,6 +26,11 @@ double tanh(const double x, double J, double input_gain, double feed_gain) {
 	return feed_gain * tanh(x + input_gain * J);
 }
 
+double sinc(const double x, double J, double input_gain, double feed_gain) {
+	if (x == 0) return 1.0;
+	return feed_gain * (sin(PI * (x + input_gain * J)) / (PI * (x + input_gain * J)));
+}
+
 
 //double Mackey_Grass(std::vector<std::vector<double>>& output_node, double input_gain, double feed_gain, double pa, std::vector<std::vector<double>>& J) {
 
