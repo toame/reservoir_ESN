@@ -341,3 +341,4 @@ healthchecksdb
 /reservoir_ESN/output_unit
 /reservoir_ESN/output_predict
 /reservoir_ESN/output_data
+/reservoir_ESN/nmse_gain_data

@@ -273,7 +273,7 @@ int main(void) {
 									if (nmse[k][lm] < opt_nmse) {
 										//std::cout << "¬Œ÷7" << "\n";
 										opt_nmse = nmse[k][lm];
-										opt_input_signal_factor = d_alpha * k + alpha_min;
+										opt_input_signal_factor = k * d_alpha + alpha_min;
 										//opt_bias_factor = bias_factor;
 										//opt_weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 										opt_feed_gain = feed_gain;
