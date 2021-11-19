@@ -110,6 +110,7 @@ int main(void) {
 				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
 			}
 			else if (task_name == "henon") {
+
 				d_bias = 1.0;
 				d_alpha = 1.0; alpha_min = 1.0;
 				d_sigma = 0.04; sigma_min = 0.04;
@@ -200,8 +201,8 @@ int main(void) {
 					reservoir_layer opt_reservoir_layer;
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
-					std::ofstream outputfile("nmse_gain_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
-					outputfile << "function_name,input_gain,feed_gain,opt_nmse" << std::endl;
+					std::ofstream outputfile2("nmse_gain_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
+					outputfile2 << "function_name,input_gain,feed_gain,opt_nmse" << std::endl;
 					for (int ite_input = 1; ite_input <= 10; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.8 + ite_input * 0.02;
@@ -299,10 +300,10 @@ int main(void) {
 								
 
 							}
-							outputfile << function_name << "," << input_gain << "," << feed_gain << "," << opt_nmse << std::endl;
+							outputfile2 << function_name << "," << input_gain << "," << feed_gain << "," << opt_nmse << std::endl;
 						}
 					}
-					outputfile.close();
+					outputfile2.close();
 
 					/*** TEST phase ***/  //論文　手順7
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
