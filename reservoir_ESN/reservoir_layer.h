@@ -40,6 +40,7 @@ public:
 	std::vector<double> a;
 	std::vector<double> b;
 	double j;
+	double j2;
 
 
 
@@ -54,8 +55,7 @@ public:
 	void reservoir_update_show(const std::vector<double> input_signal, std::vector<std::vector<double>> output_node, const int t_size, const int wash_out, const std::string name);
 	bool is_echo_state_property(const std::vector<double>& input_signal);
 	double activation_function(const double x1, const double x2, const int type, const double J);
-	//double activation_function(const double x, const int type);
-
+	double activation_function2(const double x1, const double x2, const double x3, const int type, const double J);
 };
 
 

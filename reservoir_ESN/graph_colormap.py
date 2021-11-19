@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 from matplotlib import pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 
 
@@ -17,8 +16,7 @@ for name in os.listdir(folder):
     #nmse_list = df["nmse"].unique()
     function_names = ["mackey200"];
 
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
+    fig, ax = plt.subplots()
 
     #for function_name in function_names:
     #data_x, data_y, data_z = [], [], []
@@ -30,26 +28,16 @@ for name in os.listdir(folder):
     ydata = df['feed_gain']
     zdata = df['opt_nmse']
 
-      #  for input_gain in input_gain_list:
-         #   for feed_gain in feed_gain_list:
-            #    for nmse in nmse_list:
-               #     data_x.append(input_gain)
-                #    data_y.append(feed_gain)
-                 #   data_z.append(nmse)
-      #  plt.xlim(0, 10.0)
-       # plt.ylim(0, 10.0)
-        #plt.zscale("log")
-       # plt.plot(data_x, data_y, marker="o", label = function_name)
-        #ax.plot_surface(data_x, data_y, data_z, marker="o", cmap='terrain')
-        #ax.plot_wireframe(data_x, data_y, data_z)
-     #plt.legend(loc = "best")
     
     #ax.plot_surface(xdata , ydata , zdata , cmap = 'ocean') 
-    ax.scatter(xdata , ydata , zdata , marker = "o")
+    ax.scatter(xdata , ydata , c = zdata , marker = "o")
     #ax.plot(xdata , ydata , zdata , marker = "o")
     ax.set_xlabel('input_gain')
     ax.set_ylabel('feed_gain')
-    ax.set_zlabel('opt_nmse')
+    #ax.set_zlabel('opt_nmse')
+    cm = plt.cm.get_cmap('RdYlBu')
+    mappable = ax.scatter(xdata, ydata, c=zdata, s=35, cmap=cm)
+    fig.colorbar(mappable, ax=ax)
     plt.show()
     #plt.savefig(name + ".png", dpi = 300)
     #plt.cla()
