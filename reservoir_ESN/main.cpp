@@ -111,7 +111,7 @@ int main(void) {
 			}
 			else if (task_name == "henon") {
 				d_bias = 1.0;
-				d_alpha = 0.2; alpha_min = 0.1;
+				d_alpha = 1.0; alpha_min = 1.0;
 				d_sigma = 0.04; sigma_min = 0.04;
 				const int fstep = param1[r];
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
