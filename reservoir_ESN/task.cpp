@@ -220,7 +220,7 @@ double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<do
 
 double calc_correct_rate(const std::vector<double>& teacher_signal, const std::vector<double>& weight1, const std::vector<double>& weight2,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
-	double count = 0.0;
+	double count = 0;
 	for (int t = wash_out + 1; t < step; t++) {
 		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
 		double reservoir_predict_signal1 = 0.0;
@@ -232,9 +232,9 @@ double calc_correct_rate(const std::vector<double>& teacher_signal, const std::v
 		int choice = 0;
 		if (reservoir_predict_signal1 < reservoir_predict_signal2) choice = 1;
 		else choice = 0;
-		if (teacher_signal[t] == 1.0 && choice == 0) count++;
+		if (teacher_signal[t] == 1.0 && choice == 0) count++;	// 違ったものを選んだ時カウントアップ
 		if (teacher_signal[t] == 0.0 && choice == 1) count++;
-		//std::cerr << t << " " << reservoir_predict_signal1 << " " << reservoir_predict_signal2 << " " << choice << " " << teacher_signal[t] << " " << count << std::endl;
+		std::cerr << t << " " << reservoir_predict_signal1 << " " << reservoir_predict_signal2 << " " << choice << " " << teacher_signal[t] << " " << count << std::endl;
 	}
-	return count;
+	return count;	// ミスの総量
 }

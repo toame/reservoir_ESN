@@ -37,13 +37,13 @@ typedef void (*FUNC)();
 int main(void) {
 	const int TRIAL_NUM = 20;	// ループ回数
 	const int step = 10000;
-	const int class_num = 2;
+	const int class_num = 2;	// クラス分類数
 	const int small_step = 200;
 	const int wash_out = 0;
 	std::vector<int> unit_sizes = { 100 };
 	std::vector<std::string> task_names = { "narma" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 16 };
+	std::vector<int> param1 = { 10 };
 	std::vector<double> param2 = { 0.0 };
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
@@ -64,7 +64,8 @@ int main(void) {
 		std::vector<std::vector<double>> input_signal(PHASE_NUM);
 		std::vector<std::vector<std::vector<double>>> teacher_signal(PHASE_NUM, std::vector<std::vector<double>>(class_num));
 
-		std::vector<std::string> function_names = { "sinc" , "tanh" };
+		//std::vector<std::string> function_names = { "sinc" , "tanh" };	// 活性化関数
+		std::vector<std::string> function_names = { "tanh" };	// 活性化関数
 		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -202,22 +203,24 @@ int main(void) {
 								}
 							}
 						}
+						//}
+						/*** TEST phase ***/
+						std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
+
+						std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
+						opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
+
+						//test_nmse = calc_nmse(teacher_signal[TEST][0], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
+						test_nmse = calc_correct_rate(teacher_signal[TEST][0], w[opt_k][0][opt_lm2], w[opt_k][1][opt_lm2], output_node[opt_k][TEST], unit_size, wash_out, step, false, "test");
+						end = std::chrono::system_clock::now();  // 計測終了時間
+						double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
+
+						outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(4) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse << "," << opt_nmse << "," << test_nmse << std::endl;
+						std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::setprecision(5) << (int)train_nmse << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
+
+						// リザーバーのユニット入出力を表示
+						//opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);
 					}
-					/*** TEST phase ***/
-					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
-
-					//std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
-					//opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
-
-					//test_nmse = calc_nmse(teacher_signal[TEST][0], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
-					end = std::chrono::system_clock::now();  // 計測終了時間
-					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
-
-					outputfile << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(4) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::fixed << std::setprecision(8) << train_nmse << "," << opt_nmse << "," << test_nmse << std::endl;
-					std::cerr << function_name << "," << loop << "," << unit_size << "," << std::fixed << std::setprecision(3) << p << "," << opt_input_signal_factor << "," << opt_bias_factor << "," << opt_weight_factor << "," << opt_lm2 << "," << std::setprecision(5) << (int)train_nmse << "," << opt_nmse << "," << test_nmse << " " << elapsed / 1000.0 << std::endl;
-
-					// リザーバーのユニット入出力を表示
-					//opt_reservoir_layer.reservoir_update_show(input_signal[TEST], output_node_test, step, wash_out, output_name);
 				}
 
 			}
