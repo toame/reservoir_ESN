@@ -212,6 +212,7 @@ double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<do
 double calc_nrmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	double sum_squared_average = 0.0;
+	double sum_squared_predict_signal = 0.0;
 	double y_max = -1e+9;
 	double y_min = 1e+9;
 	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);//predict 予測
@@ -226,13 +227,17 @@ double calc_nrmse(const std::vector<double>& teacher_signal, const std::vector<d
 		y_max = std::max(y_max, reservoir_predict_signal);
 		y_min = std::min(y_min, reservoir_predict_signal);
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
+		sum_squared_predict_signal += squared(reservoir_predict_signal);//とりあえず
 		//sum_squared_average = sqrt(sum_squared_average);
 		if (show) {
 			outputfile << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
 		}
 	}
-	const double mse = sum_squared_average / (step - wash_out);
+
+	//const double mse = sum_squared_average / (step - wash_out);本当はこっち
+	const double mse = sum_squared_average / sum_squared_predict_signal;//とりあえず
 	const double rmse = sqrt(mse);
 
-	return rmse / (y_max - y_min);
+	//return rmse / (y_max - y_min);本当はこっち
+	return rmse;//変更予定　https://www.sciencedirect.com/science/article/pii/S1463500313001418　1序章より
 }

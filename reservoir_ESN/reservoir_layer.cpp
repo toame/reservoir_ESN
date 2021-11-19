@@ -145,11 +145,11 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	}*/
 
 
-	/*//通常の時間遅延システム型時間発展式
+	//通常の時間遅延システム型時間発展式
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
-			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
+			output_node[t][n] = activation_function(output_node[t - 1][n], 0.0, node_type[n], J[t][n]);//ここの引数もっと増えるかも
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
 			//output_node[t][n] *= (1.0 - pow(e, -ξ));
@@ -161,7 +161,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 		}
-	}*/
+	}
 
 
 
@@ -201,7 +201,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		}
 	}*/
 
-	//三次の時間遅延システム型時間発展式
+/*	//三次の時間遅延システム型時間発展式
 	j2 = 60;
 	for (int t = 1; t <= t_size; t++) {
 		output_node[t][0] = output_node[t - 1][unit_size];
@@ -225,7 +225,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);
 			//output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
 		}
-	}
+	}*/
 }
 
 
