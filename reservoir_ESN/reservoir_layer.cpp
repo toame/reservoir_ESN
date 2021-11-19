@@ -323,11 +323,11 @@ double reservoir_layer::activation_function(const double x1,const double x2, con
 		//return feed_gain * sin(x + input_gain * J + 0.7) * sin(x + input_gain * J + 0.7);
 
 		//return feed_gain * pow(sin(x + input_gain * J + 0.3), 2.0);//池田モデル  φ:オフセット位相
-		return feed_gain * exp(-x) * sin(x + input_gain * J);//expsin ρパラメータの調整必要なし 結構良かった
+		//return feed_gain * exp(-x) * sin(x + input_gain * J);//expsin ρパラメータの調整必要なし 結構良かった
 		//}
 
-		// return nonlinear(x, J, input_gain, feed_gain);
-		//　nonlinear(x, input_gain, feed_gain, pa, J);なのかも
+		return nonlinear(x, J, input_gain, feed_gain);
+		//return nonlinear(x, input_gain, feed_gain, J);
 	}
 	assert(type != LINEAR && type != NON_LINEAR);  //?
 	return -1.0;
