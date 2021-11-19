@@ -200,18 +200,20 @@ int main(void) {
 					reservoir_layer opt_reservoir_layer;
 					std::vector<double> opt_w;
 					start = std::chrono::system_clock::now(); // 計測開始時間
-
+					std::ofstream outputfile("nmse_gain_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
+					outputfile << "function_name,input_gain,feed_gain,opt_nmse" << std::endl;
 					for (int ite_input = 1; ite_input <= 10; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.8 + ite_input * 0.02;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
 						//const double input_gain = 0.1 + ite_input * 0.2;
 						//const double input_gain = 0.1 + ite_input * 0.1;
-						const double input_gain = 0.5 + ite_input * 0.05;
+						const double input_gain = 0.1 + ite_input * 0.1;
 						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
+							//double opt_nmse = 1e+10;
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 							//const double feed_gain = 0.75 + ite_feed * 0.05;
-							const double feed_gain = 0.3 + ite_feed * 0.02;
+							const double feed_gain = 0.1 + ite_feed * 0.1;
 							//const double feed_gain = 0.1 + ite_feed * 0.2;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
@@ -268,6 +270,7 @@ int main(void) {
 							for (int k = 0; k < alpha_step; k++) {//論文　手順６
 								if (!is_echo_state_property[k]) continue;
 								
+								
 								for (int lm = 0; lm < 10; lm++) {
 									//std::cout << "成功6" << "\n";
 									if (nmse[k][lm] < opt_nmse) {
@@ -286,12 +289,20 @@ int main(void) {
 										train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
 										//std::cout << "成功8" << "\n";
 										//std::cerr << train_nmse << " " << opt_input_signal_factor << " " << opt_feed_gain << " " << opt_input_gain << std::endl;
+										
+										
+										//std::cout << "成功" << "\n";
 									}
+									//std::cout << "成功" << "\n";
+
 								}
+								
 
 							}
+							outputfile << function_name << "," << input_gain << "," << feed_gain << "," << opt_nmse << std::endl;
 						}
 					}
+					outputfile.close();
 
 					/*** TEST phase ***/  //論文　手順7
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);

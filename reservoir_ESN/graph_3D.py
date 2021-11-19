@@ -10,7 +10,7 @@ for name in os.listdir(folder):
     #name = "approx_3_3.0_100"
     name = os.path.splitext(os.path.basename(name))[0]
     df = pd.read_csv(folder + name + '.txt', sep=',',comment='#')
-    print(df)
+    #print(df)
     #p_list = df["p"].unique()
     #input_gain_list = df["input_gain"].unique()
     #feed_gain_list = df["feed_gain"].unique()
@@ -28,7 +28,7 @@ for name in os.listdir(folder):
 
     xdata = df['input_gain']
     ydata = df['feed_gain']
-    zdata = df['nmse']
+    zdata = df['opt_nmse']
 
       #  for input_gain in input_gain_list:
          #   for feed_gain in feed_gain_list:
@@ -43,11 +43,13 @@ for name in os.listdir(folder):
         #ax.plot_surface(data_x, data_y, data_z, marker="o", cmap='terrain')
         #ax.plot_wireframe(data_x, data_y, data_z)
      #plt.legend(loc = "best")
-       
+    
+    #ax.plot_surface(xdata , ydata , zdata , cmap = 'ocean') 
     ax.scatter(xdata , ydata , zdata , marker = "x")
+    ax.plot(xdata , ydata , zdata , marker = "x")
     ax.set_xlabel('input_gain')
     ax.set_ylabel('feed_gain')
-    ax.set_zlabel('nmse')
+    ax.set_zlabel('opt_nmse')
     plt.show()
     #plt.savefig(name + ".png", dpi = 300)
     #plt.cla()
