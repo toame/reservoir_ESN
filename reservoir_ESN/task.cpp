@@ -199,13 +199,22 @@ void generate_d_sequence_set(std::vector<std::vector<std::vector<int>>>& d_vec) 
 	}
 }
 
-void task_for_calc_of_NL(const std::vector<double>& input_signal, std::vector<double>& teacher_signal, std::vector<int>& d, const int step) {
+void task_for_calc_of_NL(const std::vector<double>& input_signal, std::vector<double>& teacher_signal, std::vector<int> d, const int step) {
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
 		double x = 1.0;
 		for (int i = 0; i < d.size(); i++) {
 			if (t - (i + 1) >= 0) x *= std::legendre(d[i], input_signal[t - (i + 1)]);
 		}
+		teacher_signal[t] = x;
+	}
+}
+
+void task_for_calc_of_NL2(const std::vector<double>& input_signal, std::vector<double>& teacher_signal, int nu, const int step) {
+	teacher_signal.resize(step);
+	for (int t = 0; t < step; t++) {
+		double x = 1.0;
+		x *= std::legendre(nu, input_signal[t]);
 		teacher_signal[t] = x;
 	}
 }

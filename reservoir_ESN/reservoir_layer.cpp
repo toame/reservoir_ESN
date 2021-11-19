@@ -25,14 +25,16 @@ void reservoir_layer::generate_reservoir() {
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	std::uniform_int_distribution<> rand_0or1(0, 1);
 
-	std::vector<int> permutation(unit_size + 1);
+	std::vector<int> permutation(unit_size);
 	std::iota(permutation.begin(), permutation.end(), 1);
 	//リザーバー層の結合をランダムに生成
 	for (int n = 1; n <= unit_size; n++) {
 		std::shuffle(permutation.begin(), permutation.end(), mt);
-		for (int k = 1; k <= connection_degree; k++) {
-			adjacency_list[n][k] = permutation[k];
-		}
+		//for (int k = 1; k <= connection_degree; k++) {
+		//	adjacency_list[n][k] = permutation[k];
+		//}
+		adjacency_list[n][1] = n + 1;
+		if (n == unit_size) adjacency_list[n][1] = 1;
 	}
 
 	//各ノードが線形か非線形かを決定
@@ -128,14 +130,14 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 		}
 	}
 	// ノード初期値によって状態が等しくなるならば、EchoStatePropertyを持つ
-	double err_ave = err_sum / (unit_size * 10);
+	double err_ave = err_sum / (unit_size);
 	//std::cerr << err_sum << std::endl;
-	return err_ave <= 0.1;
+	return err_ave <= 10.0;
 }
 
 double reservoir_layer::activation_function(const double x, const int type) {
 	if (type == LINEAR) {
-		return std::max(-1000.0, std::min(1000.0, x));
+		return std::max(-10000.0, std::min(10000.0, x));
 	}
 	else if (type == NON_LINEAR) {
 		return nonlinear(x);
