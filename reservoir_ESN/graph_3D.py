@@ -9,7 +9,8 @@ folder = "nmse_gain_data/"
 for name in os.listdir(folder):
     #name = "approx_3_3.0_100"
     name = os.path.splitext(os.path.basename(name))[0]
-    #df = pd.read_csv(folder + name + '.txt', sep=',',comment='#')
+    df = pd.read_csv(folder + name + '.txt', sep=',',comment='#')
+    print(df)
     #p_list = df["p"].unique()
     #input_gain_list = df["input_gain"].unique()
     #feed_gain_list = df["feed_gain"].unique()
@@ -23,11 +24,11 @@ for name in os.listdir(folder):
     #data_x, data_y, data_z = [], [], []
 
  
-    array_a = np.genfromtxt( folder + name + '.txt' , skip_header = 1 , delimiter = ',' )
+    #array_a = np.genfromtxt( folder + name + '.txt' , skip_header = 1 , delimiter = ',' )
 
-    xdata = list(array_a[0])
-    ydata = list(array_a[1])
-    zdata = list(array_a[2])
+    xdata = df['input_gain']
+    ydata = df['feed_gain']
+    zdata = df['nmse']
 
       #  for input_gain in input_gain_list:
          #   for feed_gain in feed_gain_list:
@@ -44,9 +45,9 @@ for name in os.listdir(folder):
      #plt.legend(loc = "best")
        
     ax.scatter(xdata , ydata , zdata , marker = "x")
-    ax.set_xlabel('x')
-    ax.set_ylabel('y')
-    ax.set_zlabel('z')
+    ax.set_xlabel('input_gain')
+    ax.set_ylabel('feed_gain')
+    ax.set_zlabel('nmse')
     plt.show()
     #plt.savefig(name + ".png", dpi = 300)
     #plt.cla()
