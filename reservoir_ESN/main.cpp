@@ -138,7 +138,13 @@ int main(void) {
 		outputfile << "### weight_factor [" << sigma_set.front() << ", " << sigma_set.back() << "]" << std::endl;
 		outputfile << "### bias_factor [" << bias_set.front() << ", " << bias_set.back() << "]" << std::endl;
 		outputfile << "function_name,seed,unit_size,p,input_signal_factor,bias_factor,weight_factor,train_L,L,L_log";
-		outputfile << ",train_NL,NL,NL_1,NL_log";
+		for (int i = 1; i <= 6; i++) {
+			outputfile << ",Lx_" << std::to_string(i);
+		}
+		outputfile << ",train_NL,NL,NL_log";
+		for (int i = 1; i <= 6; i++) {
+			outputfile << ",NLx_" << std::to_string(i);
+		}
 		for (int i = 1; i <= 20; i++) {
 			outputfile << ",L" << std::to_string(i);
 		}
@@ -267,13 +273,15 @@ int main(void) {
 						std::vector<double> train_L(alpha_step * sigma_step);
 						std::vector<double> NL(alpha_step * sigma_step);
 						std::vector<double> NL_log(alpha_step * sigma_step);
-						std::vector<double> NL_0(alpha_step * sigma_step);
+						std::vector<std::vector<double>> NLx(alpha_step * sigma_step, std::vector<double>(6));
+						std::vector<std::vector<double>> Lx(alpha_step * sigma_step, std::vector<double>(6));
 						std::vector<std::vector<double>> sub_L(alpha_step * sigma_step, std::vector<double>(unit_size * 3 + 3));
 						std::vector<std::vector<double>> sub_NL(alpha_step * sigma_step, std::vector<double>(unit_size * 3 + 3));
 						std::vector<double> train_NL(alpha_step * sigma_step);
 						std::vector<std::vector<double>> narma_task(alpha_step * sigma_step);
 						std::vector<std::vector<double>> approx_task(alpha_step * sigma_step);
-						#pragma omp parallel for  private(i) num_threads(48)
+						int c;
+						#pragma omp parallel for  private(i, c) num_threads(48)
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
 							for (i = 0; i < teacher_signals[TEST].size(); i++) {
@@ -285,6 +293,9 @@ int main(void) {
 									const double tmp_L = 1.0 - test_nmse;
 									if (tmp_L >= TRUNC_EPSILON) {
 										L[k] += tmp_L;
+										for (c = 0; c < 6; c++) {
+											Lx[k][c] += -log10(std::max<double>(pow(10, -c - 1), test_nmse)) / (c + 1);
+										}
 										L_log[k] += tmp_L/(i - task_size[1] + 1.0);
 										sub_L[k][i - task_size[1]] += tmp_L;
 									}
@@ -298,7 +309,9 @@ int main(void) {
 									//const double tmp_NL = d_sum * (1.0 - test_nmse);
 									if (tmp_NL >= TRUNC_EPSILON) {
 										NL[k] += tmp_NL;
-										NL_0[k] += (1.0 - test_nmse);
+										for (c = 0; c < 6; c++) {
+											NLx[k][c] += -log10(std::max<double>(pow(10, -c - 1), test_nmse)) / (c + 1);
+										}
 										NL_log[k] += (1.0 - test_nmse) / (i - task_size[2] + 1.0);
 
 										sub_NL[k][i - task_size[2] + 2] += tmp_NL;
@@ -320,7 +333,13 @@ int main(void) {
 							if (bias_factor1 < 0) bias_factor1 = input_signal_factor * weight_factor;
 							outputfile << function_name << "," << loop << "," << unit_size << "," << p << "," << input_signal_factor << "," << bias_factor1 << "," << weight_factor;
 							outputfile << "," << train_L[k] << "," << L[k] << "," << L_log[k];
-							outputfile << "," << train_NL[k] << "," << NL[k] << "," << NL_0[k] << "," << NL_log[k];
+							for (int i = 0; i < 6; i++) {
+								outputfile << "," << Lx[k][i];
+							}
+							outputfile << "," << train_NL[k] << "," << NL[k] << "," << NL_log[k];
+							for (int i = 0; i < 6; i++) {
+								outputfile << "," << NLx[k][i];
+							}
 							for (int i = 1; i <= 20; i++) {
 								outputfile << "," << sub_L[k][i];
 							}
