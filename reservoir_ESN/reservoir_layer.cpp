@@ -166,7 +166,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 
 
 	j = 70;
-/*	//二次の時間遅延システム型時間発展式
+	/*//二次の時間遅延システム型時間発展式
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {

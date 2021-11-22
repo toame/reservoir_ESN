@@ -208,7 +208,7 @@ double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<do
 	//return (sqrt(calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step)));
 	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
 }
-
+/*
 double calc_nrmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	double sum_squared_average = 0.0;
@@ -234,10 +234,16 @@ double calc_nrmse(const std::vector<double>& teacher_signal, const std::vector<d
 		}
 	}
 
-	//const double mse = sum_squared_average / (step - wash_out);本当はこっち
-	const double mse = sum_squared_average / sum_squared_predict_signal;//とりあえず
-	const double rmse = sqrt(mse);
+	const double mse = sum_squared_average / (step - wash_out);//本当はこっち
+	//const double mse = sum_squared_average / sum_squared_predict_signal;//とりあえず
+	//const double rmse = sqrt(mse);
 
-	//return rmse / (y_max - y_min);本当はこっち
-	return rmse;//変更予定　https://www.sciencedirect.com/science/article/pii/S1463500313001418　1序章より
+	return sqrt(mse / (y_max - y_min));//本当はこっち
+	//return rmse;//変更予定　https://www.sciencedirect.com/science/article/pii/S1463500313001418　1序章より
+
+}*/
+double calc_nrmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	//return (sqrt(calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step)));
+	return sqrt((calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step)));
 }
