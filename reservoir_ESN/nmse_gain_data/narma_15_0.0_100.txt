@@ -1,0 +1,8 @@
+
+function_name,input_gain,feed_gain,nmse
+mackey,1.0,1.0,1.0
+mackey,2.0,2.0,2.0
+mackey,3.0,3.0,3.0
+mackey,4.0,4.0,4.0
+
+
