@@ -42,35 +42,6 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 }
 typedef void (*FUNC)();
 
-void unit_test() {
-	const int M = 100, N = 3000;
-	std::vector<double> n(M, 0), n2(M, 0), y(N);
-	std::vector<std::vector<double>> r(N, std::vector<double>(M));
-	std::vector<std::vector<double>> r2(M, std::vector<double>(N));
-	std::vector<double> r3;
-
-	for (int t = 0; t < N; t++) y[t] = (t * 3 + 2) % 10 / 3.0 - 0.5;
-	for (int i = 0; i < M; i++) {
-		for (int t = 0; t < N; t++) {
-			r[t][i] = (t * 3 + 2 + i * 5) % 31 / 100.0 - 0.01;
-			r2[i][t] = (t * 3 + 2 + i * 5) % 31 / 100.0 - 0.01;
-		}
-	}
-	for (int i = 0; i < M * N; i++) {
-		r3.push_back(r[i % N][i / N]);
-	}
-	for (int i = 0; i < M; i++) {
-		for (int t = 0; t < N; t++) {
-			n[i] += r2[i][t] * y[t];
-		}
-	}
-	double alpha = 1.0, beta = 0.0;
-	cblas_dgemv(CblasRowMajor, CblasNoTrans, M, N, alpha, r3.data(), N, y.data(), 1, beta, n2.data(), 1);
-	for (int i = 0; i < M; i++) {
-		std::cerr << i << " " << n[i] << " " << n2[i] << std::endl;
-	}
-}
-
 int main(void) {
 
 	const int TRIAL_NUM = 3;	// ループ回数
