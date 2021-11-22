@@ -80,7 +80,7 @@ void generate_narma_task2(std::vector<double> input_signal, std::vector<double>&
 			}
 
 			teacher_signal[t] =
-				alpha * teacher_signal[t - 1] + beta * teacher_signal[t - 1] * sum + gamma * input_signal[t - tau - 1] * input_signal[t] + delta;
+				alpha * teacher_signal[t - 1] + beta * teacher_signal[t - 1] * sum + gamma * input_signal[t - tau] * input_signal[t] + delta;
 			if (tau > 9) teacher_signal[t] = tanh(teacher_signal[t]);  // NARMA(tau>=10)
 		}
 		else
