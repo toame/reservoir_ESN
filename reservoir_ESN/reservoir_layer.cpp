@@ -153,19 +153,19 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
 			//output_node[t][n] *= (1.0 - pow(e, -ξ));
-			//output_node[t][n] *= (1.0 - exp(-ξ));
-			output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
+			output_node[t][n] *= (1.0 - exp(-ξ));
+			//output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
-			//output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
-			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
+			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 		}
 	}
 
 
 
-	j = 70;
+	//j = 70;
 	/*//二次の時間遅延システム型時間発展式
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];

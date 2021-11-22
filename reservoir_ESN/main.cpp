@@ -15,10 +15,10 @@
 #define TEST (2)
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
-double mackey100(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
+double mg(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
 	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 2.0));//pa = 2-------------------------
 }
-double ikeda100(const double x, double J, double input_gain, double feed_gain) {
+double ikeda(const double x, double J, double input_gain, double feed_gain) {
 	return feed_gain * pow(sin(x + input_gain * J + 0.29), 2.0);
 }
 
@@ -31,7 +31,7 @@ double sinc(const double x, double J, double input_gain, double feed_gain) {
 	return feed_gain * (sin(PI * (x + input_gain * J)) / (PI * (x + input_gain * J)));
 }
 
-double expsin(const double x, double J, double input_gain, double feed_gain) {
+double exp(const double x, double J, double input_gain, double feed_gain) {
 	return feed_gain * exp(-x) * sin(x + input_gain * J);
 }
 
@@ -81,7 +81,7 @@ int main(void) {
 		const std::string task_name = task_names[r];
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "expsin", "mackey100","ikeda100",};//適宜他の
+		std::vector<std::string> function_names = { "mg","ikeda", "exp",  "sinc", "tanh",};//適宜他の
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -174,13 +174,13 @@ int main(void) {
 		for (auto function_name : function_names) {
 			//double (*nonlinear)(double);//変更
 			double (*nonlinear)(double, double, double, double);
-			if (function_name == "mackey100") nonlinear = mackey100;
-			//else if (function_name == "tanh") nonlinear = tanh;
+			if (function_name == "mg") nonlinear = mg;
+			else if (function_name == "tanh") nonlinear = tanh;
 			//else if (function_name == "gauss") nonlinear = gauss;
 			//else if (function_name == "oddsinc") nonlinear = oddsinc;
-			//else if (function_name == "sinc") nonlinear = sinc;
-			else if (function_name == "ikeda100") nonlinear = ikeda100;
-			else if (function_name == "expsin") nonlinear = expsin;
+			else if (function_name == "sinc") nonlinear = sinc;
+			else if (function_name == "ikeda") nonlinear = ikeda;
+			else if (function_name == "exp") nonlinear = exp;
 			else {
 				std::cerr << "error! " << function_name << "is not found" << std::endl;
 				return 0;
