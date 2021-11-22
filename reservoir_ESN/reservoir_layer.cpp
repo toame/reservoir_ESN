@@ -125,7 +125,8 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	double err_sum = 0.0;
 	for (int t = wash_out - 99; t <= wash_out; t++) {
 		for (int n = 1; n <= unit_size; n++) {
-			const double err = (output_node1[t][n] - output_node2[t][n]);
+			double err = (output_node1[t][n] - output_node2[t][n]);
+			if (std::max(output_node1[t][n], output_node2[t][n]) > 1000) err += 100000.0;
 			err_sum += err * err;
 		}
 	}
