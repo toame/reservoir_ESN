@@ -81,7 +81,7 @@ int main(void) {
 		const std::string task_name = task_names[r];
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "TDE_MG", "TDE_ikeda","TDE_exp",  };// "tanh", "sinc"は時間あれば
+		std::vector<std::string> function_names = { "TDE_MG",  "TDE_ikeda", "TDE_exp",  };// "tanh", "sinc"は時間あれば
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -93,8 +93,8 @@ int main(void) {
 				d_bias = 0.2;
 				//d_alpha = 0.05; alpha_min = 0.10; 現状これ(NARMA10も含めると)
 				//d_alpha = 0.05; alpha_min = 0.80;NARMA5に限ってはこっち
-				d_alpha = 0.05; alpha_min = 0.1;//τ = 30の時こっちのほうが良い性能だった
-				//d_alpha = 0.0; alpha_min = 0.0;
+				//d_alpha = 0.02; alpha_min = 0.4;//τ = 30の時こっちのほうが良い性能だった さっき
+				d_alpha = 0.05; alpha_min = 0.1;
 				//d_sigma = 0.07; sigma_min = 0.4;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
@@ -207,17 +207,18 @@ int main(void) {
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.8 + ite_input * 0.02;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
-						//const double input_gain = 0.1 + ite_input * 0.2;
-				 
-						//const double input_gain = 0.8 + ite_input * 0.1;
+						//const double input_gain = 0.45 + ite_input * 0.02;さっき
 						const double input_gain = 0.2 + ite_input * 0.1;
+				 
+						//const double input_gain = 0.0 + ite_input * 0.1;
+						//const double input_gain = 0.2 + ite_input * 0.02;
 						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//double opt_nmse = 1e+10;
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
-							//const double feed_gain = 0.75 + ite_feed * 0.05;
+							//const double feed_gain = 0.72 + ite_feed * 0.04;さっき
 
+							//const double feed_gain = 0.2 + ite_feed * 0.02;
 							const double feed_gain = 0.2 + ite_feed * 0.1;
-							//const double feed_gain = 0.8 + ite_feed * 0.1;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step; k++) {

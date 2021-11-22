@@ -255,7 +255,9 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 	for (int n = 1; n <= unit_size; n++) {
 		J[0][n] = input_signal_strength[n];
 		output_node[0][n] = activation_function(output_node[0][n], 0.0, node_type[n], J[0][n]);
+		//output_node[0][n] *= d / (1.0 + d); 
 		output_node[0][n] *= (1.0 - exp(-ƒÌ));
+		//output_node[0][n] += (1.0 / (1.0 + d)) * (output_node[0][n - 1]);
 		output_node[0][n] += exp(-ƒÌ) * (output_node[0][n - 1]);
 	}
 
@@ -333,7 +335,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	//std::cout << err_ave << "\n";
 	//std::cerr << err_sum << std::endl;
 	//std::cerr << input_signal_factor << " " << input_gain << " " << feed_gain << std::endl;
-	if (unit_size < 50) 
+	if (unit_size < 40) 
 		return err_ave <= 0.2;
 	else
 		return err_ave <= 0.1;//¢¢¢
