@@ -95,7 +95,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
 	//τ = (double) unit_size * 0.2;
-	d = 17.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
+	d = 7.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
 
 
@@ -128,10 +128,10 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 		J[0][n] = input_signal_strength[n];
 		output_node[0][n] = activation_function(output_node[0][n], 0.0, node_type[n], J[0][n]);
 		//output_node[0][n] *= (1.0 - pow(e, -ξ));
-		output_node[0][n] *= d / (1.0 + d); /////////////////////////////////////////////////////変更要素//////////////////////
-		//output_node[0][n] *= (1.0 - exp(-ξ));
-		//output_node[0][n] += exp(-ξ) * (output_node[0][n - 1]);
-		output_node[0][n] += (1.0 / (1.0 + d)) * (output_node[0][n - 1]);/////////////////////////////////////////変更要素////////////////////
+		//output_node[0][n] *= d / (1.0 + d); /////////////////////////////////////////////////////変更要素//////////////////////
+		output_node[0][n] *= (1.0 - exp(-ξ));
+		output_node[0][n] += exp(-ξ) * (output_node[0][n - 1]);
+		//output_node[0][n] += (1.0 / (1.0 + d)) * (output_node[0][n - 1]);/////////////////////////////////////////変更要素////////////////////
 	}
 
 	/*for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
@@ -240,7 +240,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	//const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 17.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
+	d = 7.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -333,7 +333,10 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	//std::cout << err_ave << "\n";
 	//std::cerr << err_sum << std::endl;
 	//std::cerr << input_signal_factor << " " << input_gain << " " << feed_gain << std::endl;
-	return err_ave <= 0.1;//△△△
+	if (unit_size < 50) 
+		return err_ave <= 0.2;
+	else
+		return err_ave <= 0.1;//△△△
 }
 
 double reservoir_layer::activation_function(const double x1,const double x2, const int type, const double J) {//ここの引数もっと増えるかも
@@ -366,7 +369,6 @@ double reservoir_layer::activation_function2(const double x1, const double x2, c
 //double reservoir_layer::activation_function(const double x, const int type) {
 	double x;
 	x = x1 + x2 + x3;
-	x /= 2;
 
 	if (type == LINEAR) {
 		return std::max(-1000.0, std::min(1000.0, x));
