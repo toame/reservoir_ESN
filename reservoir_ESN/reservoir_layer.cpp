@@ -240,7 +240,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	//const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 20.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
+	d = 17.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -260,22 +260,22 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 	}
 
 
-	/*
+	
 	//通常の時間遅延システム型時間発展式
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
-			output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n], J[t][n]);//ここの引数もっと増えるかも
+			output_node[t][n] = activation_function(output_node[t - 1][n], 0.0, node_type[n], J[t][n]);//ここの引数もっと増えるかも
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//output_node[t][n] *= (1.0 - pow(e, -ξ));
-			//output_node[t][n] *= (1.0 - exp(-ξ));
-			output_node[t][n] *= (d / (1.0 + d));///////////////////////////////////////////////////////////////
+			output_node[t][n] *= (1.0 - exp(-ξ));
+			//output_node[t][n] *= (d / (1.0 + d));///////////////////////////////////////////////////////////////
 			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
-			//output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
-			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);////////////////////////////////////
+			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);////////////////////////////////////
 		}
-		*/
-	//二次の時間遅延システム型時間発展式
+		
+/*	//二次の時間遅延システム型時間発展式
 	const int j = 2;
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
@@ -299,7 +299,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
 			//output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
-		}
+		}*/
 		for (int n = 1; n <= unit_size; n++) {
 			if (t >= wash_out && t < wash_out + 200)
 			//outputfile << t << "," << n << "," << input_sum_node[n] << "," << output_node[t + 1][n] << std::endl;
@@ -333,7 +333,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	//std::cout << err_ave << "\n";
 	//std::cerr << err_sum << std::endl;
 	//std::cerr << input_signal_factor << " " << input_gain << " " << feed_gain << std::endl;
-	return err_ave <= 0.05;//△△△
+	return err_ave <= 0.1;//△△△
 }
 
 double reservoir_layer::activation_function(const double x1,const double x2, const int type, const double J) {//ここの引数もっと増えるかも
