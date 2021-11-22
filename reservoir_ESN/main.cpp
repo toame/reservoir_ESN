@@ -47,7 +47,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
 	const int step = 4000;
 	const int wash_out = 400;
-	std::vector<int> unit_sizes = { 100 };
+	std::vector<int> unit_sizes = { 50 };
 	std::vector<std::string> task_names = { "NL" };
 	if (unit_sizes.size() != task_names.size()) return 0;
 	std::vector<int> param1 = {
@@ -132,12 +132,7 @@ int main(void) {
 			task_size[3] = teacher_signals[phase].size();
 		}
 		// 設定出力
-		outputfile << "### task_name: " << task_name << std::endl;
-		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;
-		outputfile << "### input_signal_factor [" << alpha_set.front() << ", " << alpha_set.back() << "]" << std::endl;
-		outputfile << "### weight_factor [" << sigma_set.front() << ", " << sigma_set.back() << "]" << std::endl;
-		outputfile << "### bias_factor [" << bias_set.front() << ", " << bias_set.back() << "]" << std::endl;
-		outputfile << "function_name,seed,unit_size,p,input_signal_factor,bias_factor,weight_factor,train_L,L,L_log";
+		outputfile << "topology,function_name,seed,unit_size,p,input_signal_factor,bias_factor,weight_factor,train_L,L,L_log";
 		for (int i = 1; i <= 6; i++) {
 			outputfile << ",Lx_" << std::to_string(i);
 		}
@@ -331,7 +326,7 @@ int main(void) {
 							const double weight_factor = sigma_set[(k % sigma_step)];
 							double bias_factor1 = bias_factor;
 							if (bias_factor1 < 0) bias_factor1 = input_signal_factor * weight_factor;
-							outputfile << function_name << "," << loop << "," << unit_size << "," << p << "," << input_signal_factor << "," << bias_factor1 << "," << weight_factor;
+							outputfile << "random," << function_name << "," << loop << "," << unit_size << "," << p << "," << input_signal_factor << "," << bias_factor1 << "," << weight_factor;
 							outputfile << "," << train_L[k] << "," << L[k] << "," << L_log[k];
 							for (int i = 0; i < 6; i++) {
 								outputfile << "," << Lx[k][i];
