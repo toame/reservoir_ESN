@@ -187,7 +187,7 @@ int main(void) {
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 8; ite_p <= 10; ite_p += 1) {//論文　手順２
+				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
