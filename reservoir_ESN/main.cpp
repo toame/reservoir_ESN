@@ -60,7 +60,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 300 };
+	std::vector<int> unit_sizes = { 20 };
 
 	std::vector<std::string> task_names = { "narma"};
 	if (unit_sizes.size() != task_names.size()) return 0;
@@ -111,7 +111,7 @@ int main(void) {
 			}
 			else if (task_name == "henon") {
 
-				d_bias = 1.0;
+				//d_bias = 1.0;
 				d_alpha = 1.0; alpha_min = 1.0;
 				//d_sigma = 0.04; sigma_min = 0.04;
 				const int fstep = param1[r];
