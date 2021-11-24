@@ -16,7 +16,7 @@
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
 double TDE_MG(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 6.0));//ρ = 2-------------------------
+	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 8.0));//ρ = 2-------------------------
 }
 double TDE_ikeda(const double x, double J, double input_gain, double feed_gain) {
 	return feed_gain * pow(sin(x + input_gain * J + 0.4), 2.0);
@@ -60,7 +60,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 50 };
+	std::vector<int> unit_sizes = { 300 };
 
 	std::vector<std::string> task_names = { "henon"};
 	if (unit_sizes.size() != task_names.size()) return 0;
@@ -185,7 +185,7 @@ int main(void) {
 			double (*nonlinear)(double, double, double, double);
 			if (function_name == "TDE_MG") {
 				nonlinear = TDE_MG;
-				d_alpha = 0.2; alpha_min = 3.0;
+				d_alpha = 0.1; alpha_min = 1.5;
 			}
 			else if (function_name == "tanh") nonlinear = tanh;
 			//else if (function_name == "gauss") nonlinear = gauss;
@@ -202,7 +202,7 @@ int main(void) {
 			}
 
 			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
+				for (int ite_p = 5; ite_p <= 10; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
@@ -218,7 +218,7 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					//std::ofstream outputfile2("nmse_gain_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 					//outputfile2 << "function_name,input_gain,feed_gain,opt_nmse" << std::endl;
-					for (int ite_input = 1; ite_input <= 10; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
+					for (int ite_input = 1; ite_input <= 5; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.7 + ite_input * 0.05;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
@@ -226,15 +226,15 @@ int main(void) {
 						//const double input_gain = 0.0 + ite_input * 0.1;
 				 
 						//const double input_gain = 0.0 + ite_input * 0.02;
-						const double input_gain = 0.7 + ite_input * 0.04;
-						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
+						const double input_gain = 0.7 + ite_input * 0.05;
+						for (int ite_feed = 1; ite_feed <= 5; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//double opt_nmse = 1e+10;
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 							//const double feed_gain = 0.72 + ite_feed * 0.04;
 							//const double feed_gain = 0.65 + ite_feed * 0.04;
 							//const double feed_gain = 0.8 + ite_feed * 0.02;
 							//const double feed_gain = 0.2 + ite_feed * 0.1;
-							const double feed_gain = 0.2 + ite_feed * 0.02;
+							const double feed_gain = 0.2 + ite_feed * 0.04;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step; k++) {
