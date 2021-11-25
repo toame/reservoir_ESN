@@ -95,9 +95,8 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
 	//τ = (double) unit_size * 0.2;
-	d = 20.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
+	d = 17.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
-
 
 	/*
 	τ = 95 err_ave  0.1345
@@ -240,7 +239,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	//const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 20.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
+	d = 52.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
