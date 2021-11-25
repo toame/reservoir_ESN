@@ -62,10 +62,10 @@ int main(void) {
 	const int wash_out = 500; 
 	std::vector<int> unit_sizes = { 20 };
 
-	std::vector<std::string> task_names = { "henon"};
+	std::vector<std::string> task_names = { "approx"};
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 7 };
-	std::vector<double> param2 = { 0};
+	std::vector<int> param1 = { 5 };
+	std::vector<double> param2 = { 1.5};
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
