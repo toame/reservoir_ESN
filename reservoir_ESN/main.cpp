@@ -16,7 +16,7 @@
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
 double TDE_MG(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 4.0));//ρ = 2-------------------------
+	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 8.0));//ρ = 2-------------------------
 }
 double TDE_ikeda(const double x, double J, double input_gain, double feed_gain) {
 	return feed_gain * pow(sin(x + input_gain * J + 0.3), 2.0);
@@ -81,7 +81,7 @@ int main(void) {
 		const std::string task_name = task_names[r];
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "TDE_MG",   "TDE_ikeda",        };// "tanh", "sinc"は時間あれば
+		std::vector<std::string> function_names = { "TDE_MG",  "TDE_ikeda",           };// "tanh", "sinc"は時間あれば
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -193,7 +193,7 @@ int main(void) {
 			else if (function_name == "sinc") nonlinear = sinc;
 			else if (function_name == "TDE_ikeda") {
 				nonlinear = TDE_ikeda;
-				d_alpha = 0.5; alpha_min = 14.0;
+				d_alpha = 1.0; alpha_min = 10.0;
 			}
 			else if (function_name == "TDE_exp") nonlinear = TDE_exp;
 			else {
