@@ -46,10 +46,10 @@ int main(void) {
 											"narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",  "laser", "laser", "laser", "henon", "henon", };
 	if (unit_sizes.size() != task_names.size()) return 0;
 	std::vector<int> param1 = {
-								   5, 10, 5, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10, 5,// 7,
+								   3, 10, 5, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10, 5,// 7,
 									  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,  1, 3, 10, 5, 7 };
 	std::vector<double> param2 = {
-									 1.5, 0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,  0,// 0,
+									 5.0, 0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,  0,// 0,
 								  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  	0, 0, 0,  0, 0 };
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
