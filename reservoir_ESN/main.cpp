@@ -19,7 +19,7 @@ double TDE_MG(const double x, double J, double input_gain, double feed_gain) {//
 	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 10.0));//ρ = 2-------------------------
 }
 double TDE_ikeda(const double x, double J, double input_gain, double feed_gain) {
-	return feed_gain * pow(sin(x + input_gain * J + 0.65), 2.0);
+	return feed_gain * pow(sin(x + input_gain * J + 0.35), 2.0);
 }
 
 double tanh(const double x, double J, double input_gain, double feed_gain) {
@@ -60,7 +60,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 20 };
+	std::vector<int> unit_sizes = { 100 };
 
 	std::vector<std::string> task_names = { "approx"};
 	if (unit_sizes.size() != task_names.size()) return 0;
@@ -196,7 +196,7 @@ int main(void) {
 			else if (function_name == "sinc") nonlinear = sinc;
 			else if (function_name == "TDE_ikeda") {
 				nonlinear = TDE_ikeda;
-				d_alpha = 0.5; alpha_min = 10.0;
+				d_alpha = 0.5; alpha_min = 5.0;
 			}
 			else if (function_name == "TDE_exp") {
 				nonlinear = TDE_exp;
@@ -207,8 +207,8 @@ int main(void) {
 				return 0;
 			}
 
-			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
+			for (int loop = 0; loop < 2; loop++) {//論文 p12 ばらつき低減
+				for (int ite_p = 1; ite_p <= 3; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
