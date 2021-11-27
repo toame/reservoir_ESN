@@ -16,10 +16,10 @@
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
 double TDE_MG(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 10.0));//ρ = 2-------------------------
+	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 1.0));//ρ = 2-------------------------
 }
 double TDE_ikeda(const double x, double J, double input_gain, double feed_gain) {
-	return feed_gain * pow(sin(x + input_gain * J + 0.6), 2.0);
+	return feed_gain * pow(sin(x + input_gain * J + 0.7), 2.0);
 }
 
 double tanh(const double x, double J, double input_gain, double feed_gain) {
@@ -60,12 +60,12 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 300 };
+	std::vector<int> unit_sizes = { 50 };
 
-	std::vector<std::string> task_names = { "approx"};
+	std::vector<std::string> task_names = { "laser"};
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 3 };
-	std::vector<double> param2 = { 5.0};
+	std::vector<int> param1 = { 1 };
+	std::vector<double> param2 = { 0.0};
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -81,7 +81,7 @@ int main(void) {
 		const std::string task_name = task_names[r];
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "TDE_MG",  "TDE_ikeda",                            };//  "sinc"は時間あれば
+		std::vector<std::string> function_names = { "TDE_MG", "TDE_ikeda",                             };//  "sinc"は時間あれば
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -130,7 +130,7 @@ int main(void) {
 				//このタスクでは、サンタフェ時系列競争の混沌とした時系列の一歩先の予測をおこなう
 				// とくにカオス領域で動作する赤外線レーザーによって作成されたデータセット1万ポイントの継続ファイルを使用
 				d_bias = 0.5;
-				d_alpha = 2.0; alpha_min = 0.1;
+				//d_alpha = 2.0; alpha_min = 0.1;
 				d_sigma = 0.1; sigma_min = 0.1;
 				const int fstep = param1[r];
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
@@ -185,7 +185,7 @@ int main(void) {
 			double (*nonlinear)(double, double, double, double);
 			if (function_name == "TDE_MG") {
 				nonlinear = TDE_MG;
-				d_alpha = 0.5; alpha_min = 4.0;
+				d_alpha = 0.1; alpha_min = 0.2;
 			}
 			else if (function_name == "tanh") {
 				//d_alpha = 0.2; alpha_min = 15.0;
@@ -196,7 +196,7 @@ int main(void) {
 			else if (function_name == "sinc") nonlinear = sinc;
 			else if (function_name == "TDE_ikeda") {
 				nonlinear = TDE_ikeda;
-				d_alpha = 1.0; alpha_min = 10.0;
+				d_alpha = 0.2; alpha_min = 0.6;
 			}
 			else if (function_name == "TDE_exp") {
 				nonlinear = TDE_exp;
@@ -228,7 +228,7 @@ int main(void) {
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.8 + ite_input * 0.05;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
-						//const double input_gain = 0.5 + ite_input * 0.05;
+						//const double input_gain = 0.2 + ite_input * 0.02;
 						//const double input_gain = 0.1 + ite_input * 0.1;
 				 
 						//const double input_gain = 0.55 + ite_input * 0.05;
