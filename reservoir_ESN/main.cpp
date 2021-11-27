@@ -81,7 +81,7 @@ int main(void) {
 		const std::string task_name = task_names[r];
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "TDE_MG", "TDE_ikeda",                           };//  "sinc"は時間あれば
+		std::vector<std::string> function_names = { "TDE_MG",  "TDE_ikeda",                            };//  "sinc"は時間あれば
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -185,7 +185,7 @@ int main(void) {
 			double (*nonlinear)(double, double, double, double);
 			if (function_name == "TDE_MG") {
 				nonlinear = TDE_MG;
-				d_alpha = 0.2; alpha_min = 5.0;
+				d_alpha = 0.5; alpha_min = 4.0;
 			}
 			else if (function_name == "tanh") {
 				//d_alpha = 0.2; alpha_min = 15.0;
@@ -196,7 +196,7 @@ int main(void) {
 			else if (function_name == "sinc") nonlinear = sinc;
 			else if (function_name == "TDE_ikeda") {
 				nonlinear = TDE_ikeda;
-				d_alpha = 0.5; alpha_min = 5.0;
+				d_alpha = 1.0; alpha_min = 10.0;
 			}
 			else if (function_name == "TDE_exp") {
 				nonlinear = TDE_exp;
@@ -207,8 +207,8 @@ int main(void) {
 				return 0;
 			}
 
-			for (int loop = 0; loop < 1; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 1; ite_p <= 2; ite_p += 1) {//論文　手順２
+			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
+				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
@@ -224,7 +224,7 @@ int main(void) {
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					//std::ofstream outputfile2("nmse_gain_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
 					//outputfile2 << "function_name,input_gain,feed_gain,opt_nmse" << std::endl;
-					for (int ite_input = 1; ite_input <= 5; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
+					for (int ite_input = 1; ite_input <= 10; ite_input += 1) {//入力ゲイン(τ = 95 pa = 2 ノード100の時は 1～1.3付近で最適なリザバーが出来上がっていた(あと、NARMAタスク, d_bias = 0.4 d_alpha = 0.05, d_sigma = 0.07))
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.8 + ite_input * 0.05;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
@@ -232,15 +232,15 @@ int main(void) {
 						//const double input_gain = 0.1 + ite_input * 0.1;
 				 
 						//const double input_gain = 0.55 + ite_input * 0.05;
-						const double input_gain = 0.7 + ite_input * 0.08;
-						for (int ite_feed = 1; ite_feed <= 5; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
+						const double input_gain = 0.7 + ite_input * 0.04;
+						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//double opt_nmse = 1e+10;
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 							//const double feed_gain = 0.72 + ite_feed * 0.04;
 							//const double feed_gain = 0.5 + ite_feed * 0.05;
 						    //const double feed_gain = 0.8 + ite_feed * 0.04;
 							//const double feed_gain = 0.1 + ite_feed * 0.1;
-							const double feed_gain = 0.2 + ite_feed * 0.04;
+							const double feed_gain = 0.2 + ite_feed * 0.02;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step; k++) {
