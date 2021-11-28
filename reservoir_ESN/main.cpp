@@ -60,7 +60,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 50 };
+	std::vector<int> unit_sizes = { 100 };
 
 	std::vector<std::string> task_names = { "laser"};
 	if (unit_sizes.size() != task_names.size()) return 0;
@@ -207,8 +207,8 @@ int main(void) {
 				return 0;
 			}
 
-			for (int loop = 0; loop < 2; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 5; ite_p <= 6; ite_p += 1) {//論文　手順２
+			for (int loop = 0; loop < 1; loop++) {//論文 p12 ばらつき低減
+				for (int ite_p = 5; ite_p <= 8; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
