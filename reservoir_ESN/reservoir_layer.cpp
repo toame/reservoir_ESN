@@ -95,7 +95,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
 	//τ = (double) unit_size * 0.2;
-	d = 52.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
+	d = 13.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
 
 	/*
