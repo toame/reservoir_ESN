@@ -19,7 +19,7 @@ double TDE_MG(const double x, double J, double input_gain, double feed_gain) {//
 	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 1.0));//ρ = 2-------------------------
 }
 double TDE_ikeda(const double x, double J, double input_gain, double feed_gain) {
-	return feed_gain * pow(sin(x + input_gain * J + 0.65), 2.0);
+	return feed_gain * pow(sin(x + input_gain * J + 0.15), 2.0);
 }
 
 double tanh(const double x, double J, double input_gain, double feed_gain) {
@@ -60,7 +60,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 20 };
+	std::vector<int> unit_sizes = { 50 };
 
 	std::vector<std::string> task_names = { "laser"};
 	if (unit_sizes.size() != task_names.size()) return 0;
@@ -81,7 +81,7 @@ int main(void) {
 		const std::string task_name = task_names[r];
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "TDE_MG", "TDE_ikeda",                              };//  "sinc"は時間あれば
+		std::vector<std::string> function_names = { "TDE_MG", "TDE_ikeda",                               };//  "sinc"は時間あれば
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -207,8 +207,8 @@ int main(void) {
 				return 0;
 			}
 
-			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
+			for (int loop = 0; loop < 2; loop++) {//論文 p12 ばらつき低減
+				for (int ite_p = 5; ite_p <= 6; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
