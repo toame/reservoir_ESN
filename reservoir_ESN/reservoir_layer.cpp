@@ -239,7 +239,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	//const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 38.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
+	d = 46.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
