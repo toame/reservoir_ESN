@@ -24,7 +24,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const double iss_factor, c
 	a.resize(6);
 	b.resize(2);
 	this->j = j;
-	this->j2 = j2;
+	//this->j2 = j2;
 }
 
 
@@ -95,7 +95,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
 	//τ = (double) unit_size * 0.2;
-	d = 17.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
+	d = 33.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
 
 	/*
@@ -144,29 +144,29 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	}*/
 
 
-	/*	//通常の時間遅延システム型時間発展式
-		for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
-			output_node[t][0] = output_node[t - 1][unit_size];
-			for (int n = 1; n <= unit_size; n++) {
-				output_node[t][n] = activation_function(output_node[t - 1][n], 0.0, node_type[n], J[t][n]);//ここの引数もっと増えるかも
+		/*//通常の時間遅延システム型時間発展式
+	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
+		output_node[t][0] = output_node[t - 1][unit_size];
+		for (int n = 1; n <= unit_size; n++) {
+			output_node[t][n] = activation_function(output_node[t - 1][n], 0.0, node_type[n], J[t][n]);//ここの引数もっと増えるかも
 				//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 				//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
 				//output_node[t][n] *= (1.0 - pow(e, -ξ));
-				output_node[t][n] *= (1.0 - exp(-ξ));
+			output_node[t][n] *= (1.0 - exp(-ξ));
 				//output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
 				//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 				//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
-				output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
 				//output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
 				//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
-			}
-		}*/
+		}
+	}*/
 
 
 
 
 		//二次の時間遅延システム型時間発展式
-	j = 30;
+	j = 80;
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -190,12 +190,12 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 			//output_node[t][n] = activation_function(output_node[t - 1][n], node_type[n]);
 			//if (n == 1) std::cerr << t << " " << output_node[t - 1][n] << " "<< output_node[t][n] << std::endl;
 			//output_node[t][n] *= (1.0 - pow(e, -ξ));
-			//output_node[t][n] *= (1.0 - exp(-ξ));
-			output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
+			output_node[t][n] *= (1.0 - exp(-ξ));
+			//output_node[t][n] *= (d / (1.0 + d));/////////////////////////////////////結構よかった//////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
-			//output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
-			output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
+			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
+			//output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);//////////////結構よかった/////////////////////
 			//if (n == 1) std::cerr << t << " " << output_node[t][n] << std::endl;
 			//if (n == unit_size) std::cerr << t << " " << output_node[t][n] << std::endl;
 		}
@@ -273,10 +273,11 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 			//output_node[t][n] += pow(e, -ξ) * (output_node[t][n - 1]);
 			output_node[t][n] += exp(-ξ) * (output_node[t][n - 1]);
 			//output_node[t][n] += (1.0 / (1.0 + d)) * (output_node[t][n - 1]);////////////////////////////////////
-		}*/
+		}
+	}*/
 		
 	//二次の時間遅延システム型時間発展式
-	const int j = 15;
+	const int j = 80;
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -333,11 +334,11 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	//std::cout << err_ave << "\n";
 	//std::cerr << err_sum << std::endl;
 	//std::cerr << input_signal_factor << " " << input_gain << " " << feed_gain << std::endl;
-	if (unit_size < 40)
+	/*if (unit_size < 40)
 		return err_ave <= 0.2;
 	else
-		return err_ave <= 0.1;//△△△
-	//return err_ave <= 0.2;
+		return err_ave <= 0.1;//△△△*/
+	return err_ave <= 0.2;
 }
 
 double reservoir_layer::activation_function(const double x1,const double x2, const int type, const double J) {//ここの引数もっと増えるかも
@@ -365,7 +366,7 @@ double reservoir_layer::activation_function(const double x1,const double x2, con
 	return -1.0;
 }
 
-
+/*
 double reservoir_layer::activation_function2(const double x1, const double x2, const double x3, const int type, const double J) {//ここの引数もっと増えるかも
 //double reservoir_layer::activation_function(const double x, const int type) {
 	double x;
@@ -390,4 +391,4 @@ double reservoir_layer::activation_function2(const double x1, const double x2, c
 	assert(type != LINEAR && type != NON_LINEAR);  //?
 	return -1.0;
 }
-  
+*/
