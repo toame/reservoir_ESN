@@ -185,7 +185,7 @@ double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {//
 double calc_mean_squared_average(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	double sum_squared_average = 0.0;
-	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);//predict —\‘ª
+	std::ofstream outputfile("output_predict_STDE/" + name + ".txt", std::ios::app);//predict —\‘ª
 	if (show)
 		outputfile << "t,predict_test,teacher" << std::endl;
 	for (int t = wash_out + 1; t < step; t++) {

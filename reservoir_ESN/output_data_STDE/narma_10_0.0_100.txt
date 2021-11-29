@@ -1,0 +1,5 @@
+### task_name: narma
+### 10 0
+### input_signal_factor [0.4, 0.6]
+function_name,seed,unit_size,p,input_singal_factor,input_gain,feed_gain,lm,train_nmse,nmse,test_nmse,test_nrmse
+STDE_MG,0,100,0.6000,0.5800,1.0000,1.0400,1.0000,0.19348119,0.20534027,0.19023928,0.43616428
