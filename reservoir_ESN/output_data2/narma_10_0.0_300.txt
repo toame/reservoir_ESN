@@ -1,0 +1,7 @@
+### task_name: narma
+### 10 0
+### input_signal_factor [0.002, 0.052]
+### weight_factor [0.1, 1.1]
+function_name,seed,unit_size,p,input_singal_factor,bias_factor,weight_factor,lm,train_nmse,nmse,test_nmse
+sinc,0,300,0.0000,0.0020,0.8000,0.7800,0.0000,0.13611575,0.14705350,0.13154632
+sinc,0,300,0.1000,0.0420,0.8000,0.7800,0.0000,0.00863036,0.02054026,0.00994419

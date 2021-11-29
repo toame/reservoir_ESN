@@ -38,7 +38,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
 	const int step = 3000;
 	const int wash_out = 500;
-	std::vector<int> unit_sizes = { 50,  50,  50,  50,  50,  50,  50,  50
+	std::vector<int> unit_sizes = { 300,  300,  300,  300,  300,  300,  300,  300
 									/*100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
 									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200*/ };
 	std::vector<std::string> task_names = { "narma", "narma","laser", "laser","approx", "approx","henon", "henon"
@@ -46,7 +46,7 @@ int main(void) {
 											/* "approx","narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon", //"henon",
 											"narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",  "laser", "laser", "laser", "henon", "henon",*/ };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = {10,  20,  1,  3,  3,  5,  5,  7
+	std::vector<int> param1 = {10, 20,  1,  3,  3,  5,  5,  7
 
 								  /* 3, 10, 5, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10, 5,// 7,
 									  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,  1, 3, 10, 5, 7*/ };
@@ -70,7 +70,7 @@ int main(void) {
 
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "sinc" };
+		std::vector<std::string> function_names = { "RND_ESN：sinc" };
 		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
 		double d_bias;
