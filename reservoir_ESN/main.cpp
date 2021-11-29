@@ -14,7 +14,7 @@
 #define VAL (1)
 #define TEST (2)
 #define MAX_NODE_SIZE (500)
-double sinc(const double x) {
+double RND_sinc(const double x) {
 	if (x == 0) return 1.0;
 	return sin(PI * x) / (PI * x);
 }
@@ -70,7 +70,7 @@ int main(void) {
 
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "RND_ESN：sinc" };
+		std::vector<std::string> function_names = { "RND_sinc" };
 		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -154,7 +154,7 @@ int main(void) {
 		std::chrono::system_clock::time_point  start, end; // 型は auto で可
 		for (auto function_name : function_names) {
 			double (*nonlinear)(double);
-			if (function_name == "sinc") nonlinear = sinc;
+			if (function_name == "RND_sinc") nonlinear = RND_sinc;
 			else if (function_name == "tanh") nonlinear = tanh;
 			else if (function_name == "gauss") nonlinear = gauss;
 			else if (function_name == "oddsinc") nonlinear = oddsinc;
