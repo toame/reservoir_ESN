@@ -1,13 +1,13 @@
 import pandas as pd
 import os
 from matplotlib import pyplot as plt
-folder = "output_data_mix/"
+folder = "Various_ESN_comparison/"
 for name in os.listdir(folder):
     #name = "approx_3_3.0_100"
     name = os.path.splitext(os.path.basename(name))[0]
     df = pd.read_csv(folder + name + '.txt', sep=',',comment='#')
     p_list = df["p"].unique()
-    function_names = ["mackey", "sinc", "oddsinc", "gauss"];
+    function_names = ["TD_MG", "TD_ikeda","RND_sinc"];
     for function_name in function_names:
         data_x, data_y = [], []
         for p in p_list:
