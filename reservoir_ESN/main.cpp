@@ -15,10 +15,10 @@
 #define TEST (2)
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
-double STDE_MG(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
+double TD_MG(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
 	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 2.0));//ρ = 2-------------------------
 }
-double STDE_ikeda(const double x, double J, double input_gain, double feed_gain) {
+double TD_ikeda(const double x, double J, double input_gain, double feed_gain) {
 	return feed_gain * pow(sin(x + input_gain * J + 0.35), 2.0);
 }
 
@@ -60,7 +60,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 300 };
+	std::vector<int> unit_sizes = { 100 };
 
 	std::vector<std::string> task_names = { "narma"};
 	if (unit_sizes.size() != task_names.size()) return 0;
@@ -81,7 +81,7 @@ int main(void) {
 		const std::string task_name = task_names[r];
 		std::vector<std::vector<double>> input_signal(PHASE_NUM), teacher_signal(PHASE_NUM);
 
-		std::vector<std::string> function_names = { "STDE_MG", "STDE_ikeda", };// "STDE_MG", "STDE_ikeda",      "STDE_exp",                          };//  "sinc"は時間あれば
+		std::vector<std::string> function_names = { "TD_ikeda", "TD_MG",  };// "STDE_MG", "STDE_ikeda",      "STDE_exp",                          };//  "sinc"は時間あれば
 		double alpha_min, d_alpha;//タスクによって最小値が変わる　
 		double sigma_min, d_sigma;
 		double d_bias;
@@ -90,12 +90,12 @@ int main(void) {
 		for (int phase = 0; phase < PHASE_NUM; phase++) {//論文　手順１
 			
 			if (task_name == "narma") {
-				d_bias = 0.2;
+				//d_bias = 0.2;
 				//d_alpha = 0.05; alpha_min = 0.10; 現状これ(NARMA10も含めると)
 				//d_alpha = 0.05; alpha_min = 0.80;NARMA5に限ってはこっち
-				d_alpha = 0.02; alpha_min = 0.4;
+				d_alpha = 5.0; alpha_min = 5.0;
 				//d_alpha = 0.02; alpha_min = 0.4;
-				d_sigma = 0.07; sigma_min = 0.4;
+				//d_sigma = 0.07; sigma_min = 0.4;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
@@ -183,8 +183,8 @@ int main(void) {
 		for (auto function_name : function_names) {
 			//double (*nonlinear)(double);//変更
 			double (*nonlinear)(double, double, double, double);
-			if (function_name == "STDE_MG") {
-				nonlinear = STDE_MG;
+			if (function_name == "TD_MG") {
+				nonlinear = TD_MG;
 				//d_alpha = 0.05; alpha_min = 0.1;
 			}
 			else if (function_name == "tanh") {
@@ -194,8 +194,8 @@ int main(void) {
 			//else if (function_name == "gauss") nonlinear = gauss;
 			//else if (function_name == "oddsinc") nonlinear = oddsinc;
 			else if (function_name == "sinc") nonlinear = sinc;
-			else if (function_name == "STDE_ikeda") {
-				nonlinear = STDE_ikeda;
+			else if (function_name == "TD_ikeda") {
+				nonlinear = TD_ikeda;
 				//d_alpha = 0.05; alpha_min = 0.1;
 			}
 			else if (function_name == "STDE_exp") {
@@ -207,8 +207,8 @@ int main(void) {
 				return 0;
 			}
 
-			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 8; ite_p <= 10; ite_p += 1) {//論文　手順２
+			for (int loop = 0; loop < 1; loop++) {//論文 p12 ばらつき低減
+				for (int ite_p = 6; ite_p <= 10; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
@@ -228,19 +228,19 @@ int main(void) {
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 0.8 + ite_input * 0.05;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
-						//const double input_gain = 0.2 + ite_input * 0.02;
+						const double input_gain = 0.2 + ite_input * 0.02;
 						//const double input_gain = 0.1 + ite_input * 0.1;
 						//const double input_gain = 0.5 + ite_input * 0.05;
-						const double input_gain = 0.05 + ite_input * 0.0;
+						//const double input_gain = 0.05 + ite_input * 0.0;
 						//const double input_gain = 0.7 + ite_input * 0.04;
 						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//double opt_nmse = 1e+10;
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
-							//const double feed_gain = 0.72 + ite_feed * 0.04;
+							const double feed_gain = 0.72 + ite_feed * 0.04;
 							//const double feed_gain = 0.5 + ite_feed * 0.05;
 						    //const double feed_gain = 0.8 + ite_feed * 0.04;
 							//const double feed_gain = 0.3 + ite_feed * 0.02;
-							const double feed_gain = 0.75 + ite_feed * 0.02;
+							//const double feed_gain = 0.75 + ite_feed * 0.02;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 							for (int k = 0; k < alpha_step; k++) {
