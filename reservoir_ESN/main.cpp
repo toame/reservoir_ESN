@@ -162,7 +162,7 @@ int main(void) {
 				std::cerr << "error! " << function_name << "is not found" << std::endl;
 				return 0;
 			}
-			for (int loop = 0; loop < 1; loop++) {
+			for (int loop = 0; loop < TRIAL_NUM; loop++) {
 				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;
