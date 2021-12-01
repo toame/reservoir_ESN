@@ -46,7 +46,7 @@ int main(void) {
 											/* "approx","narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon", //"henon",
 											"narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",  "laser", "laser", "laser", "henon", "henon",*/ };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = {  10,  20,  1,  3,  3,  5, 5,  7 ,
+	std::vector<int> param1 = {  20,  20,  1,  3,  3,  5, 5,  7 ,
 
 								  /* 3, 10, 5, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10, 5,// 7,
 									  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,  1, 3, 10, 5, 7*/ };
@@ -184,7 +184,7 @@ int main(void) {
 							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
-							reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);//ノード20の時 「結合数をノード数/5」に変更
+							reservoir_layer reservoir_layer1(unit_size, unit_size / 5, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);//ノード20の時 「結合数をノード数/5」に変更
 							reservoir_layer1.generate_reservoir();
 
 							reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
