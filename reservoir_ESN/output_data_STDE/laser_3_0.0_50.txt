@@ -1,4 +1,6 @@
 ### task_name: laser
 ### 3 0
-### input_signal_factor [3.57738e-312, 3.93512e-311]
+### input_signal_factor [3.71023e-313, 4.08126e-312]
 function_name,seed,unit_size,p,input_singal_factor,input_gain,feed_gain,lm,train_nmse,nmse,test_nmse,test_nrmse
+TD_MG,0,50,0.3000,0.0000,0.0500,0.9500,5.0000,2.33783192,2.48904570,2.76891438,0.44756317
+TD_MG,0,50,0.4000,0.0000,0.0500,0.9500,5.0000,2.40774913,2.56910317,2.87089251,2.59721797
