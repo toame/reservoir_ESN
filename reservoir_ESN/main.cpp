@@ -38,19 +38,19 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
 	const int step = 3000;
 	const int wash_out = 500;
-	std::vector<int> unit_sizes = { 40,  40,  20,  20,  20,  20,  20,  20
+	std::vector<int> unit_sizes = { 20,  20,  20,  20,  20,  20,  20,  20
 									/*100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
 									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200*/ };
-	std::vector<std::string> task_names = { "henon", "henon",  "narma", "narma","laser", "laser", "approx", "approx",
+	std::vector<std::string> task_names = {  "narma", "narma","laser", "laser", "approx", "approx", "henon", "henon",
 
 											/* "approx","narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx","laser", "laser", "laser", "henon", //"henon",
 											"narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",  "laser", "laser", "laser", "henon", "henon",*/ };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 5,  7 ,  10,  20,  1,  3,  3,  5,
+	std::vector<int> param1 = {  10,  20,  1,  3,  3,  5, 5,  7 ,
 
 								  /* 3, 10, 5, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10, 5,// 7,
 									  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,  1, 3, 10, 5, 7*/ };
-	std::vector<double> param2 = { 0.0,  0.0,  0.0,  0.0,  0.0,  0.0,  5.0,  1.5,
+	std::vector<double> param2 = {  0.0,  0.0,  0.0,  0.0,  5.0,  1.5,  0.0,  0.0,
 									/* 5.0, 0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,  0,// 0,
 								  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  	0, 0, 0,  0, 0*/ };
 	if (param1.size() != param2.size()) return 0;
@@ -184,7 +184,7 @@ int main(void) {
 							const double input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
 							const double weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 
-							reservoir_layer reservoir_layer1(unit_size, unit_size / 10, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);
+							reservoir_layer reservoir_layer1(unit_size, unit_size / 4, input_signal_factor, weight_factor, bias_factor, p, nonlinear, loop, wash_out);//ノード20の時 「結合数をノード数/5」に変更
 							reservoir_layer1.generate_reservoir();
 
 							reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
