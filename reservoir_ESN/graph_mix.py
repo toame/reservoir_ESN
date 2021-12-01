@@ -16,7 +16,17 @@ for name in os.listdir(folder):
         #plt.ylim(0, 0.3)
         plt.yscale("log")
         plt.plot(data_x, data_y, marker="o", label = function_name)
+    plt.xlabel("p",size=12)
+    plt.ylabel("NMSE",size=12)
     plt.legend(loc = "best")
+    plt.subplots_adjust(left=0.15,
+                    bottom=0.1, 
+                    right=0.9, 
+                    top=0.9, 
+                    wspace=0.2, 
+                    hspace=0.35)
+    #plt.tight_layout()
+    #plt.figure(figsize=(20,20))
     #plt.show()
     plt.savefig(name + ".png", dpi = 300)
     plt.cla()
