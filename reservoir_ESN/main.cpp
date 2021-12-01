@@ -60,7 +60,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 100 };
+	std::vector<int> unit_sizes = { 50 };
 
 	std::vector<std::string> task_names = { "laser"};
 	if (unit_sizes.size() != task_names.size()) return 0;
