@@ -38,19 +38,11 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
 	const int step = 3000;
 	const int wash_out = 500;
-	std::vector<int> unit_sizes = {
-									100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
-									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200 };
-	std::vector<std::string> task_names = {
-											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",
-											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx" };
+	std::vector<int> unit_sizes = { 100 };
+	std::vector<std::string> task_names = { "approx2" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = {
-								   1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,
-									1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7 };
-	std::vector<double> param2 = {
-									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,
-									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };
+	std::vector<int> param1 = { 3 };
+	std::vector<double> param2 = { 1.0 };
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -122,6 +114,23 @@ int main(void) {
 
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				task_for_function_approximation(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
+			}
+			else if (task_name == "approx2") {
+				const int tau = param1[r];
+				const double nu = param2[r];
+				if (tau == 7) { d_alpha = 1.0; alpha_min = 0.1; d_bias = 0.5; d_sigma = 0.03; sigma_min = 0.1; }
+				else if (tau == 5) { d_alpha = 2.0; alpha_min = 0.5; d_bias = 1.0; d_sigma = 0.02; sigma_min = 0.02; }
+				else if (tau == 3) { d_alpha = 1.0; alpha_min = 1.0; d_bias = 4.0;  d_sigma = 0.05; sigma_min = 0.05; }
+				else if (tau == 1) {
+					d_alpha = 10.0; alpha_min = 1.0; d_bias = 20.0;  d_sigma = 0.02; sigma_min = 0.02;
+				}
+				else {
+					std::cerr << "error! approx parameter is not setting" << std::endl;
+					return 0;
+				}
+
+				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
+				task_for_function_approximation2(input_signal[phase], teacher_signal[phase], nu, tau, step, phase);
 			}
 			else if (task_name == "legendre") {
 				const int tau = param1[r];
