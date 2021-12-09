@@ -1,0 +1,6 @@
+### task_name: approx2
+### 3 0.5
+### input_signal_factor [5.06876e-312, 5.57564e-311]
+function_name,seed,unit_size,p,input_singal_factor,input_gain,feed_gain,lm,train_nmse,nmse,test_nmse,test_nrmse
+TD_MG,0,50,0.3000,9.5000,0.5000,1.1000,8.0000,1.99997366,1.98302836,2.03943828,0.41951990
+TD_MG,0,50,0.4000,5.5000,0.9000,0.4000,8.0000,2.00222783,1.98741095,2.03130786,0.44944331

@@ -24,6 +24,24 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 			output_signal.push_back(0);
 	}
 }
+
+void task_for_function_approximation2(const std::vector<double>& input_signal, std::vector<double>& output_signal, const double nu, const int tau,
+	const int step, const int seed) {
+	std::mt19937 mt(seed);
+	std::uniform_real_distribution<> rand_0to1(0, 1);
+	std::uniform_int_distribution<> rand_0or1(0, 1);
+
+	for (int t = 0; t < step; t++) {
+		if (t - tau >= 0) {
+			//output_signal.push_back(sin(PI * nu * input_signal[t - 1]));
+			output_signal.push_back(sin(PI * nu * input_signal[t]) * output_signal[t - tau] + 0.5);
+		}
+		else
+			output_signal.push_back(0);
+	}
+
+}
+
 //  0.3, 0.05, 1.5, 0.1
 void generate_narma_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, int tau, int step) {
 	const double alpha = 0.3;
