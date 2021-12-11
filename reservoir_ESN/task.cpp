@@ -31,13 +31,19 @@ void task_for_function_approximation2(const std::vector<double>& input_signal, s
 	std::uniform_real_distribution<> rand_0to1(0, 1);
 	std::uniform_int_distribution<> rand_0or1(0, 1);
 
+	//for (int t = 0; t < step; t++) {
+	//	if (t - tau >= 0) {
+	//		//output_signal.push_back(sin(PI * nu * input_signal[t - 1]));
+	//		output_signal.push_back(sin(PI * nu * input_signal[t]) * output_signal[t - tau] + 0.5);
+	//	}
+	//	else
+	//		output_signal.push_back(0);
+	//}
 	for (int t = 0; t < step; t++) {
-		if (t - tau >= 0) {
-			//output_signal.push_back(sin(PI * nu * input_signal[t - 1]));
-			output_signal.push_back(sin(PI * nu * input_signal[t]) * output_signal[t - tau] + 0.5);
-		}
-		else
-			output_signal.push_back(0);
+		double sum = 0;
+		for (int r = std::max(0, t - tau); r <= t; r++) sum += input_signal[r];
+		sum /= sqrt(tau + 1);
+		output_signal.push_back(sin(nu * PI * sum));
 	}
 
 }
