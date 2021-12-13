@@ -95,7 +95,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
 	//τ = (double) unit_size * 0.2;
-	d = 17.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
+	d = 20.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
 
 	/*
@@ -167,7 +167,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 
 
 		//二次の時間遅延システム型時間発展式
-	j = 81;
+	j = 1;
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -243,7 +243,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	//const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 17.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
+	d = 20.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -282,7 +282,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 }*/
 		
 	//二次の時間遅延システム型時間発展式
-	const int j = 81;
+	const int j = 1;
 	for (int t = 1; t <= t_size; t++) {//t = 0→t = 1に変更
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -349,7 +349,8 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 double reservoir_layer::activation_function(const double x1,const double x2, const int type, const double J) {//ここの引数もっと増えるかも
 //double reservoir_layer::activation_function(const double x, const int type) {
 	double x;
-	x = (x1 + x2) / 2.0;
+    x = (x1 + x2) / 2.0;
+	//x = x1 + x2;
 
 	if (type == LINEAR) {
 		return std::max(-1000.0, std::min(1000.0, x)); 
