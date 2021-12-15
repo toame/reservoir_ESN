@@ -167,7 +167,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 
 
 		//“ñŸ‚ÌŠÔ’x‰„ƒVƒXƒeƒ€Œ^ŠÔ”­“W®
-	j = 1;
+	j = 20;
 	for (int t = 1; t <= t_size; t++) {//t = 0¨t = 1‚É•ÏX
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {
@@ -282,7 +282,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 }*/
 		
 	//“ñŸ‚ÌŠÔ’x‰„ƒVƒXƒeƒ€Œ^ŠÔ”­“W®
-	const int j = 1;
+	const int j = 20;
 	for (int t = 1; t <= t_size; t++) {//t = 0¨t = 1‚É•ÏX
 		output_node[t][0] = output_node[t - 1][unit_size];
 		for (int n = 1; n <= unit_size; n++) {

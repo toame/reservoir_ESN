@@ -16,10 +16,10 @@
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
 double STD_MG(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 8.0));//ρ = 2-------------------------
+	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 6.0));//ρ = 2-------------------------
 }
 double STD_ikeda(const double x, double J, double input_gain, double feed_gain) {
-	return feed_gain * pow(sin(x + input_gain * J + 0.3), 2.0);
+	return feed_gain * pow(sin(x + input_gain * J + 0.6), 2.0);
 }
 
 double tanh(const double x, double J, double input_gain, double feed_gain) {
@@ -62,10 +62,10 @@ int main(void) {
 	const int wash_out = 500; 
 	std::vector<int> unit_sizes = { 100 };
 
-	std::vector<std::string> task_names = { "henon"};
+	std::vector<std::string> task_names = { "approx2"};
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 5 };
-	std::vector<double> param2 = { 0};
+	std::vector<int> param1 = { 3 };
+	std::vector<double> param2 = { 1.5};
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -203,7 +203,7 @@ int main(void) {
 			double (*nonlinear)(double, double, double, double);
 			if (function_name == "STD_MG") {
 				nonlinear = STD_MG;
-				d_alpha = 0.02; alpha_min = 1.5;
+				d_alpha = 0.05; alpha_min = 0.8;
 			}
 			else if (function_name == "tanh") {
 				//d_alpha = 0.2; alpha_min = 0.6;
@@ -214,7 +214,7 @@ int main(void) {
 			else if (function_name == "sinc") nonlinear = sinc;
 			else if (function_name == "STD_ikeda") {
 				nonlinear = STD_ikeda;
-				d_alpha = 0.1; alpha_min = 8.0;
+				d_alpha = 0.05; alpha_min = 0.8;
 			}
 			else if (function_name == "STDE_exp") {
 				nonlinear = STDE_exp;
@@ -225,8 +225,8 @@ int main(void) {
 				return 0;
 			}
 
-			for (int loop = 0; loop < TRIAL_NUM; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 0; ite_p <= 10; ite_p += 1) {//論文　手順２
+			for (int loop = 0; loop < 1; loop++) {//論文 p12 ばらつき低減
+				for (int ite_p = 7; ite_p <= 10; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
@@ -257,7 +257,7 @@ int main(void) {
 							//const double feed_gain = 0.90 + ite_feed * 0.02;
 							//const double feed_gain = 0.1 + ite_feed * 0.1;
 						    //const double feed_gain = 0.8 + ite_feed * 0.04;
-							const double feed_gain = 0.20 + ite_feed * 0.02;
+							const double feed_gain = 0.30 + ite_feed * 0.02;
 							//const double feed_gain = 0.50 + ite_feed * 0.05;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
