@@ -203,7 +203,7 @@ int main(void) {
 			double (*nonlinear)(double, double, double, double);
 			if (function_name == "STD_MG") {
 				nonlinear = STD_MG;
-				d_alpha = 0.05; alpha_min = 0.8;
+				d_alpha = 0.04; alpha_min = 1.0;
 			}
 			else if (function_name == "tanh") {
 				//d_alpha = 0.2; alpha_min = 0.6;
@@ -214,7 +214,7 @@ int main(void) {
 			else if (function_name == "sinc") nonlinear = sinc;
 			else if (function_name == "STD_ikeda") {
 				nonlinear = STD_ikeda;
-				d_alpha = 0.05; alpha_min = 0.8;
+				d_alpha = 0.05; alpha_min = 0.6;
 			}
 			else if (function_name == "STDE_exp") {
 				nonlinear = STDE_exp;
@@ -246,10 +246,10 @@ int main(void) {
 						//const double input_gain = d_bias * ite_input * 0.1;//d_biasの部分たぶん無くす　
 						//const double input_gain = 1.0 + ite_input * 0.05;
 						//NARMA10の場合300秒かけた結果、入力ゲインが0.25, フィードゲインが0.9の時に0.16418というNMSEを達成
-						//const double input_gain = 0.3 + ite_input * 0.03;
+						//const double input_gain = 0.2 + ite_input * 0.03;
 						//const double input_gain = 0.1 + ite_input * 0.1;
-						//const double input_gain = 0.5 + ite_input * 0.05;
-						const double input_gain = 0.9 + ite_input * 0.02;
+						const double input_gain = 0.5 + ite_input * 0.05;
+						//const double input_gain = 0.9 + ite_input * 0.02;
 						//const double input_gain = 0.7 + ite_input * 0.04;
 						for (int ite_feed = 1; ite_feed <= 10; ite_feed += 1) {//τ = 95 pa = 2 ノード100の時は 0.35で最適なリザバーが出来上がることが多かった
 							//double opt_nmse = 1e+10;
