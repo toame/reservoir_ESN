@@ -36,21 +36,13 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 typedef void (*FUNC)();
 int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
-	const int step = 3000;
-	const int wash_out = 500;
-	std::vector<int> unit_sizes = {
-									100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
-									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200 };
-	std::vector<std::string> task_names = {
-											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx",
-											"laser", "laser", "laser", "henon", "henon", "narma", "narma", "narma", "narma", "narma2", "narma2", "narma2", "narma2", "approx", "approx", "approx" };
+	const int step = 10000;
+	const int wash_out = 0;
+	std::vector<int> unit_sizes = { 100 };
+	std::vector<std::string> task_names = { "narma" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = {
-								   1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,
-									1, 3, 10, 5, 7,  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7 };
-	std::vector<double> param2 = {
-									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,
-									0, 0, 0,  0, 0,  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0 };
+	std::vector<int> param1 = { 5 };
+	std::vector<double> param2 = { 0 };
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 11;
 	const int sigma_step = 11;
@@ -81,7 +73,7 @@ int main(void) {
 				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
-				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
+				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step, phase == TEST);
 			}
 			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
 			else if (task_name == "narma2") {
@@ -187,7 +179,7 @@ int main(void) {
 
 							reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
 							reservoir_layer1.reservoir_update(input_signal[VAL], output_node[k][VAL], step);
-							is_echo_state_property[k] = reservoir_layer1.is_echo_state_property(input_signal[VAL]);
+							is_echo_state_property[k] = true;
 							reservoir_layer_v[k] = reservoir_layer1;
 						}
 						int lm;
@@ -245,6 +237,7 @@ int main(void) {
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
 
 					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
+					double test_nmse2 = calc_correct_rate(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 

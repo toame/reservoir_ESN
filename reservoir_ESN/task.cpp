@@ -25,7 +25,7 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 	}
 }
 //  0.3, 0.05, 1.5, 0.1
-void generate_narma_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, int tau, int step) {
+void generate_narma_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, int tau, int step, bool test_mode) {
 	const double alpha = 0.3;
 	const double beta = 0.05;
 	const double gamma = 1.5;
@@ -36,29 +36,67 @@ void generate_narma_task(std::vector<double>& input_signal, std::vector<double>&
 		input_signal[t] = (input_signal[t] + 1) / 4;
 	}
 	teacher_signal.resize(step);
-	for (int t = 0; t < step; t++) {
+	std::vector<double> narma_signal(step + 100);
+	std::vector<double> narma_signal2(step + 100);
+	for (int t = 0; t < narma_signal.size(); t++) {
 		double sum = 0.0;
 		if (t - tau >= 0) {
 			for (int i = tau + 1; i >= 1; i--) {  // for(i=tau; i>=1; i--){
-				sum = sum + teacher_signal[t - i];
+				sum = sum + narma_signal[t - i];
 			}
 
-			teacher_signal[t] =
-				alpha * teacher_signal[t - 1] + beta * teacher_signal[t - 1] * sum + gamma * input_signal[t - tau] * input_signal[t] + delta;
-			if (tau > 9) teacher_signal[t] = tanh(teacher_signal[t]);  // NARMA(tau>=10)
+			narma_signal[t] =
+				alpha * narma_signal[t - 1] + beta * narma_signal[t - 1] * sum + gamma * input_signal[t - tau] * input_signal[t] + delta;
+			if (tau > 9) narma_signal[t] = tanh(narma_signal[t]);  // NARMA(tau>=10)
 		}
 		else
-			teacher_signal[t] = 0;
+			narma_signal[t] = 0;
 
 		//... cutt-off bound ...
-		if (teacher_signal[t] > 1.0) {
-			teacher_signal[t] = 1.0;
+		if (narma_signal[t] > 1.0) {
+			narma_signal[t] = 1.0;
 		}
-		else if (teacher_signal[t] < -1.0) {
-			teacher_signal[t] = -1.0;
+		else if (narma_signal[t] < -1.0) {
+			narma_signal[t] = -1.0;
+		}
+	}
+	tau += 5;
+	if (tau >= 10) delta = 0.01;
+	for (int t = 0; t < narma_signal2.size(); t++) {
+		double sum = 0.0;
+		if (t - tau >= 0) {
+			for (int i = tau + 1; i >= 1; i--) {  // for(i=tau; i>=1; i--){
+				sum = sum + narma_signal2[t - i];
+			}
+
+			narma_signal2[t] =
+				alpha * narma_signal2[t - 1] + beta * narma_signal2[t - 1] * sum + gamma * input_signal[t - tau] * input_signal[t] + delta;
+			if (tau > 9) narma_signal2[t] = tanh(narma_signal2[t]);  // NARMA(tau>=10)
+		}
+		else
+			narma_signal2[t] = 0;
+
+		//... cutt-off bound ...
+		if (narma_signal2[t] > 1.0) {
+			narma_signal2[t] = 1.0;
+		}
+		else if (narma_signal[t] < -1.0) {
+			narma_signal2[t] = -1.0;
+		}
+	}
+	for (int t = 0; t < step; t++) {
+		input_signal[t] = narma_signal[t];
+		teacher_signal[t] = narma_signal[t + 1];
+		if (test_mode && (t / 100) % 2 == 1) {
+			input_signal[t] = narma_signal2[t];
+			teacher_signal[t] = narma_signal2[t + 1];
 		}
 	}
 }
+// 0 0.1
+// 0.1 0.2
+// 0.1 0.3
+// 0.4 0.4
 
 //  0.3, 0.05, 1.5, 0.1
 void generate_narma_task2(std::vector<double> input_signal, std::vector<double>& teacher_signal, int tau, int step) {
@@ -201,6 +239,38 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 	}
 	return sum_squared_average / (step - wash_out);
 }
+
+double calc_correct_rate(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	double sum_squared_average = 0.0;
+	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);
+	if (show)
+		outputfile << "t,predict_test,teacher" << std::endl;
+	double sum1 = 0.0;
+	double sum2 = 0.0;
+	int cnt = 0;
+	for (int t = 1; t < step; t++) {
+		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
+		double reservoir_predict_signal = 0.0;
+		for (int n = 0; n <= unit_size; n++) {
+			reservoir_predict_signal += weight[n] * output_node[t + 1][n];
+		}
+		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
+		if((t/100) % 2 == 0)
+			sum1 += squared(teacher_signal[t] - reservoir_predict_signal);
+		else
+			sum2 += squared(teacher_signal[t] - reservoir_predict_signal);
+		if ((t + 1) % 200 == 0) {
+			if (sum1 < sum2) cnt++;
+			std::cerr << t << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
+			sum1 = 0.0;
+			sum2 = 0.0;
+		}
+	}
+
+	return sum_squared_average / (step - wash_out);
+}
+
 
 double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
