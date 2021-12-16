@@ -109,7 +109,7 @@ int main(void) {
 					double opt_lm2 = 0;
 					double test_nmse = 1e+10;
 					double train_nmse = 1e+10;
-					reservoir_layer opt_reservoir_layer;
+					reservoir_layer opt_reservoir_layer[2];
 					std::vector<std::vector<double>> opt_w(class_num);
 					start = std::chrono::system_clock::now(); // 計測開始時間
 					
@@ -139,7 +139,9 @@ int main(void) {
 
 						std::vector<output_learning> output_learning[341];
 						for (int i = 0; i < 341; i++) output_learning[i].resize(class_num);
-#pragma omp parallel for  private(lm) num_threads(32)
+						std::vector < double> A[341];
+						int j;
+#pragma omp parallel for  private(lm, j) num_threads(32)
 						// 重みの学習を行う
 						for (int c = 0; c < 2; c++) {
 							for (int k = 0; k < alpha_step * sigma_step; k++) {
@@ -150,10 +152,12 @@ int main(void) {
 
 								double opt_lm = 0;
 								double opt_lm_nmse = 1e+9;
+								for (j = 0; j <= unit_size; j++) {
+									A[k].push_back(output_learning[k][c].A[j][j]);
+								}
 								for (lm = 0; lm < 10; lm++) {
 									for (int j = 0; j <= unit_size; j++) {
-										output_learning[k][c].A[j][j] += pow(10, -15 + lm);
-										if (lm != 0) output_learning[k][c].A[j][j] -= pow(10, -16 + lm);
+										output_learning[k][c].A[j][j] = A[k][j] + pow(10, -15 + lm);
 									}
 									output_learning[k][c].IncompleteCholeskyDecomp2(unit_size + 1);
 									double eps = 1e-12;
@@ -177,7 +181,7 @@ int main(void) {
 									opt_lm2 = lm;
 									opt_k = k;
 									opt_w[0] = w[k][0][lm];
-									opt_reservoir_layer = reservoir_layer_v[k];
+									opt_reservoir_layer[0] = reservoir_layer_v[k];
 									train_nmse = calc_nmse(teacher_signal[TRAIN][0], opt_w[0], output_node[opt_k][TRAIN][0], unit_size, wash_out, step, false);
 								}
 							}
@@ -194,7 +198,7 @@ int main(void) {
 									opt_lm2 = lm;
 									opt_k = k;
 									opt_w[1] = w[k][1][lm];
-									opt_reservoir_layer = reservoir_layer_v[k];
+									opt_reservoir_layer[1] = reservoir_layer_v[k];
 									train_nmse = calc_nmse(teacher_signal[TRAIN][1], opt_w[1], output_node[opt_k][TRAIN][1], unit_size, wash_out, step, false);
 								}
 							}
@@ -203,11 +207,12 @@ int main(void) {
 					/*** TEST phase ***/
 					std::string output_name = task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + function_name + "_" + std::to_string(unit_size) + "_" + std::to_string(loop) + "_" + std::to_string(ite_p);
 
-					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
-					opt_reservoir_layer.reservoir_update(input_signal[TEST][0], output_node_test, step);
-
-					test_nmse = calc_nmse(teacher_signal[TEST][0], opt_w[0], output_node_test, unit_size, wash_out, step, true, output_name);
-					int test_nmse2 = calc_correct_rate(teacher_signal[TEST][0], opt_w[0], opt_w[1], output_node_test, unit_size, wash_out, step, true, output_name);
+					std::vector<std::vector<double>> output_node_test1(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
+					std::vector<std::vector<double>> output_node_test2(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
+					opt_reservoir_layer[0].reservoir_update(input_signal[TEST][0], output_node_test1, step);
+					opt_reservoir_layer[1].reservoir_update(input_signal[TEST][0], output_node_test2, step);
+					test_nmse = calc_nmse(teacher_signal[TEST][0], opt_w[0], output_node_test1, unit_size, wash_out, step, true, output_name);
+					int test_nmse2 = calc_correct_rate(teacher_signal[TEST][0], opt_w[0], opt_w[1], output_node_test1, output_node_test2, unit_size, wash_out, step, true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 

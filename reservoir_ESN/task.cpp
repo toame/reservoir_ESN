@@ -241,7 +241,7 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 }
 
 double calc_correct_rate(const std::vector<double>& teacher_signal, const std::vector<double>& weight, const std::vector<double>& weight2,
-	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	const std::vector<std::vector<double>>& output_node, const std::vector<std::vector<double>>& output_node2, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	double sum_squared_average = 0.0;
 	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);
 	if (show)
@@ -255,13 +255,14 @@ double calc_correct_rate(const std::vector<double>& teacher_signal, const std::v
 		double reservoir_predict_signal2 = 0.0;
 		for (int n = 0; n <= unit_size; n++) {
 			reservoir_predict_signal += weight[n] * output_node[t + 1][n];
-			reservoir_predict_signal2 += weight2[n] * output_node[t + 1][n];
+			reservoir_predict_signal2 += weight2[n] * output_node2[t + 1][n];
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		sum1 += squared(teacher_signal[t] - reservoir_predict_signal);
 		sum2 += squared(teacher_signal[t] - reservoir_predict_signal2);
 		if ((t + 1) % 100 == 0) {
-			if (sum1 < sum2) cnt++;
+			if ((t / 100) % 2 == 0 && (sum1 < sum2)) cnt++;
+			if ((t / 100) % 2 == 1 && (sum1 > sum2)) cnt++;
 			std::cerr << t << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
 			sum1 = 0.0;
 			sum2 = 0.0;
