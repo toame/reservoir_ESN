@@ -63,7 +63,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	mt2.seed(seed);
 	std::uniform_real_distribution<> rand_minus1toplus1(-1, 1);
 	output_node[0][0] = 1.0;
-	for (int n = 1; n <= unit_size; n++) output_node[0][n] = rand_minus1toplus1(mt2);
+	for (int n = 1; n <= unit_size; n++) output_node[0][n] = 0.0;
 	std::vector<double> input_sum_node(unit_size + 1, 0);
 	for (int t = 0; t <= t_size; t++) {
 		for (int n = 1; n <= unit_size; n++) {

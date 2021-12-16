@@ -85,11 +85,11 @@ void generate_narma_task(std::vector<double>& input_signal, std::vector<double>&
 		}
 	}
 	for (int t = 0; t < step; t++) {
-		input_signal[t] = narma_signal[t];
-		teacher_signal[t] = narma_signal[t + 1];
+		input_signal[t] = narma_signal[t + 50];
+		teacher_signal[t] = narma_signal[t + 51];
 		if (test_mode && (t / 100) % 2 == 1) {
-			input_signal[t] = narma_signal2[t];
-			teacher_signal[t] = narma_signal2[t + 1];
+			input_signal[t] = narma_signal2[t + 50];
+			teacher_signal[t] = narma_signal2[t + 51];
 		}
 	}
 }
@@ -240,7 +240,7 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 	return sum_squared_average / (step - wash_out);
 }
 
-double calc_correct_rate(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+double calc_correct_rate(const std::vector<double>& teacher_signal, const std::vector<double>& weight, const std::vector<double>& weight2,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	double sum_squared_average = 0.0;
 	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);
@@ -252,23 +252,22 @@ double calc_correct_rate(const std::vector<double>& teacher_signal, const std::v
 	for (int t = 1; t < step; t++) {
 		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
 		double reservoir_predict_signal = 0.0;
+		double reservoir_predict_signal2 = 0.0;
 		for (int n = 0; n <= unit_size; n++) {
 			reservoir_predict_signal += weight[n] * output_node[t + 1][n];
+			reservoir_predict_signal2 += weight2[n] * output_node[t + 1][n];
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
-		if((t/100) % 2 == 0)
-			sum1 += squared(teacher_signal[t] - reservoir_predict_signal);
-		else
-			sum2 += squared(teacher_signal[t] - reservoir_predict_signal);
-		if ((t + 1) % 200 == 0) {
+		sum1 += squared(teacher_signal[t] - reservoir_predict_signal);
+		sum2 += squared(teacher_signal[t] - reservoir_predict_signal2);
+		if ((t + 1) % 100 == 0) {
 			if (sum1 < sum2) cnt++;
 			std::cerr << t << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
 			sum1 = 0.0;
 			sum2 = 0.0;
 		}
 	}
-
-	return sum_squared_average / (step - wash_out);
+	return cnt;
 }
 
 
