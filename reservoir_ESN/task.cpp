@@ -268,11 +268,12 @@ double calc_correct_rate(const std::vector<double>& teacher_signal, const std::v
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		sum1 += squared(teacher_signal[t] - reservoir_predict_signal);
 		sum2 += squared(teacher_signal[t] - reservoir_predict_signal2);
-
+		int choice = 0;
+		if (sum1 < sum2) choice = 0;
+		else if (sum1 > sum2) choice = 1;
 		if ((t + 1) % 100 == 0) {
-			if (order[t/100] == 0 && (sum1 < sum2)) cnt++;
-			if (order[t/100] == 1 && (sum1 > sum2)) cnt++;
-			std::cerr << order[t/100] << "," << t << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
+			if (order[t/100] == choice) cnt++;
+			std::cerr << t << "," << order[t/100] << "," << choice << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
 			sum1 = 0.0;
 			sum2 = 0.0;
 		}
