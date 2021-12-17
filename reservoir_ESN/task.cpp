@@ -273,7 +273,7 @@ double calc_correct_rate(const std::vector<double>& teacher_signal, const std::v
 		else if (sum1 > sum2) choice = 1;
 		if ((t + 1) % 100 == 0) {
 			if (order[t/100] == choice) cnt++;
-			std::cerr << t << "," << order[t/100] << "," << choice << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
+			//std::cerr << t << "," << order[t/100] << "," << choice << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
 			sum1 = 0.0;
 			sum2 = 0.0;
 		}

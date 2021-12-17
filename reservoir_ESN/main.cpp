@@ -42,7 +42,7 @@ int main(void) {
 	std::vector<int> unit_sizes = { 100 };
 	std::vector<std::string> task_names = { "narma" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 5 };
+	std::vector<int> param1 = { 15 };
 	std::vector<double> param2 = { 0 };
 	if (param1.size() != param2.size()) return 0;
 	const int alpha_step = 7;
@@ -81,7 +81,6 @@ int main(void) {
 				generate_narma_task(input_signal[phase][1], teacher_signal[phase][1], tau + 5, step, order, phase == TEST);
 			}
 		}
-		std::cerr << "OK0" << std::endl;
 		// 設定出力
 		outputfile << "### task_name: " << task_name << std::endl;
 		outputfile << "### " << param1[r] << " " << param2[r] << std::endl;
@@ -116,7 +115,6 @@ int main(void) {
 					
 					for (int ite_b = 0; ite_b <= 5; ite_b += 1) {
 						const double bias_factor = d_bias * ite_b;
-						std::cerr << "Ok0" << std::endl;
 #pragma omp parallel for num_threads(32)
 						// 複数のリザーバーの時間発展をまとめて処理
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
@@ -133,7 +131,6 @@ int main(void) {
 							is_echo_state_property[k] = true;
 							reservoir_layer_v[k] = reservoir_layer1;
 						}
-						std::cerr << "Ok1" << std::endl;
 						int lm;
 
 						int opt_k = 0;
@@ -169,7 +166,6 @@ int main(void) {
 								}
 							}
 						}
-						std::cerr << "Ok2" << std::endl;
 						// 検証データでもっとも性能の良いリザーバーを選択
 						for (int k = 0; k < alpha_step * sigma_step; k++) {
 							if (!is_echo_state_property[k]) continue;
