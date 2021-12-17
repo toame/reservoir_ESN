@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+#include <random>
 void generate_input_signal_random(std::vector<double>& input_signal, const int u_min, const int u_delta, const int step, const int seed) {
 	std::mt19937 mt(seed);
 	std::uniform_real_distribution<> rand_0to1(0, 1);
@@ -25,7 +26,7 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 	}
 }
 //  0.3, 0.05, 1.5, 0.1
-void generate_narma_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, int tau, int step, bool test_mode) {
+void generate_narma_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, int tau, int step, std::vector<int>& order,bool test_mode) {
 	const double alpha = 0.3;
 	const double beta = 0.05;
 	const double gamma = 1.5;
@@ -84,10 +85,16 @@ void generate_narma_task(std::vector<double>& input_signal, std::vector<double>&
 			narma_signal2[t] = -1.0;
 		}
 	}
+	if (test_mode && order.size() == 0) {
+		for (int i = 0; i < 50; i++) order.push_back(0);
+		for (int i = 0; i < 50; i++) order.push_back(1);
+		std::mt19937 mt;
+		std::shuffle(order.begin(), order.end(), mt);
+	}
 	for (int t = 0; t < step; t++) {
 		input_signal[t] = narma_signal[t + 50];
 		teacher_signal[t] = narma_signal[t + 51];
-		if (test_mode && (t / 100) % 2 == 1) {
+		if (test_mode && order[t/100] == 1) {
 			input_signal[t] = narma_signal2[t + 50];
 			teacher_signal[t] = narma_signal2[t + 51];
 		}
@@ -241,7 +248,8 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 }
 
 double calc_correct_rate(const std::vector<double>& teacher_signal, const std::vector<double>& weight, const std::vector<double>& weight2,
-	const std::vector<std::vector<double>>& output_node, const std::vector<std::vector<double>>& output_node2, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	const std::vector<std::vector<double>>& output_node, const std::vector<std::vector<double>>& output_node2, const int unit_size, 
+	const int wash_out, const int step, std::vector<int>& order, bool show, std::string name) {
 	double sum_squared_average = 0.0;
 	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);
 	if (show)
@@ -260,10 +268,11 @@ double calc_correct_rate(const std::vector<double>& teacher_signal, const std::v
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		sum1 += squared(teacher_signal[t] - reservoir_predict_signal);
 		sum2 += squared(teacher_signal[t] - reservoir_predict_signal2);
+
 		if ((t + 1) % 100 == 0) {
-			if ((t / 100) % 2 == 0 && (sum1 < sum2)) cnt++;
-			if ((t / 100) % 2 == 1 && (sum1 > sum2)) cnt++;
-			std::cerr << t << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
+			if (order[t/100] == 0 && (sum1 < sum2)) cnt++;
+			if (order[t/100] == 1 && (sum1 > sum2)) cnt++;
+			std::cerr << order[t/100] << "," << t << "," << sum1 << "," << sum2 << "," << cnt << std::endl;
 			sum1 = 0.0;
 			sum2 = 0.0;
 		}

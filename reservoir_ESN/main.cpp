@@ -36,17 +36,17 @@ std::string to_string_with_precision(const T a_value, const int n = 6)
 typedef void (*FUNC)();
 int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
-	const int step = 5000;
+	const int step = 10000;
 	const int class_num = 2;
 	const int wash_out = 0;
 	std::vector<int> unit_sizes = { 100 };
 	std::vector<std::string> task_names = { "narma" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = { 12 };
+	std::vector<int> param1 = { 5 };
 	std::vector<double> param2 = { 0 };
 	if (param1.size() != param2.size()) return 0;
-	const int alpha_step = 11;
-	const int sigma_step = 11;
+	const int alpha_step = 7;
+	const int sigma_step = 7;
 	std::string task_name;
 	std::string function_name;
 
@@ -67,6 +67,7 @@ int main(void) {
 		double sigma_min, d_sigma;
 		double d_bias;
 		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".txt");
+		std::vector<int> order;
 		// 入力信号 教師信号の生成
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
 			if (task_name == "narma") {
@@ -75,9 +76,9 @@ int main(void) {
 				d_sigma = 0.07; sigma_min = 0.5;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase][0], -1.0, 2.0, step, phase + 1);
-				generate_narma_task(input_signal[phase][0], teacher_signal[phase][0], tau, step, phase == TEST);
+				generate_narma_task(input_signal[phase][0], teacher_signal[phase][0], tau, step, order, phase == TEST);
 				generate_input_signal_random(input_signal[phase][1], -1.0, 2.0, step, phase + 1);
-				generate_narma_task(input_signal[phase][1], teacher_signal[phase][1], tau + 5, step, phase == TEST);
+				generate_narma_task(input_signal[phase][1], teacher_signal[phase][1], tau + 5, step, order, phase == TEST);
 			}
 		}
 		std::cerr << "OK0" << std::endl;
@@ -212,7 +213,7 @@ int main(void) {
 					opt_reservoir_layer[0].reservoir_update(input_signal[TEST][0], output_node_test1, step);
 					opt_reservoir_layer[1].reservoir_update(input_signal[TEST][0], output_node_test2, step);
 					test_nmse = calc_nmse(teacher_signal[TEST][0], opt_w[0], output_node_test1, unit_size, wash_out, step, true, output_name);
-					int test_nmse2 = calc_correct_rate(teacher_signal[TEST][0], opt_w[0], opt_w[1], output_node_test1, output_node_test2, unit_size, wash_out, step, true, output_name);
+					int test_nmse2 = calc_correct_rate(teacher_signal[TEST][0], opt_w[0], opt_w[1], output_node_test1, output_node_test2, unit_size, wash_out, step, order, true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
