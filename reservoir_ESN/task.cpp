@@ -141,7 +141,7 @@ void generate_henom_map_task(std::vector<double>& input_signal, std::vector<doub
 	generate_input_signal_henon_map(input_signal, fstep, step, wash_out);
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
-		teacher_signal[t] = input_signal[t + fstep];
+		teacher_signal[t] = input_signal[t + fstep - fstep];
 	}
 }
 
@@ -242,7 +242,8 @@ double calc_nrmse(const std::vector<double>& teacher_signal, const std::vector<d
 	std::ofstream outputfile("output_predict/" + name + ".txt", std::ios::app);//predict —\‘ª
 	if (show)
 		outputfile << "t,predict_test,teacher" << std::endl;
-	for (int t = wash_out + 1; t < step; t++) {
+	//for (int t = wash_out + 1; t < step; t++) {
+	for (int t = 1; t < step; t++) {
 		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
 		double reservoir_predict_signal = 0.0;
 		for (int n = 0; n <= unit_size; n++) {
