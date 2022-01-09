@@ -1,0 +1,7 @@
+### task_name: henon
+### 0 0
+### input_signal_factor [2, 102]
+### weight_factor [0.1, 1.1]
+function_name,seed,unit_size,p,input_singal_factor,bias_factor,weight_factor,lm,train_nmse,nmse,test_nmse
+RND_sinc,0,40,0.0000,102.0000,0.0000,0.0800,3.0000,0.00000022,0.00000022,0.00000021
+RND_sinc,0,40,0.1000,42.0000,0.0000,0.0400,1.0000,0.00000022,0.00000022,0.00000021
