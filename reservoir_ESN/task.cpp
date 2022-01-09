@@ -100,17 +100,17 @@ void generate_input_signal_henon_map(std::vector<double>& input_signal, const in
 	double a = 0.1, b = 0.2, c = 0;
 	const double alpha = 1.4;
 	const double beta = 0.3;
-	//input_signal.resize(step + fstep + 10);
-	input_signal.resize(step + 10);
-	/*for (int t = 0; t < wash_out; t++) {
+	input_signal.resize(step + fstep + 10);
+	//input_signal.resize(step + 10);
+	for (int t = 0; t < wash_out; t++) {
 		c = 1 - alpha * b * b + beta * a;
 		std::swap(a, b);
 		std::swap(b, c);
-	}*/
+	}
 	input_signal[0] = a;
 	input_signal[1] = b;
-	//for (int t = 2; t <= step + fstep; t++) {
-	for (int t = 2; t <= step ; t++) {
+	for (int t = 2; t <= step + fstep; t++) {
+	//for (int t = 2; t <= step ; t++) {
 		input_signal[t] = 1 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2];
 	}
 }
@@ -119,8 +119,8 @@ void generate_henom_map_task(std::vector<double>& input_signal, std::vector<doub
 	generate_input_signal_henon_map(input_signal, fstep, step, wash_out);
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
-		//teacher_signal[t] = input_signal[t + fstep];
-		teacher_signal[t] = input_signal[t];
+		teacher_signal[t] = input_signal[t + fstep];
+		//teacher_signal[t] = input_signal[t];
 	}
 }
 
@@ -191,8 +191,8 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 	std::ofstream outputfile("output_predict2/" + name + ".txt", std::ios::app);
 	if(show)
 		outputfile << "t,predict_test,teacher" << std::endl;
-	//for (int t = wash_out + 1; t < step; t++) {
-	for (int t = 0; t < step; t++) {
+	for (int t = wash_out + 1; t < step; t++) {
+	//for (int t = 0; t < step; t++) {
 		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
 		double reservoir_predict_signal = 0.0;
 		for (int n = 0; n <= unit_size; n++) {
