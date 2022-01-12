@@ -38,7 +38,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
 	const int step = 3000;
 	const int wash_out = 500;
-	std::vector<int> unit_sizes = { 20, // 20,  20,  20,  
+	std::vector<int> unit_sizes = { 40, // 20,  20,  20,  
 									/*100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
 									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200*/ };
 	std::vector<std::string> task_names = { "henon2",// "henon",  "narma", "laser",
