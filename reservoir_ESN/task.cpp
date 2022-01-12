@@ -152,7 +152,7 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	}*/
 	input_signal.resize(step + fstep + 10);
 	for (int t = 0; t < wash_out; t++) {
-		c = 1 - alpha * b * b + beta * a;// +dist(mt) * ƒÐ;
+		c = 1 - alpha * b * b + beta * a +dist(mt) * ƒÐ;
 		std::swap(a, b);
 		std::swap(b, c);
 	}
