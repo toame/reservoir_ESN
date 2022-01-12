@@ -101,6 +101,14 @@ int main(void) {
 				const int fstep = param1[r];
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
+			else if (task_name == "henon2") {
+				d_bias = 10.0;
+				d_alpha = 10.0; alpha_min = 2.0;
+				d_sigma = 0.04; sigma_min = 0.04;
+				const int fstep = param1[r];
+				generate_henom_map_task2(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
+			}
+
 			else if (task_name == "laser") {
 				d_bias = 0.5;
 				d_alpha = 0.4; alpha_min = 0.1;
