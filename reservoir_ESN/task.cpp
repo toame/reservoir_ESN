@@ -125,13 +125,18 @@ void generate_henom_map_task(std::vector<double>& input_signal, std::vector<doub
 }
 
 void generate_input_signal_henon_map2(std::vector<double>& input_signal, const int fstep, const int step, const int wash_out) {
+	std::random_device seed_gen;
+	std::default_random_engine engine(seed_gen());
+	std::normal_distribution<> dist(0.0, 1.0);
+	std::mt19937 mt(1);
+	const double ƒĞ = 0.005;
 	double a = 0.1, b = 0.2, c = 0;
 	const double alpha = 1.4;
 	const double beta = 0.3;
 	input_signal.resize(step + fstep + 10);
 	//input_signal.resize(step + 10);
 	for (int t = 0; t < wash_out; t++) {
-		c = 1 - alpha * b * b + beta * a;
+		c = 1 - alpha * b * b + beta * a + dist(mt) * ƒĞ;
 		std::swap(a, b);
 		std::swap(b, c);
 	}
@@ -139,22 +144,12 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	input_signal[1] = b;
 	for (int t = 2; t <= step + fstep; t++) {
 		//for (int t = 2; t <= step ; t++) {
-		input_signal[t] = 1 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2];
+		input_signal[t] = 1 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2] + dist(mt)*ƒĞ;
 	}
 }
 
 void generate_henom_map_task2(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
-	generate_input_signal_henon_map(input_signal, fstep, step, wash_out);
-	teacher_signal.resize(step);
-	for (int t = 0; t < step; t++) {
-		teacher_signal[t] = input_signal[t + fstep];
-		//teacher_signal[t] = input_signal[t];
-	}
-}
-
-
-void generate_henom_map_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
-	generate_input_signal_henon_map(input_signal, fstep, step, wash_out);
+	generate_input_signal_henon_map2(input_signal, fstep, step, wash_out);
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
 		teacher_signal[t] = input_signal[t + fstep];
