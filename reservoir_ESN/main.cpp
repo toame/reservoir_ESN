@@ -16,10 +16,10 @@
 #define MAX_NODE_SIZE (500)
 //非線形カーネル　関数の選択　いまのところマッキーグラスのみを想定
 double TD_MG(const double x, double J, double input_gain, double feed_gain) {//Mackey_Glass
-	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 8.0));//ρ = 2-------------------------
+	return (feed_gain * (x + input_gain * J)) / (1.0 + pow(x + input_gain * J, 4.0));//ρ = 2-------------------------
 }
 double TD_ikeda(const double x, double J, double input_gain, double feed_gain) {
-	return feed_gain * pow(sin(x + input_gain * J + 0.4), 2.0);
+	return feed_gain * pow(sin(x + input_gain * J + 0.5), 2.0);
 }
 
 double tanh(const double x, double J, double input_gain, double feed_gain) {
@@ -60,9 +60,9 @@ int main(void) {
 	const int TRIAL_NUM = 3;	
 	const int step = 3000;
 	const int wash_out = 500; 
-	std::vector<int> unit_sizes = { 100 };
+	std::vector<int> unit_sizes = { 20 };
 
-	std::vector<std::string> task_names = { "henon"};
+	std::vector<std::string> task_names = { "henon2"};
 	if (unit_sizes.size() != task_names.size()) return 0;
 	std::vector<int> param1 = { 5 };
 	std::vector<double> param2 = {0.0};
@@ -221,7 +221,7 @@ int main(void) {
 			double (*nonlinear)(double, double, double, double);
 			if (function_name == "TD_MG") {
 				nonlinear = TD_MG;
-				d_alpha = 0.1; alpha_min = 1.5;
+				d_alpha = 0.2; alpha_min = 0.0;
 			}
 			else if (function_name == "tanh") {
 				//d_alpha = 0.2; alpha_min = 0.6;
@@ -232,7 +232,7 @@ int main(void) {
 			else if (function_name == "sinc") nonlinear = sinc;
 			else if (function_name == "TD_ikeda") {
 				nonlinear = TD_ikeda;
-				d_alpha = 0.4; alpha_min = 8.0;
+				d_alpha = 2.0; alpha_min = 0.0;
 			}
 			else if (function_name == "STDE_exp") {
 				nonlinear = STDE_exp;

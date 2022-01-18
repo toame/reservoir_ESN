@@ -1,0 +1,4 @@
+### task_name: henon2
+### 5 0
+### input_signal_factor [3.19502e-312, 3.51452e-311]
+function_name,seed,unit_size,p,input_singal_factor,input_gain,feed_gain,lm,train_nmse,nmse,test_nmse,test_nrmse

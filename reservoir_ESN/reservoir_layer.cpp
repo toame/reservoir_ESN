@@ -95,7 +95,7 @@ void reservoir_layer::reservoir_update(const std::vector<double>& input_signal, 
 	//const double e = 2.7182818;// 2.718281828459045;
 	double ξ, d;
 	//τ = (double) unit_size * 0.2;
-	d = 20.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
+	d = 2.0 / (double)unit_size;//（遅延時間）を1としているが論文では80としている場合も...　　////////////////////////変更要素/////////////////
 	ξ = log(1.0 + d);
 
 	/*
@@ -243,7 +243,7 @@ void reservoir_layer::reservoir_update_show(const std::vector<double> input_sign
 
 	//const double e = 2.7182818;// 281828459045;
 	double ξ, d;
-	d = 20.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
+	d = 2.0 / (double)unit_size;//分母 +1を消した　//////////////////////////////////////////変更要素//////////////////
 	ξ = log(1.0 + d);
 
 	//std::vector<double> input_sum_node(unit_size + 1, 0);    //要素数unit_size+1、全ての要素の値0 で初期化
@@ -340,7 +340,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	//std::cerr << err_sum << std::endl;
 	//std::cerr << input_signal_factor << " " << input_gain << " " << feed_gain << std::endl;
 	if (unit_size < 40)
-		return err_ave <= 0.2;
+		return err_ave <= 1.0;
 	else
 		return err_ave <= 0.1;//△△△*/
 	//return err_ave <= 0.2;

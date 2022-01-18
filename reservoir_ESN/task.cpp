@@ -145,21 +145,25 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	double a = 0.1, b = 0.2, c = 0;
 	const double alpha = 1.4;
 	const double beta = 0.3;
-	const double É– = 0.005;
+	const double É– = 0.01;
 	//std::vector<double> ÉÃ;
 	/*for (int t = 2; t <= step + fstep; t++) {
 		ÉÃ[t] = É– * dist(engine);
 	}*/
 	input_signal.resize(step + fstep + 10);
 	for (int t = 0; t < wash_out; t++) {
-		c = 1 - alpha * b * b + beta * a +dist(mt) * É–;
+		c = 1 - alpha * b * b + beta * a;
 		std::swap(a, b);
 		std::swap(b, c);
 	}
 	input_signal[0] = a;
 	input_signal[1] = b;
 	for (int t = 2; t <= step + fstep; t++) {
-		input_signal[t] = 1.0 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2] + dist(mt)*É–;
+		input_signal[t] = 1.0 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2];// +dist(mt) * É–;
+	}
+
+	for (int t = 0; t <= step + fstep; t++) {
+		input_signal[t] += dist(mt) * É–;
 	}
 }
 
