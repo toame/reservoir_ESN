@@ -129,7 +129,7 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	std::default_random_engine engine(seed_gen());
 	std::normal_distribution<> dist(0.0, 1.0);
 	std::mt19937 mt(1);
-	const double É– = 0.005;
+	const double É– = 0.01;
 	double a = 0.1, b = 0.2, c = 0;
 	const double alpha = 1.4;
 	const double beta = 0.3;
@@ -144,7 +144,11 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	input_signal[1] = b;
 	for (int t = 2; t <= step + fstep; t++) {
     //for (int t = 2; t <= step ; t++) {
-		input_signal[t] = 1 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2] + dist(mt)*É–;
+		input_signal[t] = 1 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2];// +dist(mt) * É–;
+	}
+
+	for (int t = 0; t <= step + fstep; t++) {
+		input_signal[t] += dist(mt) * É–;
 	}
 }
 
