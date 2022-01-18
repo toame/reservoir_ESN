@@ -1,7 +1,7 @@
 import pandas as pd
 import os
 from matplotlib import pyplot as plt
-folder = "Various_ESN_comparison/"
+folder = "output_data_mix/"
 for name in os.listdir(folder):
     #name = "approx_3_3.0_100"
     name = os.path.splitext(os.path.basename(name))[0]
