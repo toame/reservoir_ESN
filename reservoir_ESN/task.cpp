@@ -145,7 +145,7 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	double a = 0.1, b = 0.2, c = 0;
 	const double alpha = 1.4;
 	const double beta = 0.3;
-	const double É– = 0.01;
+	const double É– = 0.001;
 	//std::vector<double> ÉÃ;
 	/*for (int t = 2; t <= step + fstep; t++) {
 		ÉÃ[t] = É– * dist(engine);
