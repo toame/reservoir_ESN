@@ -162,12 +162,12 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 		input_signal[t] = 1.0 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2];// +dist(mt) * ƒĞ;
 	}
 
-	/*for (int t = 0; t <= step + fstep; t++) {
-		input_signal[t] += dist(mt) * ƒĞ;
-	}*/
 	for (int t = 0; t <= step + fstep; t++) {
 		input_signal[t] *= ƒĞ;
 	}
+	/*for (int t = 0; t <= step + fstep; t++) {
+		input_signal[t] *= ƒĞ;
+	}*/
 }
 
 void generate_henom_map_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
