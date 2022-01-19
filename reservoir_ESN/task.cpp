@@ -129,7 +129,7 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	std::default_random_engine engine(seed_gen());
 	std::normal_distribution<> dist(0.0, 1.0);
 	std::mt19937 mt(1);
-	const double É– = 5.0;
+	const double É– = 0.1;
 	double a = 0.1, b = 0.2, c = 0;
 	const double alpha = 1.4;
 	const double beta = 0.3;
@@ -150,11 +150,17 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	for (int t = 0; t <= step + fstep; t++) {
 		input_signal[t] += dist(mt) * É–;
 	}
+
+	/*for (int t = 0; t <= step + fstep; t++) {
+		input_signal[t] *= É–;
+	}*/
+
 }
 
 void generate_henom_map_task2(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
 	generate_input_signal_henon_map2(input_signal, fstep, step, wash_out);
 	teacher_signal.resize(step);
+	//const double É– = 10.0;
 	for (int t = 0; t < step; t++) {
 		teacher_signal[t] = input_signal[t + fstep];
 		//teacher_signal[t] = input_signal[t];
