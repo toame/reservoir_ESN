@@ -129,7 +129,7 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	std::default_random_engine engine(seed_gen());
 	std::normal_distribution<> dist(0.0, 1.0);
 	std::mt19937 mt(1);
-	const double É– = 0.1;
+	const double É– = 0.001;
 	double a = 0.1, b = 0.2, c = 0;
 	const double alpha = 1.4;
 	const double beta = 0.3;
@@ -234,8 +234,8 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 	std::ofstream outputfile("output_predict2/" + name + ".txt", std::ios::app);
 	if(show)
 		outputfile << "t,predict_test,teacher" << std::endl;
-	//for (int t = wash_out + 1; t < step; t++) {
-	for (int t = 0; t < step; t++) {
+	for (int t = wash_out + 1; t < step; t++) {
+	//for (int t = 0; t < step; t++) {
 		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
 		double reservoir_predict_signal = 0.0;
 		for (int n = 0; n <= unit_size; n++) {
