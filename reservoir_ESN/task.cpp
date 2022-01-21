@@ -181,8 +181,57 @@ void generate_input_signal_henon_map2(std::vector<double>& input_signal, const i
 	}*/
 }
 
+void generate_input_signal_henon_map3(std::vector<double>& input_signal, const int fstep, const int step, const int wash_out) {
+	std::random_device seed_gen;
+	std::default_random_engine engine(seed_gen());
+	std::normal_distribution<> dist(0.0, 1.0);
+	std::mt19937 mt(2);
+	double a = 0.1, b = 0.2, c = 0;
+	const double alpha = 1.4;
+	const double beta = 0.3;
+	const double ƒĞ = 0.001;
+	//std::vector<double> ƒÌ;
+	/*for (int t = 2; t <= step + fstep; t++) {
+		ƒÌ[t] = ƒĞ * dist(engine);
+	}*/
+	input_signal.resize(step + fstep + 10);
+	for (int t = 0; t < wash_out; t++) {
+		c = 1 - alpha * b * b + beta * a;
+		std::swap(a, b);
+		std::swap(b, c);
+	}
+	input_signal[0] = a;
+	input_signal[1] = b;
+	for (int t = 2; t <= step + fstep; t++) {
+		input_signal[t] = 1.0 - alpha * input_signal[t - 1] * input_signal[t - 1] + beta * input_signal[t - 2];// +dist(mt) * ƒĞ;
+	}
+
+
+	for (int t = 0; t <= step + fstep; t++) {
+		if (input_signal[t] < 0) {
+			input_signal[t] *= -1.0;
+		}
+	}
+
+	for (int t = 0; t <= step + fstep; t++) {
+		input_signal[t] *= 100.0;
+	}
+	/*for (int t = 0; t <= step + fstep; t++) {
+		input_signal[t] *= ƒĞ;
+	}*/
+}
+
+
 void generate_henom_map_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
 	generate_input_signal_henon_map(input_signal, fstep, step, wash_out);
+	teacher_signal.resize(step);
+	for (int t = 0; t < step; t++) {
+		teacher_signal[t] = input_signal[t + fstep];
+	}
+}
+
+void generate_henom_map_task3(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int fstep, const int step, const int wash_out) {
+	generate_input_signal_henon_map3(input_signal, fstep, step, wash_out);
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
 		teacher_signal[t] = input_signal[t + fstep];
@@ -196,6 +245,7 @@ void generate_henom_map_task2(std::vector<double>& input_signal, std::vector<dou
 		teacher_signal[t] = input_signal[t + fstep];
 	}
 }
+
 
 void generate_input_signal_wave(std::vector<double>& input_signal, const double nu, const int step, const int wash_out) {
 	for (int t = 0; t < step; t++) {
