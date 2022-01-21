@@ -38,7 +38,7 @@ int main(void) {
 	const int TRIAL_NUM = 3;	// ループ回数
 	const int step = 3000;
 	const int wash_out = 500;
-	std::vector<int> unit_sizes = { 20, // 20,  20,  20,  
+	std::vector<int> unit_sizes = { 30, // 20,  20,  20,  
 									/*100, 100, 100,  100, 100,  100, 100, 100, 100,  100, 100, 100, 100,  100, 100, 100,
 									200, 200, 200,  200, 200,  200, 200, 200, 200,  200, 200, 200, 200,  200, 200, 200*/ };
 	std::vector<std::string> task_names = { "approx",// "henon",  "narma", "laser",
@@ -50,7 +50,7 @@ int main(void) {
 
 								  /* 3, 10, 5, 15, 20, 5, 10, 15, 20, 3, 5, 7, 1, 3, 10, 5,// 7,
 									  5, 10, 15, 20, 5, 10, 15, 20, 3, 5, 7,  1, 3, 10, 5, 7*/ };
-	std::vector<double> param2 = {0.5 //0.0,  0.0,  0.0,
+	std::vector<double> param2 = {5.0 //0.0,  0.0,  0.0,
 									/* 5.0, 0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  0, 0, 0,  0,// 0,
 								  0, 0, 0, 0,    0, 0,  0, 0,   3.0, 1.5, 1.0,  	0, 0, 0,  0, 0*/ };
 	if (param1.size() != param2.size()) return 0;
