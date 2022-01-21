@@ -244,7 +244,7 @@ int main(void) {
 			}
 			//std::cout << "成功7" << "\n";
 			for (int loop = 0; loop < 1; loop++) {//論文 p12 ばらつき低減
-				for (int ite_p = 1; ite_p <= 3; ite_p += 1) {//論文　手順２
+				for (int ite_p = 0; ite_p <= 4; ite_p += 1) {//論文　手順２
 					const double p = ite_p * 0.1;
 					double opt_nmse = 1e+10;//opt 最適な値  
 					double opt_input_signal_factor = 0;
@@ -273,8 +273,8 @@ int main(void) {
 							//double opt_nmse = 1e+10;
 							//const double feed_gain = d_bias * ite_feed / 20.0;//d_biasの部分無くす、もしくは変更する--  フィードバックゲインパラメーターηを1から3の間で変化させます。すでに説明したように、自律領域のTDRは、これらのパラメーター値に対して、±（η- 1）1/2;
 							//const double feed_gain = 0.1 + ite_feed * 0.1;
-							const double feed_gain = 0.3 + ite_feed * 0.01;
-						   // const double feed_gain = 0.8 + ite_feed * 0.04;
+							//const double feed_gain = 0.3 + ite_feed * 0.01;
+						    const double feed_gain = 0.8 + ite_feed * 0.04;
 							//const double feed_gain = 0.30 + ite_feed * 0.02;
 							//const double feed_gain = 0.50 + ite_feed * 0.05;
 #pragma omp parallel for num_threads(32)
