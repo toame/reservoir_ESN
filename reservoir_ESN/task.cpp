@@ -17,12 +17,12 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 	std::uniform_real_distribution<> rand_0to1(0, 1);
 	std::uniform_int_distribution<> rand_0or1(0, 1);
 
-	//ノイズありの場合
+	/*//ノイズありの場合
 	std::random_device seed_gen;
 	std::default_random_engine engine(seed_gen());
 	std::normal_distribution<> dist(0.0, 1.0);
 	std::mt19937 mt2(1);
-	const double σ = 0.001;
+	const double σ = 0.001;*/
 
 	for (int t = 0; t < step; t++) {
 		if (t - tau >= 0)
@@ -31,9 +31,9 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 			output_signal.push_back(0);
 	}
 
-	for (int t = 0; t < step; t++) {
+	/*for (int t = 0; t < step; t++) {
 		output_signal[t] += dist(mt2) * σ;
-	}
+	}*/
 }
 
 void task_for_function_approximation2(const std::vector<double>& input_signal, std::vector<double>& output_signal, const double nu, const int tau,
