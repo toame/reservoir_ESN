@@ -46,6 +46,12 @@ void generate_narma_task(std::vector<double>& input_signal, std::vector<double>&
 	for (int t = 0; t < step; t++) {
 		input_signal[t] = (input_signal[t] + 1) / 4;
 	}
+	/*
+	//“ü—ÍM†Œ©‚é
+	for (int t = 0; t < step; t++) {
+		std::cerr << t << "__" << input_signal[t] << std::endl;
+	}*/
+
 	teacher_signal.resize(step);
 	for (int t = 0; t < step; t++) {
 		double sum = 0.0;
