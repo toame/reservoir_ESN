@@ -20,9 +20,23 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 
 	for (int t = 0; t < step; t++) {
 		if (t - tau >= 0)
-			output_signal.push_back(sin(nu * PI * input_signal[t - tau]));
+			output_signal.push_back(sin(nu * PI * input_signal[t - tau]) );
 		else
 			output_signal.push_back(0);
+	}
+}
+void task_for_function_approximation2(const std::vector<double>& input_signal, std::vector<double>& output_signal, const double nu, const int tau,
+	const int step, const int seed) {
+	std::mt19937 mt(seed);
+	std::uniform_real_distribution<> rand_0to1(0, 1);
+	std::uniform_int_distribution<> rand_0or1(0, 1);
+
+	for (int t = 0; t < step; t++) {
+		double sum = 0.0;
+		for (int r = std::max(0, t - tau); r <= t; r++) sum += input_signal[r];
+		double average = sum / sqrt((tau + 1.0));
+		output_signal.push_back(sin(nu * PI * average));
+
 	}
 }
 //  0.3, 0.05, 1.5, 0.1
@@ -185,17 +199,17 @@ void generate_d_sequence(std::vector<std::vector<int>>& d_vec, std::vector<int>&
 void generate_d_sequence_set(std::vector<std::vector<std::vector<int>>>& d_vec) {
 	for (int mode = 0; mode < PHASE_NUM; mode++) {
 		std::vector<int> d;
-		d.resize(12); generate_d_sequence(d_vec[mode], d, 2);
-		d.resize(9); generate_d_sequence(d_vec[mode], d, 3);
-		d.resize(7); generate_d_sequence(d_vec[mode], d, 4);
-		d.resize(6); generate_d_sequence(d_vec[mode], d, 5);
-		d.resize(5); generate_d_sequence(d_vec[mode], d, 6);
-		d.resize(4); generate_d_sequence(d_vec[mode], d, 7);
-		d.resize(3); generate_d_sequence(d_vec[mode], d, 8);
-		for (int u = 9; u < 30; u++) {
-			d.resize(2);
-			generate_d_sequence(d_vec[mode], d, u);
-		}
+		d.resize(8); generate_d_sequence(d_vec[mode], d, 2);
+		d.resize(5); generate_d_sequence(d_vec[mode], d, 3);
+		d.resize(4); generate_d_sequence(d_vec[mode], d, 4);
+		d.resize(3); generate_d_sequence(d_vec[mode], d, 5);
+		d.resize(3); generate_d_sequence(d_vec[mode], d, 6);
+		d.resize(2); generate_d_sequence(d_vec[mode], d, 7);
+		//d.resize(2); generate_d_sequence(d_vec[mode], d, 8);
+		//for (int u = 9; u < 20; u++) {
+		//	d.resize(2);
+		//	generate_d_sequence(d_vec[mode], d, u);
+		//}
 	}
 }
 

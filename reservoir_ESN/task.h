@@ -2,6 +2,7 @@
 #define PI (3.14159265358979)
 void generate_input_signal_random(std::vector<double>& input_signal, const int u_min, const int u_delta, const int step, const int seed);
 void task_for_function_approximation(const std::vector<double>& input_signal, std::vector<double>& output_signal, const double nu, const int tau, const int step, const int seed);
+void task_for_function_approximation2(const std::vector<double>& input_signal, std::vector<double>& output_signal, const double nu, const int tau, const int step, const int seed);
 void generate_narma_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, const int tau, int step);
 void generate_narma_task2(std::vector<double> input_signal, std::vector<double>& teacher_signal, const int tau, int step);
 void generate_input_signal_henon_map(std::vector<double>& input_signal, const int fstep, const int step, const int wash_out);

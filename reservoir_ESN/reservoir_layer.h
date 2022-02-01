@@ -24,12 +24,13 @@ public:
 	double p;											//	ノードで使用される活性化関数の非線形の割合
 	double (*nonlinear)(double);						//	非線形関数の関数ポインタ
 	std::vector<int> node_type;							//	n番目のノードの線形/非線形の種類
+	std::string toporogy_type;
 	std::mt19937 mt;
 	int wash_out;
 
 	reservoir_layer();
 	reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double bias_factor, const double p,
-		double (*nonlinear)(double), const unsigned int seed, const int wash_out);
+		double (*nonlinear)(double), const unsigned int seed, const int wash_out, const std::string toporogy_type);
 
 	void generate_reservoir();
 	void reservoir_update(const std::vector<double>& input_signal, std::vector<std::vector<double>>& output_node, const int t_size, int seed = 0);

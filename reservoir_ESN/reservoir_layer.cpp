@@ -1,7 +1,7 @@
 ﻿#include "reservoir_layer.h"
 reservoir_layer::reservoir_layer() {}
 reservoir_layer::reservoir_layer(const int unit_size, const int connection_degree, const double iss_factor, const double weight_factor, const double bias_factor, const double p,
-	double (*nonlinear)(double), unsigned int seed = 0, const int wash_out = 500) {
+		double (*nonlinear)(double), const unsigned int seed, const int wash_out, const std::string toporogy_type) {
 	this->unit_size = unit_size;
 	this->connection_degree = connection_degree;
 	this->input_signal_factor = iss_factor;
@@ -11,6 +11,7 @@ reservoir_layer::reservoir_layer(const int unit_size, const int connection_degre
 	this->seed = seed;
 	this->nonlinear = nonlinear;
 	this->wash_out = wash_out;
+	this->toporogy_type = toporogy_type;
 	if (bias_factor < -0.9) this->bias_factor = input_signal_factor * weight_factor;
 	node_type.resize(unit_size + 1);
 	adjacency_list.resize(unit_size + 1, std::vector<int>(connection_degree + 1));
@@ -29,12 +30,19 @@ void reservoir_layer::generate_reservoir() {
 	std::iota(permutation.begin(), permutation.end(), 1);
 	//リザーバー層の結合をランダムに生成
 	for (int n = 1; n <= unit_size; n++) {
-		std::shuffle(permutation.begin(), permutation.end(), mt);
-		//for (int k = 1; k <= connection_degree; k++) {
-		//	adjacency_list[n][k] = permutation[k];
-		//}
-		adjacency_list[n][1] = n + 1;
-		if (n == unit_size) adjacency_list[n][1] = 1;
+		if (toporogy_type == "random") {
+			std::shuffle(permutation.begin(), permutation.end(), mt);
+			for (int k = 1; k <= connection_degree; k++) {
+				adjacency_list[n][k] = permutation[k];
+			}
+		}
+		else if (toporogy_type == "ring") {
+			adjacency_list[n][1] = n + 1;
+			if (n == unit_size) adjacency_list[n][1] = 1;
+		}
+		else {
+			std::cerr << "no found toporogy_type:" << toporogy_type << std::endl;
+		}
 	}
 
 	//各ノードが線形か非線形かを決定
@@ -126,7 +134,12 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 	for (int t = wash_out - 99; t <= wash_out; t++) {
 		for (int n = 1; n <= unit_size; n++) {
 			double err = (output_node1[t][n] - output_node2[t][n]);
-			if (std::max(output_node1[t][n], output_node2[t][n]) > 1000) err += 100000.0;
+			if (std::max(abs(output_node1[t][n]), abs(output_node2[t][n])) > 1000) {
+				err += 100000.0;
+				//std::cerr << output_node1[t][n] << "," << output_node2[t][n] << "," << weight_factor << std::endl;
+				err_sum += err * err;
+				break;
+			}
 			err_sum += err * err;
 		}
 	}

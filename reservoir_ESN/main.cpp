@@ -19,7 +19,7 @@
 #define VAL (1)
 #define TEST (2)
 #define MAX_UNIT_SIZE (200)
-#define MAX_TASK_SIZE (1000)
+#define MAX_TASK_SIZE (3000)
 #define TRUNC_EPSILON (1.7e-4)
 double sinc(const double x) {
 	if (x == 0) return 1.0;
@@ -44,22 +44,30 @@ typedef void (*FUNC)();
 
 int main(void) {
 
-	const int TRIAL_NUM = 3;	// ループ回数
+	const int TRIAL_NUM = 2;	// ループ回数
 	const int step = 4000;
 	const int wash_out = 400;
-	std::vector<int> unit_sizes = { 50 };
-	std::vector<std::string> task_names = { "NL" };
+	std::vector<int> unit_sizes = {100, 100, 200, 200 };
+	std::vector<std::string> toporogy = {"random", "ring","random", "ring" };
+	std::vector<std::string> task_names = { "NL", "NL" , "NL", "NL" };
 	if (unit_sizes.size() != task_names.size()) return 0;
-	std::vector<int> param1 = {
-								   0 };
-	std::vector<double> param2 = {
-									0 };
+	std::vector<int> param1 = { 0, 0, 0, 0};
+	std::vector<double> param2 = { 0, 0, 0, 0 };
 	if (param1.size() != param2.size()) return 0;
-	std::vector<double> p_set{ 0.02, 0.05, 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 0.95, 0.98, 1.0 };
-	std::vector<double> bias_set{ 0, 0.5, 1, 2, 3, 5, 7, 10, 20, 40, 80 };
-	//std::vector<double> bias_set{ -1 };
-	std::vector<double> alpha_set{ 0.005, 0.01, 0.02, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 5.0, 7.0, 10.0, 15.0, 20.0, 30.0, 50.0, 70.0, 100.0, 150.0, 200.0, 300.0 };
+	
+	
+	std::vector<double> p_set{ 0.0, 0.05, 0.1, 0.2, 0.35, 0.5, 0.65, 0.8, 0.9, 0.95, 1.0 };
+	//std::vector<double> bias_set{ 0, 0.5, 1, 2, 3, 5, 7, 10, 20, 40, 80 };
+	//std::vector<double> alpha_set{ 0.005, 0.01, 0.02, 0.03, 0.05, 0.07, 0.1, 0.2, 0.3, 0.5, 0.7, 1.0, 1.5, 2.0, 3.0, 5.0, 7.0, 10.0, 15.0, 20.0, 30.0, 50.0, 70.0, 100.0, 150.0, 200.0, 300.0 };
+	//std::vector<double> sigma_set{ 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2 };
+	std::vector<double> bias_set{ 0, 1, 2, 3, 5, 8};
+	std::vector<double> alpha_set{ 0.01, 0.02, 0.03, 0.04, 0.06, 0.08, 0.1, 0.15, 0.2, 0.3, 0.4, 0.6, 0.8, 1.0, 1.5, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 10.0};
 	std::vector<double> sigma_set{ 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2 };
+	//std::vector<double> p_set{ 0.1, 0.5, 1.0 };
+	//std::vector<double> alpha_set{ 0.01, 0.1, 1.0, 10.0, 100.0 };
+	//std::vector<double> sigma_set{ 0.1, 0.4, 0.7, 1.0 }
+	//std::vector<double> bias_set{ -1 };
+	//*/
 	const int alpha_step = alpha_set.size();
 	const int sigma_step = sigma_set.size();
 	const int lambda_step = 4;
@@ -71,13 +79,15 @@ int main(void) {
 	std::vector<bool> is_echo_state_property(alpha_step * sigma_step);
 	std::vector < std::vector<std::vector<std::vector<double>>>> w(alpha_step * sigma_step, std::vector<std::vector<std::vector<double>>>(MAX_TASK_SIZE, std::vector<std::vector<double>>(lambda_step))); // 各リザーバーの出力重み
 	std::vector<std::vector<std::vector<double>>> nmse(alpha_step * sigma_step, std::vector<std::vector<double>>(MAX_TASK_SIZE, std::vector<double>(lambda_step)));						// 各リザーバーのnmseを格納
-	std::vector<double> approx_nu_set({ -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0});
-	std::vector<double> approx_tau_set({ -2, 0, 1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0});
+	std::vector<double> approx_nu_set({ -3.0, -2.5, -2.0, -1.5, -1.0, -0.5, 0.0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0, 6.5, 7.0});
+	std::vector<double> approx_tau_set({ -2, 0, 1, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 5.5, 6.0});
 	std::vector<int> narma_tau_set({ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 });
 	for (int r = 0; r < unit_sizes.size(); r++) {
 		const int unit_size = unit_sizes[r];
 		const std::string task_name = task_names[r];
-
+		const std::string toporogy_type = toporogy[r];
+		int connection_degree = unit_size / 10;
+		if (toporogy_type == "ring") connection_degree = 1;
 		std::vector<std::vector<double>> input_signal(PHASE_NUM);
 		std::vector<std::vector<std::vector<double>>> teacher_signals(PHASE_NUM);
 
@@ -85,13 +95,12 @@ int main(void) {
 		double alpha_min, d_alpha;
 		double sigma_min, d_sigma;
 		
-		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + ".csv");
+		std::ofstream outputfile("output_data/" + task_name + "_" + std::to_string(param1[r]) + "_" + to_string_with_precision(param2[r], 1) + "_" + std::to_string(unit_size) + "_" + toporogy_type + ".csv");
 		// 入力信号 教師信号の生成
 		std::vector<std::vector<std::vector<int>>> d_vec(PHASE_NUM);
 		std::vector<std::string> task_name2;
-		std::vector<int> task_size(4);
+		std::vector<int> task_size(5);
 		generate_d_sequence_set(d_vec);
-		
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
 			generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 			for (auto tau : narma_tau_set) {
@@ -101,14 +110,24 @@ int main(void) {
 				if(phase == TRAIN) task_name2.push_back("narma" + std::to_string(tau));
 			}
 			task_size[0] = teacher_signals[phase].size();
+			//for (int i = 0; i < approx_nu_set.size(); i++) {
+			//	for (int j = 0; j < approx_tau_set.size(); j++) {
+			//		double nu = approx_nu_set[i];
+			//		double tau = approx_tau_set[j];
+			//		std::vector<double> tmp_teacher_signal;
+			//		task_for_function_approximation(input_signal[phase], tmp_teacher_signal, pow(2, nu), (int)(pow(2, tau) + 0.5), step, phase);
+			//		teacher_signals[phase].push_back(tmp_teacher_signal);
+			//		if (phase == TRAIN) task_name2.push_back("approx0_" + std::to_string((int)(pow(2, tau) + 0.5)) + "_" + to_string_with_precision(nu, 1));
+			//	}
+			//}
 			for (int i = 0; i < approx_nu_set.size(); i++) {
 				for (int j = 0; j < approx_tau_set.size(); j++) {
 					double nu = approx_nu_set[i];
 					double tau = approx_tau_set[j];
 					std::vector<double> tmp_teacher_signal;
-					task_for_function_approximation(input_signal[phase], tmp_teacher_signal, pow(2, nu), (int)(pow(2, tau) + 0.5), step, phase);
+					task_for_function_approximation2(input_signal[phase], tmp_teacher_signal, pow(2, nu), (int)(pow(2, tau) + 0.5), step, phase);
 					teacher_signals[phase].push_back(tmp_teacher_signal);
-					if (phase == TRAIN) task_name2.push_back("approx" + std::to_string((int)(pow(2, tau) + 0.5)) + "_" + to_string_with_precision(nu, 1));
+					if (phase == TRAIN) task_name2.push_back("approx_" + std::to_string((int)(pow(2, tau) + 0.5)) + "_" + to_string_with_precision(nu, 1));
 				}
 			}
 			task_size[1] = teacher_signals[phase].size();
@@ -119,17 +138,18 @@ int main(void) {
 			}
 			task_size[2] = teacher_signals[phase].size();
 			std::cerr << "ok: " << d_vec[phase].size() << std::endl;
-			//for (auto& d : d_vec[phase]) {
-			//	std::vector<double> tmp_teacher_signal;
-			//	task_for_calc_of_NL(input_signal[phase], tmp_teacher_signal, d, step);
-			//	teacher_signals[phase].push_back(tmp_teacher_signal);
-			//}
-			for (int nu = 2; nu <= unit_size * 3; nu++) {
+			for (int nu = 2; nu <= unit_size; nu++) {
 				std::vector<double> tmp_teacher_signal;
 				task_for_calc_of_NL2(input_signal[phase], tmp_teacher_signal, nu, step);
 				teacher_signals[phase].push_back(tmp_teacher_signal);
 			}
 			task_size[3] = teacher_signals[phase].size();
+			for (auto& d : d_vec[phase]) {
+				std::vector<double> tmp_teacher_signal;
+				task_for_calc_of_NL(input_signal[phase], tmp_teacher_signal, d, step);
+				teacher_signals[phase].push_back(tmp_teacher_signal);
+			}
+			task_size[4] = teacher_signals[phase].size();
 		}
 		// 設定出力
 		outputfile << "topology,function_name,seed,unit_size,p,input_signal_factor,bias_factor,weight_factor,train_L,L,L_log";
@@ -140,18 +160,24 @@ int main(void) {
 		for (int i = 1; i <= 6; i++) {
 			outputfile << ",NLx_" << std::to_string(i);
 		}
+		outputfile << ",train_NL_old,NL_old,NL1_old";
+		for (int i = 1; i <= 6; i++) {
+			outputfile << ",NLx_old_" << std::to_string(i);
+		}
 		for (int i = 1; i <= 20; i++) {
 			outputfile << ",L" << std::to_string(i);
 		}
 		for (int i = 30; i <= 100; i += 10) {
 			outputfile << ",L" << std::to_string(i);
 		}
-		
 		for (int i = 2; i <= 20; i++) {
 			outputfile << ",NL" << std::to_string(i);
 		}
 		for (int i = 30; i <= 200; i += 10) {
 			outputfile << ",NL" << std::to_string(i);
+		}
+		for (int i = 2; i < 30; i++) {
+			outputfile << ",NL_old" << std::to_string(i);
 		}
 		for (int i = 0; i < task_name2.size(); i++) {
 			outputfile << "," << task_name2[i];
@@ -187,7 +213,7 @@ int main(void) {
 							double bias_factor1 = bias_factor;
 							if (bias_factor1 < 0) bias_factor1 = input_signal_factor * weight_factor;
 
-							reservoir_layer reservoir_layer1(unit_size, 1, input_signal_factor, weight_factor, bias_factor1, p, nonlinear, loop, wash_out);
+							reservoir_layer reservoir_layer1(unit_size, connection_degree, input_signal_factor, weight_factor, bias_factor1, p, nonlinear, loop, wash_out, toporogy_type);
 							reservoir_layer1.generate_reservoir();
 
 							reservoir_layer1.reservoir_update(input_signal[TRAIN], output_node[k][TRAIN], step);
@@ -269,10 +295,15 @@ int main(void) {
 						std::vector<double> NL(alpha_step * sigma_step);
 						std::vector<double> NL_log(alpha_step * sigma_step);
 						std::vector<std::vector<double>> NLx(alpha_step * sigma_step, std::vector<double>(6));
+						std::vector<double> NL_old(alpha_step * sigma_step);
+						std::vector<double> NL1_old(alpha_step * sigma_step);
+						std::vector<std::vector<double>> sub_NL_old(alpha_step * sigma_step, std::vector<double>(32));
+						std::vector<std::vector<double>> NLx_old(alpha_step * sigma_step, std::vector<double>(6));
 						std::vector<std::vector<double>> Lx(alpha_step * sigma_step, std::vector<double>(6));
-						std::vector<std::vector<double>> sub_L(alpha_step * sigma_step, std::vector<double>(unit_size * 3 + 3));
-						std::vector<std::vector<double>> sub_NL(alpha_step * sigma_step, std::vector<double>(unit_size * 3 + 3));
+						std::vector<std::vector<double>> sub_L(alpha_step * sigma_step, std::vector<double>(unit_size * 6 + 3));
+						std::vector<std::vector<double>> sub_NL(alpha_step * sigma_step, std::vector<double>(unit_size * 6 + 3));
 						std::vector<double> train_NL(alpha_step * sigma_step);
+						std::vector<double> train_NL_old(alpha_step * sigma_step);
 						std::vector<std::vector<double>> narma_task(alpha_step * sigma_step);
 						std::vector<std::vector<double>> approx_task(alpha_step * sigma_step);
 						int c;
@@ -297,11 +328,8 @@ int main(void) {
 									const double tmp_train_L = 1.0 - train_nmse;
 									if (tmp_train_L >= TRUNC_EPSILON) train_L[k] += tmp_train_L;
 								}
-								else {
-									int d_sum = 0;
-									//for (auto& e : d_vec[TEST][i - task_size[2]]) d_sum += e;
+								else if(i < task_size[3]){
 									const double tmp_NL = (1.0 - test_nmse);
-									//const double tmp_NL = d_sum * (1.0 - test_nmse);
 									if (tmp_NL >= TRUNC_EPSILON) {
 										NL[k] += tmp_NL;
 										for (c = 0; c < 6; c++) {
@@ -310,11 +338,25 @@ int main(void) {
 										NL_log[k] += (1.0 - test_nmse) / (i - task_size[2] + 1.0);
 
 										sub_NL[k][i - task_size[2] + 2] += tmp_NL;
-										//sub_NL[k][d_sum] += tmp_NL;
 									}
 									const double tmp_train_NL = (1.0 - train_nmse);
-									//const double tmp_train_NL = d_sum * (1.0 - train_nmse);
 									if (tmp_train_NL >= TRUNC_EPSILON) train_NL[k] += tmp_train_NL;
+								}
+								else {
+									int d_sum = 0;
+									for (auto& e : d_vec[TEST][i - task_size[3]]) d_sum += e;
+									const double tmp_NL = d_sum * (1.0 - test_nmse);
+									
+									if (tmp_NL >= TRUNC_EPSILON) {
+										NL1_old[k] += 1.0 - test_nmse;
+										NL_old[k] += tmp_NL;
+										for (c = 0; c < 6; c++) {
+											NLx_old[k][c] += -log10(std::max<double>(pow(10, -c - 1), test_nmse)) / (c + 1);
+										}
+										sub_NL_old[k][d_sum] += tmp_NL;
+									}
+									const double tmp_train_NL = 1.0 - train_nmse;
+									if (tmp_train_NL >= TRUNC_EPSILON) train_NL_old[k] += d_sum * tmp_train_NL;
 								}
 							}
 
@@ -326,7 +368,7 @@ int main(void) {
 							const double weight_factor = sigma_set[(k % sigma_step)];
 							double bias_factor1 = bias_factor;
 							if (bias_factor1 < 0) bias_factor1 = input_signal_factor * weight_factor;
-							outputfile << "random," << function_name << "," << loop << "," << unit_size << "," << p << "," << input_signal_factor << "," << bias_factor1 << "," << weight_factor;
+							outputfile << toporogy_type << "," << function_name << "," << loop << "," << unit_size << "," << p << "," << input_signal_factor << "," << bias_factor1 << "," << weight_factor;
 							outputfile << "," << train_L[k] << "," << L[k] << "," << L_log[k];
 							for (int i = 0; i < 6; i++) {
 								outputfile << "," << Lx[k][i];
@@ -335,18 +377,24 @@ int main(void) {
 							for (int i = 0; i < 6; i++) {
 								outputfile << "," << NLx[k][i];
 							}
+							outputfile << "," << train_NL_old[k] << "," << NL_old[k] << "," << NL1_old[k];
+							for (int i = 0; i < 6; i++) {
+								outputfile << "," << NLx_old[k][i];
+							}
 							for (int i = 1; i <= 20; i++) {
 								outputfile << "," << sub_L[k][i];
 							}
 							for (int i = 30; i <= 100; i += 10) {
 								outputfile << "," << sub_L[k][i];
 							}
-							
 							for (int i = 2; i <= 20; i++) {
 								outputfile << "," << sub_NL[k][i];
 							}
 							for (int i = 30; i <= 200; i += 10) {
 								outputfile << "," << sub_NL[k][i];
+							}
+							for (int i = 2; i < 30; i++) {
+								outputfile << "," << sub_NL_old[k][i];
 							}
 							for (int i = 0; i < narma_task[k].size(); i++) {
 								outputfile << "," << narma_task[k][i];
