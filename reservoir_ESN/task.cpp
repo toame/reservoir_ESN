@@ -17,12 +17,12 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 	std::uniform_real_distribution<> rand_0to1(0, 1);
 	std::uniform_int_distribution<> rand_0or1(0, 1);
 
-	//ノイズありの場合
+	/*//ノイズありの場合
 	std::random_device seed_gen;
 	std::default_random_engine engine(seed_gen());
 	std::normal_distribution<> dist(0.0, 1.0);
 	const double σ = 1.0;
-	std::mt19937 mt2(1);
+	std::mt19937 mt2(1);*/
 
 
 	for (int t = 0; t < step; t++) {
@@ -31,9 +31,10 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 		else
 			output_signal.push_back(0);
 	}
+	/*
 	for (int t = 0; t < step; t++) {
 		output_signal[t] += dist(mt2) * σ;
-	}
+	}*/
 }
 //  0.3, 0.05, 1.5, 0.1
 void generate_narma_task(std::vector<double>& input_signal, std::vector<double>& teacher_signal, int tau, int step) {
@@ -300,8 +301,8 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 	std::ofstream outputfile("output_predict2/" + name + ".txt", std::ios::app);
 	if(show)
 		outputfile << "t,predict_test,teacher" << std::endl;
-	for (int t = wash_out + 1; t < step; t++) {
-	//for (int t = 0; t < step; t++) {
+	//for (int t = wash_out + 1; t < step; t++) {
+	for (int t = 0; t < step; t++) {
 		//const double reservoir_predict_signal = cblas_ddot(unit_size + 1, weight.data(), 1, output_node[t + 1].data(), 1);
 		double reservoir_predict_signal = 0.0;
 		for (int n = 0; n <= unit_size; n++) {
