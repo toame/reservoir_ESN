@@ -240,7 +240,6 @@ int main(void) {
 									w[k][lm] = output_learning[k].w;
 									nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
 								}
-								
 							}
 							// 検証データでもっとも性能の良いリザーバーを選択
 							for (int k = 0; k < alpha_step; k++) {//論文　手順６
@@ -288,17 +287,9 @@ int main(void) {
 					//		}
 					//	}
 					//}
-
 				}
-
 			}
 		}
 		outputfile.close();
 	}
 }
-
-
-
-
-
-
