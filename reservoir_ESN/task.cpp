@@ -25,11 +25,14 @@ void task_for_function_approximation(const std::vector<double>& input_signal, st
 	std::mt19937 mt2(1);*/
 
 
+	//std::ofstream outputfile("output_predict3/" + name + ".txt", std::ios::app);
+	//outputfile << "t,predict_test,teacher" << std::endl;
 	for (int t = 0; t < step; t++) {
 		if (t - tau >= 0)
 			output_signal.push_back(sin(nu * PI * input_signal[t - tau]));
 		else
 			output_signal.push_back(0);
+		//outputfile << t << "," << input_signal[t - tau] << "," << output_signal[t] << "," << std::endl;
 	}
 	/*
 	for (int t = 0; t < step; t++) {
@@ -295,8 +298,8 @@ double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {
 	return tt_ave0 - t_ave0 * t_ave0;
 }
 
-double calc_mean_squared_average(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
-	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+double calc_mean_squared_average(const std::vector<double>& input_signal, const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {//Œã‚Å’¼‚·
 	double sum_squared_average = 0.0;
 	std::ofstream outputfile("output_predict2/" + name + ".txt", std::ios::app);
 	if(show)
@@ -310,13 +313,18 @@ double calc_mean_squared_average(const std::vector<double>& teacher_signal, cons
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		if (show) {
-			outputfile << t << "," << reservoir_predict_signal << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
+			outputfile << t << "," << input_signal[t - 3] << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
 		}
 	}
 	return sum_squared_average / (step - wash_out);
 }
-
+/*
 double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
+}*/
+
+double calc_nmse(const std::vector<double>& input_signal, const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
+	return (calc_mean_squared_average(input_signal, teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));//Œã‚Å’¼‚·
 }
