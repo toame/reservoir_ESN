@@ -73,7 +73,7 @@ int main(void) {
 		for (int phase = 0; phase < PHASE_NUM; phase++) {
 			
 			if (task_name == "narma") {
-				//d_alpha = 0.01; alpha_min = 0.1;
+				d_alpha = 0.01; alpha_min = 0.1;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task(input_signal[phase], teacher_signal[phase], tau, step);
