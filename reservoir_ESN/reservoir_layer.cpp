@@ -244,6 +244,7 @@ bool reservoir_layer::is_echo_state_property(const std::vector<double>& input_si
 double reservoir_layer::activation_function(const double x1,const double x2, const int type, const double J) {
 	double x;
     x = (x1 + x2);
+	//x = (x1 + x2)/2
 
 	if (type == LINEAR) {
 		//return feed_gain * (std::max(-1000.0, std::min(1000.0, x)) + input_gain * J); 
