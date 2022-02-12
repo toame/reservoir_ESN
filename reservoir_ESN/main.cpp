@@ -80,23 +80,23 @@ int main(void) {
 			}
 			// 入力分布[-1, 1] -> 出力分布[0, 0.5]のnarmaタスク
 			else if (task_name == "narma2") {
-				//d_alpha = 0.005; alpha_min = 0.002;
+				d_alpha = 0.005; alpha_min = 0.002;
 				const int tau = param1[r];
 				generate_input_signal_random(input_signal[phase], -1.0, 2.0, step, phase + 1);
 				generate_narma_task2(input_signal[phase], teacher_signal[phase], tau, step);
 			}
 			else if (task_name == "henon") {
-				//d_alpha = 0.2; alpha_min = 0.0;
+				d_alpha = 0.2; alpha_min = 0.0;
 				const int fstep = param1[r];
 				generate_henom_map_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "henon2") {
-				//d_alpha = 0.2; alpha_min = 0.0;
+				d_alpha = 0.2; alpha_min = 0.0;
 				const int fstep = param1[r];
 				generate_henom_map_task2(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
 			else if (task_name == "laser") {
-				//d_alpha = 2.0; alpha_min = 0.1;
+				d_alpha = 2.0; alpha_min = 0.1;
 				const int fstep = param1[r];
 				generate_laser_task(input_signal[phase], teacher_signal[phase], fstep, step, phase * step);
 			}
