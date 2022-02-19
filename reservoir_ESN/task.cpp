@@ -298,8 +298,8 @@ double t_tt_calc(std::vector<double> yt, const int wash_out, const int step) {
 	return tt_ave0 - t_ave0 * t_ave0;
 }
 
-double calc_mean_squared_average(const std::vector<double>& input_signal, const std::vector<double>& teacher_signal, const std::vector<double>& weight,
-	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {//Œã‚Å’¼‚·
+double calc_mean_squared_average(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
 	double sum_squared_average = 0.0;
 	std::ofstream outputfile("output_predict2/" + name + ".txt", std::ios::app);
 	if(show)
@@ -313,7 +313,7 @@ double calc_mean_squared_average(const std::vector<double>& input_signal, const 
 		}
 		sum_squared_average += squared(teacher_signal[t] - reservoir_predict_signal);
 		if (show) {
-			outputfile << t << "," << input_signal[t - 3] << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
+			outputfile << t << "," << teacher_signal[t] << "," << sum_squared_average << std::endl;
 		}
 	}
 	return sum_squared_average / (step - wash_out);
@@ -324,7 +324,7 @@ double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<do
 	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
 }*/
 
-double calc_nmse(const std::vector<double>& input_signal, const std::vector<double>& teacher_signal, const std::vector<double>& weight,
+double calc_nmse(const std::vector<double>& teacher_signal, const std::vector<double>& weight,
 	const std::vector<std::vector<double>>& output_node, const int unit_size, const int wash_out, const int step, bool show, std::string name) {
-	return (calc_mean_squared_average(input_signal, teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));//Œã‚Å’¼‚·
+	return (calc_mean_squared_average(teacher_signal, weight, output_node, unit_size, wash_out, step, show, name) / t_tt_calc(teacher_signal, wash_out, step));
 }

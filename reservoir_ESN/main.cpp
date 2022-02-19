@@ -225,8 +225,7 @@ int main(void) {
 								int itr = 10;
 								output_learning[k].ICCGSolver(unit_size + 1, itr, eps);
 								w[k][lm] = output_learning[k].w;
-								//nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
-								nmse[k][lm] = calc_nmse(input_signal[VAL], teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
+								nmse[k][lm] = calc_nmse(teacher_signal[VAL], output_learning[k].w, output_node[k][VAL], unit_size, wash_out, step, false);
 							}
 						}
 
@@ -237,14 +236,14 @@ int main(void) {
 								if (nmse[k][lm] < opt_nmse) {
 									opt_nmse = nmse[k][lm];
 									opt_input_signal_factor = (k / sigma_step) * d_alpha + alpha_min;
+
 									opt_bias_factor = bias_factor;
 									opt_weight_factor = (k % sigma_step) * d_sigma + sigma_min;
 									opt_lm2 = lm;
 									opt_k = k;
 									opt_w = w[k][lm];
 									opt_reservoir_layer = reservoir_layer_v[k];
-									//train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
-									train_nmse = calc_nmse(input_signal[TRAIN], teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
+									train_nmse = calc_nmse(teacher_signal[TRAIN], opt_w, output_node[opt_k][TRAIN], unit_size, wash_out, step, false);
 								}
 							}
 
@@ -256,8 +255,7 @@ int main(void) {
 					std::vector<std::vector<double>> output_node_test(step + 2, std::vector<double>(MAX_NODE_SIZE + 1, 0));
 					opt_reservoir_layer.reservoir_update(input_signal[TEST], output_node_test, step);
 
-					//test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
-					test_nmse = calc_nmse(input_signal[TEST], teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
+					test_nmse = calc_nmse(teacher_signal[TEST], opt_w, output_node_test, unit_size, wash_out, step, true, output_name);
 					end = std::chrono::system_clock::now();  // 計測終了時間
 					double elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count(); //処理に要した時間をミリ秒に変換
 
